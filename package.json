@@ -37,6 +37,7 @@
     "vsce": "^2.15.0"
   },
   "dependencies": {
+    "@types/ws": "^8.18.1",
     "axios": "^1.6.0",
     "commander": "^11.1.0",
     "dotenv": "^16.3.1",
@@ -44,7 +45,9 @@
     "glob": "^10.3.10",
     "inquirer": "^9.2.11",
     "ora": "^7.0.1",
-    "simple-git": "^3.19.1"
+    "simple-git": "^3.19.1",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.3"
   },
   "jest": {
     "preset": "ts-jest",

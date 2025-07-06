@@ -32,10 +32,13 @@ export class AutoEditService {
         // Override the default showInformationMessage for edit confirmations
         const originalShowInfo = vscode.window.showInformationMessage;
         
-        (vscode.window as any).showInformationMessage = async (message: string, ...items: any[]) => {
+        (vscode.window as any).showInformationMessage = async (message: string, ...args: any[]) => {
             // Check if this is an edit confirmation dialog
             if (this.shouldAutoConfirm(message)) {
                 console.log(`Auto-confirming: ${message}`);
+                
+                // Extract items from args
+                const items = args.filter(arg => typeof arg === 'string');
                 
                 // Return the positive response
                 if (items.includes('Yes')) return 'Yes';
@@ -49,7 +52,7 @@ export class AutoEditService {
             }
             
             // Otherwise, show the dialog normally
-            return originalShowInfo.apply(vscode.window, [message, ...items]);
+            return (originalShowInfo as any).call(vscode.window, message, ...args);
         };
     }
 
