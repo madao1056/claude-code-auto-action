@@ -1,0 +1,216 @@
+{
+  "defaultMode": "bypassPermissions",
+  "autoApprove": true,
+  "skipConfirmation": true,
+  "interactive": false,
+  "batchMode": true,
+  "bypassAllPrompts": true,
+  "suppressUserConfirmation": true,
+  "autoConfirmAll": true,
+  "silentMode": false,
+  "contextAutoCompactThreshold": 0.9,
+  "preferredModel": "sonnet",
+  "planningModel": "opus",
+  "subagent_limit": 10,
+  "parallel_task_distribution": "auto",
+  "automation": {
+    "enabled": true,
+    "autoApproveAll": true,
+    "skipAllPrompts": true,
+    "auto_commit": true,
+    "auto_format": true,
+    "auto_lint": true,
+    "auto_test": true,
+    "test_before_commit": true,
+    "auto_push": false,
+    "auto_architect": {
+      "enabled": true,
+      "default_prompts": "deep-thinking",
+      "parallel_agents": 10,
+      "auto_initialize": true,
+      "hierarchical_execution": true
+    }
+  },
+  "agent_hierarchy": {
+    "architect": {
+      "model": "opus",
+      "temperature": 0.7,
+      "max_tokens": 4000,
+      "system_prompts": ["deep-thinking", "architecture-first", "step-by-step reasoning", "evaluate trade-offs"]
+    },
+    "managers": {
+      "model": "opus",
+      "temperature": 0.6,
+      "max_tokens": 3000,
+      "system_prompts": ["step-by-step", "context-aware", "consider edge cases"]
+    },
+    "workers": {
+      "model": "sonnet",
+      "temperature": 0.5,
+      "max_tokens": 2000,
+      "system_prompts": ["implementation-focused", "clean-code", "performance-critical"]
+    }
+  },
+  "deep_thinking": {
+    "enabled": true,
+    "keywords": [
+      "step-by-step reasoning",
+      "consider edge cases",
+      "evaluate trade-offs",
+      "context-aware",
+      "iterative refinement",
+      "debug with reasoning",
+      "architecture-first",
+      "security-first",
+      "performance-critical",
+      "explain assumptions"
+    ],
+    "auto_apply": true,
+    "force_for_complex_tasks": true
+  },
+  "permissions": {
+    "allow": [
+      "*",
+      "Bash(*)",
+      "FileEdit(*)",
+      "Write(*)",
+      "Read(*)",
+      "MultiEdit(*)",
+      "FetchContent(*)",
+      "Proceed(*)",
+      "Edit(*)",
+      "LS(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "Task(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "TodoRead(*)",
+      "TodoWrite(*)",
+      "NotebookRead(*)",
+      "NotebookEdit(*)",
+      "mcp__ide__getDiagnostics(*)",
+      "mcp__ide__executeCode(*)"
+    ],
+    "deny": [
+      "Bash(rm:*)",
+      "Bash(rm -rf *)",
+      "Bash(sudo:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "FileEdit(.env*)",
+      "FileEdit(**/*secret*)",
+      "FileEdit(**/*key*)",
+      "FileEdit(**/.ssh/*)",
+      "Write(.env*)",
+      "Write(**/*secret*)",
+      "Write(**/*key*)",
+      "Write(**/.ssh/*)"
+    ]
+  },
+  "autoCommit": {
+    "enabled": true,
+    "checkpointInterval": 300,
+    "commitMessage": "Claude checkpoint - {{timestamp}}"
+  },
+  "hooks": {
+    "pre_run": "echo '🐙 Claude Code session started at $(date)' >> logs/cc.log && node hooks/auto-architect-hook.js init",
+    "pre_task": "node hooks/auto-architect-hook.js intercept",
+    "post_task": "/clear",
+    "post_run": "git add -A && git commit -m 'Claude checkpoint' || true && node hooks/auto-architect-hook.js shutdown"
+  },
+  "optimization": {
+    "autoCompactOnMemoryPressure": true,
+    "preferSonnetForImplementation": true,
+    "useOpusForPlanning": true,
+    "maxTokensPerMessage": 2000,
+    "summarizationStrategy": "dot_points"
+  },
+  "costControl": {
+    "dailyLimit": 8,
+    "warningThreshold": 6,
+    "autoLogoutOnLimit": true
+  },
+  "commands": {
+    "test-driven": {
+      "description": "Generate unit tests with 90%+ coverage",
+      "pattern": "Write comprehensive unit tests for {{file}} using pytest"
+    },
+    "optimize": {
+      "description": "Optimize imports and format code",
+      "commands": [
+        "ruff check --fix {{file}}",
+        "ruff format {{file}}"
+      ]
+    }
+  },
+  "extended_capabilities": {
+    "system_initialization": {
+      "auto_detect_requirements": true,
+      "auto_install_dependencies": true,
+      "auto_setup_database": true,
+      "auto_configure_environment": true,
+      "auto_create_docker_compose": true,
+      "auto_setup_ci_cd": true,
+      "auto_generate_tests": true,
+      "auto_create_documentation": true,
+      "auto_setup_monitoring": true,
+      "auto_configure_logging": true,
+      "auto_setup_security": true,
+      "auto_optimize_performance": true
+    },
+    "technology_support": {
+      "frontend": ["react", "vue", "angular", "svelte", "solid", "preact", "alpine", "htmx"],
+      "backend": ["node", "python", "ruby", "go", "rust", "java", "csharp", "php", "elixir"],
+      "database": ["postgres", "mysql", "mongodb", "redis", "elasticsearch", "cassandra", "dynamodb", "firestore"],
+      "message_queue": ["rabbitmq", "kafka", "redis", "sqs", "pubsub"],
+      "cache": ["redis", "memcached", "varnish"],
+      "search": ["elasticsearch", "meilisearch", "algolia", "typesense"],
+      "monitoring": ["prometheus", "grafana", "datadog", "newrelic", "sentry"],
+      "ci_cd": ["github-actions", "gitlab-ci", "jenkins", "circleci", "travis"],
+      "deployment": ["docker", "kubernetes", "vercel", "netlify", "heroku", "aws", "gcp", "azure"],
+      "testing": ["jest", "mocha", "cypress", "playwright", "pytest", "rspec", "junit"],
+      "authentication": ["jwt", "oauth2", "saml", "auth0", "firebase-auth", "supabase-auth"],
+      "payment": ["stripe", "paypal", "square", "razorpay", "mollie"],
+      "email": ["sendgrid", "mailgun", "ses", "postmark", "resend"],
+      "sms": ["twilio", "vonage", "messagebird"],
+      "storage": ["s3", "gcs", "azure-blob", "cloudinary", "uploadthing"],
+      "cdn": ["cloudflare", "fastly", "cloudfront", "bunny"],
+      "analytics": ["google-analytics", "mixpanel", "amplitude", "posthog", "plausible"]
+    },
+    "project_templates": {
+      "saas": {
+        "includes": ["multi-tenant", "billing", "admin-panel", "api", "webhooks"]
+      },
+      "marketplace": {
+        "includes": ["vendor-management", "payments", "reviews", "search", "recommendations"]
+      },
+      "social": {
+        "includes": ["auth", "profiles", "posts", "comments", "likes", "follows", "notifications"]
+      },
+      "iot": {
+        "includes": ["device-management", "data-ingestion", "real-time", "analytics", "alerts"]
+      },
+      "ai": {
+        "includes": ["model-serving", "training-pipeline", "data-processing", "api", "monitoring"]
+      }
+    },
+    "code_generation": {
+      "use_best_practices": true,
+      "include_error_handling": true,
+      "include_logging": true,
+      "include_tests": true,
+      "include_documentation": true,
+      "follow_solid_principles": true,
+      "implement_design_patterns": true,
+      "optimize_for_performance": true,
+      "ensure_security": true,
+      "make_accessible": true,
+      "support_i18n": true,
+      "responsive_design": true,
+      "progressive_enhancement": true
+    }
+  }
+}

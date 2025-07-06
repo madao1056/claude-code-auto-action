@@ -1,0 +1,134 @@
+{
+  "version": "1.0.0",
+  "automation": {
+    "enabled": true,
+    "mode": "full",
+    "skipAllPrompts": true,
+    "autoApproveAll": true,
+    "nonInteractive": true,
+    "batchMode": true
+  },
+  "permissions": {
+    "mode": "bypassPermissions",
+    "autoApprove": {
+      "fileOperations": true,
+      "shellCommands": true,
+      "networkRequests": true,
+      "systemChanges": true,
+      "destructiveOperations": true
+    },
+    "skipValidation": true,
+    "trustAllOperations": true
+  },
+  "project": {
+    "autoCreate": true,
+    "skipPrompts": {
+      "projectName": true,
+      "techStack": true,
+      "directory": true,
+      "features": true,
+      "dependencies": true
+    },
+    "defaults": {
+      "type": "auto-detect",
+      "stack": "auto-detect",
+      "license": "MIT",
+      "packageManager": "npm",
+      "testFramework": "jest",
+      "linter": "eslint",
+      "formatter": "prettier"
+    },
+    "autoSetup": {
+      "git": true,
+      "dependencies": true,
+      "environment": true,
+      "docker": true,
+      "ci": true
+    }
+  },
+  "execution": {
+    "parallel": true,
+    "maxAgents": 10,
+    "maxWorkers": 20,
+    "continueOnError": true,
+    "retryFailedOperations": true,
+    "maxRetries": 3
+  },
+  "cost": {
+    "limitPerDay": 8,
+    "warningThreshold": 6,
+    "autoStopOnLimit": false,
+    "optimizationMode": "aggressive"
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "~/.claude/logs/automation.log",
+    "verbose": false,
+    "debug": false
+  },
+  "ui": {
+    "interactive": false,
+    "confirmations": false,
+    "progress": false,
+    "notifications": false,
+    "colors": true
+  },
+  "api": {
+    "timeout": 300,
+    "maxRetries": 3,
+    "retryDelay": 5,
+    "concurrentRequests": 5
+  },
+  "cache": {
+    "enabled": true,
+    "ttl": 3600,
+    "directory": "~/.claude/cache",
+    "autoClean": true
+  },
+  "features": {
+    "autoCommit": true,
+    "autoFormat": true,
+    "autoLint": true,
+    "autoTest": true,
+    "autoDocument": true,
+    "autoOptimize": true,
+    "contextOptimization": true,
+    "smartCaching": true
+  },
+  "responses": {
+    "defaultAnswers": {
+      "confirmOperation": "yes",
+      "overwriteFile": "yes",
+      "createDirectory": "yes",
+      "installDependency": "yes",
+      "runCommand": "yes",
+      "continueOnError": "yes",
+      "useDefaults": "yes"
+    },
+    "skipConfirmationFor": [
+      "file_write",
+      "file_edit",
+      "directory_create",
+      "command_execute",
+      "dependency_install",
+      "git_operations",
+      "test_execution",
+      "build_process"
+    ]
+  },
+  "cli": {
+    "flags": {
+      "dangerouslySkipPermissions": true,
+      "nonInteractive": true,
+      "autoApprove": true,
+      "batchMode": true,
+      "quiet": false,
+      "verbose": false
+    },
+    "defaultArguments": [
+      "--dangerously-skip-permissions",
+      "--non-interactive",
+      "--auto-approve"
+    ]
+  }
+}

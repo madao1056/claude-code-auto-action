@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Claude Code Pre-commit Hook
+
+# Check if automation is enabled
+CLAUDE_CONFIG="$HOME/.claude/settings.json"
+if [ ! -f "$CLAUDE_CONFIG" ]; then
+    exit 0
+fi
+
+automation_enabled=$(jq -r '.automation.enabled' "$CLAUDE_CONFIG" 2>/dev/null)
+if [ "$automation_enabled" != "true" ]; then
+    exit 0
+fi
+
+echo "Running Claude Code pre-commit checks..."
+
+# Run auto-format
+auto_format=$(jq -r '.automation.auto_format' "$CLAUDE_CONFIG")
+if [ "$auto_format" == "true" ]; then
+    echo "Formatting code..."
+    npm run format 2>/dev/null || prettier --write . 2>/dev/null || true
+    git add -A
+fi
+
+# Run auto-lint
+auto_lint=$(jq -r '.automation.auto_lint' "$CLAUDE_CONFIG")
+if [ "$auto_lint" == "true" ]; then
+    echo "Linting code..."
+    npm run lint 2>/dev/null || eslint . --fix 2>/dev/null || true
+    git add -A
+fi
+
+# Run tests
+test_before_commit=$(jq -r '.automation.test_before_commit' "$CLAUDE_CONFIG")
+if [ "$test_before_commit" == "true" ]; then
+    echo "Running tests..."
+    if ! npm test 2>/dev/null; then
+        echo "Tests failed! Commit aborted."
+        echo "Fix the failing tests or disable test_before_commit in ~/.claude/settings.json"
+        exit 1
+    fi
+fi
+
+# Check file sizes
+max_file_size=$(jq -r '.file_system.max_file_size_mb' "$HOME/.claude/permissions.json")
+max_file_size_bytes=$((max_file_size * 1024 * 1024))
+
+for file in $(git diff --cached --name-only); do
+    if [ -f "$file" ]; then
+        file_size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+        if [ "$file_size" -gt "$max_file_size_bytes" ]; then
+            echo "Error: File $file exceeds maximum allowed size of ${max_file_size}MB"
+            exit 1
+        fi
+    fi
+done
+
+echo "Pre-commit checks passed!"
+exit 0

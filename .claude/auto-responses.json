@@ -1,0 +1,146 @@
+{
+  "version": "1.0.0",
+  "description": "Automatic responses for Claude CLI prompts",
+  "responses": {
+    "pattern_matches": [
+      {
+        "pattern": "Do you want to proceed?",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Do you want to make this edit",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Save file to continue",
+        "response": "save",
+        "auto": true
+      },
+      {
+        "pattern": "Opened changes in Cursor",
+        "response": "continue",
+        "auto": true
+      },
+      {
+        "pattern": "Bash command",
+        "response": "execute",
+        "auto": true
+      },
+      {
+        "pattern": "Are you sure",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Continue?",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Confirm",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Overwrite",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Create",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Install",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Execute",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Run",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Delete",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Remove",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Replace",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Update",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Modify",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Apply",
+        "response": "yes",
+        "auto": true
+      },
+      {
+        "pattern": "Start",
+        "response": "yes",
+        "auto": true
+      }
+    ],
+    "exact_matches": {
+      "Y/n": "Y",
+      "y/N": "y",
+      "[Y/n]": "Y",
+      "[y/N]": "y",
+      "(Y/n)": "Y",
+      "(y/N)": "y",
+      "yes/no": "yes",
+      "Yes/No": "Yes",
+      "YES/NO": "YES"
+    },
+    "command_specific": {
+      "git": {
+        "commit": "yes",
+        "push": "yes",
+        "merge": "yes",
+        "rebase": "yes"
+      },
+      "npm": {
+        "install": "yes",
+        "update": "yes",
+        "audit": "yes",
+        "publish": "yes"
+      },
+      "docker": {
+        "build": "yes",
+        "run": "yes",
+        "compose": "yes",
+        "push": "yes"
+      }
+    }
+  },
+  "settings": {
+    "auto_respond": true,
+    "response_delay": 0,
+    "log_responses": true,
+    "fallback_response": "yes",
+    "interactive_fallback": false
+  }
+}

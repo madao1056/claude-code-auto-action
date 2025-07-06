@@ -1,0 +1,120 @@
+{
+  "orchestration": {
+    "hierarchy": {
+      "architect": {
+        "role": "System Architect",
+        "description": "Top-level system design and task decomposition",
+        "prompts": {
+          "system_analysis": "Analyze the request step-by-step. Consider architecture-first approach, evaluate trade-offs, and explain assumptions. Break down into subsystems.",
+          "task_decomposition": "Decompose the system into manageable components. Consider microservices, monolith, or hybrid approaches based on requirements."
+        },
+        "outputs": [
+          "system_architecture.md",
+          "task_breakdown.json",
+          "technology_stack.json"
+        ]
+      },
+      "managers": {
+        "frontend": {
+          "role": "Frontend Manager",
+          "description": "Manages UI/UX implementation tasks",
+          "receives_from": "architect",
+          "manages": ["ui_workers", "style_workers", "state_workers"],
+          "prompts": {
+            "planning": "Based on system architecture, plan frontend implementation with step-by-step reasoning. Consider performance-critical aspects and security-first approach."
+          }
+        },
+        "backend": {
+          "role": "Backend Manager", 
+          "description": "Manages API and business logic tasks",
+          "receives_from": "architect",
+          "manages": ["api_workers", "service_workers", "auth_workers"],
+          "prompts": {
+            "planning": "Design backend services considering scalability, edge cases, and security. Use context-aware analysis of project requirements."
+          }
+        },
+        "database": {
+          "role": "Database Manager",
+          "description": "Manages data architecture and persistence",
+          "receives_from": "architect",
+          "manages": ["schema_workers", "migration_workers", "optimization_workers"],
+          "prompts": {
+            "planning": "Design database schema with normalization, performance optimization, and future scalability in mind."
+          }
+        },
+        "devops": {
+          "role": "DevOps Manager",
+          "description": "Manages infrastructure and deployment",
+          "receives_from": "architect",
+          "manages": ["ci_workers", "deployment_workers", "monitoring_workers"],
+          "prompts": {
+            "planning": "Plan CI/CD pipeline, containerization strategy, and monitoring setup. Consider security and scalability."
+          }
+        },
+        "testing": {
+          "role": "Testing Manager",
+          "description": "Manages test strategy and implementation",
+          "receives_from": "architect",
+          "manages": ["unit_test_workers", "integration_test_workers", "e2e_test_workers"],
+          "prompts": {
+            "planning": "Design comprehensive test strategy with TDD approach. Ensure 90%+ coverage and consider edge cases."
+          }
+        }
+      },
+      "workers": {
+        "types": {
+          "code_generator": "Generates actual code files",
+          "file_creator": "Creates project structure and configuration files",
+          "test_writer": "Writes test cases",
+          "doc_writer": "Creates documentation",
+          "optimizer": "Optimizes existing code"
+        },
+        "prompts": {
+          "execution": "Execute the assigned task with attention to detail. Follow project conventions and best practices."
+        }
+      }
+    },
+    "execution_flow": {
+      "phases": [
+        {
+          "phase": "analysis",
+          "agent": "architect",
+          "duration": "5-10 minutes",
+          "outputs": ["requirements.md", "constraints.md"]
+        },
+        {
+          "phase": "design", 
+          "agent": "architect",
+          "duration": "10-15 minutes",
+          "outputs": ["architecture.md", "task_breakdown.json"]
+        },
+        {
+          "phase": "planning",
+          "agents": ["managers"],
+          "parallel": true,
+          "duration": "10-15 minutes",
+          "outputs": ["frontend_plan.md", "backend_plan.md", "database_plan.md", "devops_plan.md", "test_plan.md"]
+        },
+        {
+          "phase": "implementation",
+          "agents": ["workers"],
+          "parallel": true,
+          "duration": "30-60 minutes",
+          "outputs": ["source_code", "tests", "documentation", "configuration"]
+        },
+        {
+          "phase": "integration",
+          "agents": ["architect", "managers"],
+          "duration": "10-15 minutes",
+          "outputs": ["integration_report.md", "final_structure.md"]
+        }
+      ]
+    },
+    "parallel_settings": {
+      "max_concurrent_agents": 10,
+      "task_distribution": "intelligent",
+      "communication": "message_passing",
+      "synchronization": "phase_barriers"
+    }
+  }
+}

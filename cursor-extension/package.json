@@ -1,0 +1,128 @@
+{
+  "name": "claude-code-integration",
+  "displayName": "Claude Code Integration",
+  "description": "Seamless integration between Cursor/VSCode and Claude Code CLI",
+  "version": "1.0.0",
+  "publisher": "claude-code",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages",
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claude.askQuestion",
+        "title": "Ask Claude"
+      },
+      {
+        "command": "claude.autoCommit",
+        "title": "Claude: Auto Commit"
+      },
+      {
+        "command": "claude.generateTests",
+        "title": "Claude: Generate Tests"
+      },
+      {
+        "command": "claude.optimizeCode",
+        "title": "Claude: Optimize Code"
+      },
+      {
+        "command": "claude.explainCode",
+        "title": "Claude: Explain Code"
+      },
+      {
+        "command": "claude.fixErrors",
+        "title": "Claude: Fix Errors"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "claude.askQuestion",
+        "key": "cmd+shift+a",
+        "mac": "cmd+shift+a",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "claude.autoCommit",
+        "key": "cmd+shift+c",
+        "mac": "cmd+shift+c"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Code",
+      "properties": {
+        "claude.apiKey": {
+          "type": "string",
+          "description": "Your Claude API key"
+        },
+        "claude.autoCommit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable automatic commits"
+        },
+        "claude.autoTest": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run tests before committing"
+        },
+        "claude.autoFormat": {
+          "type": "boolean",
+          "default": true,
+          "description": "Format code on save"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "claude-explorer",
+          "title": "Claude Code",
+          "icon": "$(hubot)"
+        }
+      ]
+    },
+    "views": {
+      "claude-explorer": [
+        {
+          "id": "claude.tasksView",
+          "name": "Tasks",
+          "icon": "$(checklist)"
+        },
+        {
+          "id": "claude.historyView",
+          "name": "History",
+          "icon": "$(history)"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.84.0",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "eslint": "^8.52.0",
+    "typescript": "^5.2.2",
+    "@vscode/test-electron": "^2.3.6"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "child_process": "^1.0.2"
+  }
+}

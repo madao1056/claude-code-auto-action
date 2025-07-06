@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Claude Code Post-commit Hook
+
+# Check if automation is enabled
+CLAUDE_CONFIG="$HOME/.claude/settings.json"
+if [ ! -f "$CLAUDE_CONFIG" ]; then
+    exit 0
+fi
+
+automation_enabled=$(jq -r '.automation.enabled' "$CLAUDE_CONFIG" 2>/dev/null)
+if [ "$automation_enabled" != "true" ]; then
+    exit 0
+fi
+
+echo "Running Claude Code post-commit tasks..."
+
+# Log the commit
+commit_hash=$(git rev-parse HEAD)
+commit_message=$(git log -1 --pretty=%B)
+timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# Create log entry
+log_entry="{\"timestamp\": \"$timestamp\", \"commit\": \"$commit_hash\", \"message\": \"$commit_message\"}"
+echo "$log_entry" >> "$HOME/.claude/logs/commits.jsonl"
+
+# Check if we should push automatically
+auto_push=$(jq -r '.automation.auto_push' "$CLAUDE_CONFIG" 2>/dev/null)
+if [ "$auto_push" == "true" ]; then
+    current_branch=$(git branch --show-current)
+    if git remote -v | grep -q origin; then
+        echo "Pushing to origin/$current_branch..."
+        git push origin "$current_branch"
+    fi
+fi
+
+# Update task status if any
+if [ -f ".claude/current-task.json" ]; then
+    task_id=$(jq -r '.id' ".claude/current-task.json")
+    if [ "$task_id" != "null" ]; then
+        # Mark task as completed
+        claude task complete "$task_id" 2>/dev/null || true
+    fi
+fi
+
+echo "Post-commit tasks completed!"
+exit 0
