@@ -315,7 +315,11 @@ ${task.child_tasks.map(childId => {
     this.processTaskQueue();
   }
 
-  private failTask(taskId: string, error: Error): void {
+  getTask(taskId: string): Task | undefined {
+    return this.tasks.get(taskId);
+  }
+
+  failTask(taskId: string, error: Error): void {
     const task = this.tasks.get(taskId);
     if (!task) return;
 

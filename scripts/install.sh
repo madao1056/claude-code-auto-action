@@ -104,6 +104,9 @@ if ! grep -q "claude-code" "$SHELL_RC"; then
     echo "alias cc-status='$(pwd)/scripts/claude-auto.sh status'" >> "$SHELL_RC"
     echo "alias cc-watch='$(pwd)/scripts/claude-auto.sh watch'" >> "$SHELL_RC"
     echo "alias cc-commit='$(pwd)/scripts/claude-auto.sh commit'" >> "$SHELL_RC"
+    echo "alias cc-auto-edit='$(pwd)/scripts/cursor-auto-edit.sh'" >> "$SHELL_RC"
+    echo "alias cc-edit-start='$(pwd)/scripts/cursor-auto-edit.sh start'" >> "$SHELL_RC"
+    echo "alias cc-edit-yolo='$(pwd)/scripts/cursor-auto-edit.sh yolo'" >> "$SHELL_RC"
     echo "" >> "$SHELL_RC"
     echo "# Claude Automation Environment Variables" >> "$SHELL_RC"
     echo "export CLAUDE_AUTO_ACTION=1" >> "$SHELL_RC"
@@ -175,7 +178,21 @@ touch logs/permissions.log
 
 # Set executable permissions
 chmod +x scripts/*.sh
+chmod +x scripts/*.py
+chmod +x scripts/*.applescript
 chmod +x hooks/*
+
+# Install Python dependencies for auto-save daemon
+echo "Installing Python dependencies..."
+pip3 install pyautogui watchdog pillow 2>/dev/null || {
+    echo "Warning: Could not install Python dependencies. Auto-save daemon may not work."
+}
+
+# Create symlinks for new scripts
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ln -sf "$SCRIPT_DIR/cursor-auto-edit.sh" /usr/local/bin/cursor-auto-edit 2>/dev/null || {
+    echo "Warning: Could not create symlink. You may need to run with sudo."
+}
 
 echo ""
 echo "Installation complete!"
@@ -205,10 +222,20 @@ echo "- cc-safe        : Run Claude in safe mode"
 echo "- cc-status      : Check current status"
 echo "- cc-watch       : Watch files for changes"
 echo "- cc-commit      : Auto-commit with AI message"
+echo "- cc-auto-edit   : Manage Cursor auto-edit handlers"
+echo "- cc-edit-start  : Start auto-edit handlers"
+echo "- cc-edit-yolo   : Enable YOLO mode for edits"
 echo ""
 echo "Security notes:"
 echo "- YOLO mode is enabled by default (auto-permissions)"
 echo "- Daily cost limit: $8"
 echo "- Sensitive files (.env, secrets) are protected"
+echo ""
+echo ""
+echo "NEW! Cursor Auto-Edit Feature:"
+echo "- Automatically confirms edit dialogs in Cursor"
+echo "- Start with: cc-edit-start"
+echo "- Enable YOLO mode: cc-edit-yolo"
+echo "- Works with 'Do you want to make this edit?' prompts"
 echo ""
 echo "Happy coding with Claude! 🚀"

@@ -486,6 +486,48 @@ Please provide:
       .filter(command => command.status === status);
   }
 
+  private async cancelCommandTasks(command: Command): Promise<void> {
+    console.log(`🚫 Cancelling tasks for command: ${command.title}`);
+
+    // Cancel all tasks associated with this command
+    for (const taskId of command.generated_tasks) {
+      // Get task from orchestrator
+      const task = this.orchestrator.getTask(taskId);
+      if (task && (task.status === 'pending' || task.status === 'in_progress')) {
+        // Mark task as failed
+        this.orchestrator.failTask(taskId, new Error('Command cancelled by user'));
+      }
+    }
+
+    // Notify all assigned agents about the cancellation
+    const cancellationMessage = {
+      type: MessageType.SHUTDOWN,
+      from: 'system',
+      to: 'broadcast' as const,
+      payload: {
+        command_id: command.id,
+        command_title: command.title,
+        reason: 'Command cancelled by user',
+        affected_tasks: command.generated_tasks
+      },
+      priority: 'high' as const,
+      requires_response: false
+    };
+
+    // Send cancellation notification to all assigned agents
+    for (const agentId of command.assigned_agents) {
+      await this.communicationHub.sendMessageToAgent(agentId, {
+        ...cancellationMessage,
+        to: agentId
+      });
+    }
+
+    // Also broadcast to all agents for awareness
+    this.communicationHub.broadcastMessage(cancellationMessage);
+
+    console.log(`✅ Cancelled ${command.generated_tasks.length} tasks and notified ${command.assigned_agents.length} agents`);
+  }
+
   async cancelCommand(commandId: string): Promise<void> {
     const command = this.activeCommands.get(commandId);
     if (!command) {
@@ -495,7 +537,8 @@ Please provide:
     command.status = 'failed';
     command.error = 'Cancelled by user';
     
-    // TODO: Cancel associated tasks and notify agents
+    // Cancel associated tasks and notify agents
+    await this.cancelCommandTasks(command);
     
     this.emit('command_cancelled', command);
   }

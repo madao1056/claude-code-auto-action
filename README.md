@@ -19,6 +19,7 @@
 - **Auto-format** - 保存時に自動整形
 - **Auto-test** - コミット前に自動テスト実行
 - **Auto-optimize** - importの自動整理
+- **Auto-edit** - Cursorの「Do you want to make this edit?」ダイアログを自動確認
 
 ### 🏗️ 階層的エージェントシステム (NEW!)
 - **Auto-architect** - 「〇〇するシステムを作りたい」という要求から完全なシステムを自動生成
@@ -83,6 +84,12 @@ scripts/claude-auto.sh compact
 
 # 現在の状態確認
 scripts/claude-auto.sh status
+
+# Cursor自動編集ハンドラを開始
+cc-edit-start
+
+# YOLO mode for edits
+cc-edit-yolo
 ```
 
 #### 階層的エージェントシステム (Auto-architect)
@@ -141,6 +148,36 @@ cc-architect upgrade -r "マイクロサービス化" -t refactor
 - 📊 **詳細レポート** - 改善提案を優先順位付きで提示
 - ⚡ **段階的実行** - 大規模変更も安全に実施
 
+## Cursor自動編集機能 🆕
+
+### 概要
+Cursorの編集確認ダイアログ（「Do you want to make this edit to line.ts?」など）を自動的に処理し、開発フローを中断させません。
+
+### 使い方
+```bash
+# 自動編集ハンドラを開始
+cursor-auto-edit start
+# または
+cc-edit-start
+
+# YOLOモードで全ての確認を自動化
+cursor-auto-edit yolo
+# または
+cc-edit-yolo
+
+# ステータス確認
+cursor-auto-edit status
+
+# 停止
+cursor-auto-edit stop
+```
+
+### 実装方式
+1. **Direct Edit Mode** - ファイルを直接書き換えて確認ダイアログを回避
+2. **AppleScript Handler** - macOSでダイアログボタンを自動クリック
+3. **Python Auto-Save Daemon** - ファイル変更を監視して自動保存
+4. **Auto-Response Patterns** - ダイアログテキストをパターンマッチして自動応答
+
 ## VSCode/Cursor統合
 
 ### 拡張機能のインストール
@@ -188,6 +225,11 @@ cc-architect upgrade -r "マイクロサービス化" -t refactor
       "enabled": true,                     // 階層的エージェントシステム有効化
       "parallel_agents": 10,               // 最大並列エージェント数
       "hierarchical_execution": true       // 階層的実行モード
+    },
+    "auto_edit": {
+      "enabled": true,                     // 自動編集確認有効化
+      "yolo_mode": false,                  // YOLOモード（全自動確認）
+      "save_delay": 1.0                    // 自動保存の遅延（秒）
     }
   },
   "agent_hierarchy": {
