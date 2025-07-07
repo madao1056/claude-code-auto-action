@@ -23,6 +23,20 @@
     "auto_test": true,
     "test_before_commit": true,
     "auto_push": false,
+    "docker": {
+      "enabled": true,
+      "auto_start": true,
+      "auto_build": true,
+      "auto_stop": false,
+      "skip_confirmation": true,
+      "patterns": [
+        "docker-compose up",
+        "docker run",
+        "docker build",
+        "Start Docker containers",
+        "Starting containers"
+      ]
+    },
     "auto_architect": {
       "enabled": true,
       "default_prompts": "deep-thinking",

@@ -87,9 +87,12 @@ ccmobile() { ccnew "$1" "mobile application with React Native, TypeScript, navig
 # Enable full automation mode
 claude-auto-on() {
     export CLAUDE_AUTO_MODE=true
+    export CLAUDE_AUTO_DOCKER=true
+    export CLAUDE_DOCKER_AUTO_START=true
+    export CLAUDE_DOCKER_SKIP_CONFIRM=true
     source ~/.claude-auto-env
     echo "Claude automation mode: ON"
-    echo "All prompts will be auto-approved"
+    echo "All prompts will be auto-approved (including Docker)"
 }
 
 # Disable automation mode
@@ -97,8 +100,29 @@ claude-auto-off() {
     unset CLAUDE_AUTO_MODE
     unset CLAUDE_AUTO_APPROVE
     unset CLAUDE_SKIP_CONFIRMATION
+    unset CLAUDE_AUTO_DOCKER
+    unset CLAUDE_DOCKER_AUTO_START
+    unset CLAUDE_DOCKER_SKIP_CONFIRM
     echo "Claude automation mode: OFF"
     echo "Interactive prompts enabled"
+}
+
+# Enable Docker automation specifically
+claude-docker-on() {
+    export CLAUDE_AUTO_DOCKER=true
+    export CLAUDE_DOCKER_AUTO_START=true
+    export CLAUDE_DOCKER_SKIP_CONFIRM=true
+    echo "Claude Docker automation: ON"
+    echo "Docker commands will be auto-approved"
+}
+
+# Disable Docker automation
+claude-docker-off() {
+    unset CLAUDE_AUTO_DOCKER
+    unset CLAUDE_DOCKER_AUTO_START
+    unset CLAUDE_DOCKER_SKIP_CONFIRM
+    echo "Claude Docker automation: OFF"
+    echo "Docker commands will require confirmation"
 }
 
 # Check automation status
@@ -107,6 +131,8 @@ claude-status() {
     echo "========================"
     echo "Auto Mode: ${CLAUDE_AUTO_MODE:-false}"
     echo "Auto Approve: ${CLAUDE_AUTO_APPROVE:-false}"
+    echo "Docker Auto: ${CLAUDE_AUTO_DOCKER:-false}"
+    echo "Docker Auto Start: ${CLAUDE_DOCKER_AUTO_START:-false}"
     echo "Skip Confirmations: ${CLAUDE_SKIP_CONFIRMATION:-false}"
     echo "Permissions Mode: ${CLAUDE_PERMISSIONS_MODE:-ask}"
     echo "Daily Cost Limit: \$${CLAUDE_COST_LIMIT_PER_DAY:-8}"

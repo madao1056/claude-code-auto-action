@@ -1,0 +1,71 @@
+// Timing constants
+const TIMING = {
+  RESPONSE_DEBOUNCE_TIME: 0.1,
+  POLL_INTERVAL: 0.01,
+  PROCESS_READY_TIMEOUT: 30000,
+  TASK_RESULT_TIMEOUT: 300000,
+  CLEANUP_TIMEOUT: 1000
+};
+
+// Process management constants
+const PROCESS = {
+  MULTI_AGENT_COMMAND: 'node',
+  MULTI_AGENT_SCRIPT: 'scripts/multi-agent-system.js',
+  CLAUDE_EXECUTABLE: 'claude',
+  CLAUDE_FLAGS: ['--dangerously-skip-permissions', '--non-interactive']
+};
+
+// Port configuration
+const PORTS = {
+  GATEWAY: 3000,
+  AUTH_SERVICE: 3001,
+  MAIN_API: 3002,
+  FRONTEND: 3003,
+  ADMIN_PANEL: 3004,
+  DATABASE: 5432,
+  REDIS: 6379
+};
+
+// Environment variable names
+const ENV_VARS = {
+  AUTO_MODE: 'CLAUDE_AUTO_MODE',
+  AUTO_APPROVE: 'CLAUDE_AUTO_APPROVE',
+  SKIP_CONFIRMATION: 'CLAUDE_SKIP_CONFIRMATION',
+  NON_INTERACTIVE: 'CLAUDE_NON_INTERACTIVE',
+  BATCH_MODE: 'CLAUDE_BATCH_MODE',
+  YES_TO_ALL: 'CLAUDE_YES_TO_ALL',
+  PERMISSIONS_MODE: 'CLAUDE_PERMISSIONS_MODE',
+  DANGEROUSLY_SKIP_PERMISSIONS: 'CLAUDE_DANGEROUSLY_SKIP_PERMISSIONS',
+  AUTO_EXECUTE_COMMANDS: 'CLAUDE_AUTO_EXECUTE_COMMANDS',
+  AUTO_SAVE_FILES: 'CLAUDE_AUTO_SAVE_FILES',
+  SKIP_EDITOR_PROMPTS: 'CLAUDE_SKIP_EDITOR_PROMPTS',
+  AUTO_DOCKER: 'CLAUDE_AUTO_DOCKER',
+  DOCKER_AUTO_START: 'CLAUDE_DOCKER_AUTO_START',
+  DOCKER_SKIP_CONFIRM: 'CLAUDE_DOCKER_SKIP_CONFIRM'
+};
+
+// Notification sounds
+const SOUNDS = {
+  SUCCESS: 'Blow',
+  ERROR: 'Basso',
+  WARNING: 'Tink',
+  INFO: 'Pop'
+};
+
+// File paths
+const PATHS = {
+  SETTINGS: '.claude/settings.json',
+  PERMISSIONS: '.claude/permissions.json',
+  LOGS_DIR: 'logs',
+  HOOKS_DIR: 'hooks',
+  SCRIPTS_DIR: 'scripts'
+};
+
+module.exports = {
+  TIMING,
+  PROCESS,
+  PORTS,
+  ENV_VARS,
+  SOUNDS,
+  PATHS
+};

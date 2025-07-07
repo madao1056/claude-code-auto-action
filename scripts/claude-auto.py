@@ -9,13 +9,23 @@ import os
 import select
 import time
 import re
+import json
 from threading import Thread
 from queue import Queue
+from typing import List, Tuple, Optional
+
+# Constants
+RESPONSE_DEBOUNCE_TIME = 0.1
+POLL_INTERVAL = 0.01
+THREAD_JOIN_TIMEOUT = 1.0
 
 class ClaudeAutoWrapper:
     def __init__(self):
         # Set environment variables
         self.setup_environment()
+        
+        # Load Docker patterns from settings if available
+        self.docker_patterns = self.load_docker_patterns()
         
         # Define auto-response patterns
         self.response_patterns = [
@@ -42,8 +52,43 @@ class ClaudeAutoWrapper:
             (r"Update.*\?", "yes"),
             (r"Delete.*\?", "yes"),
             (r"Remove.*\?", "yes"),
+            # Docker-specific patterns
+            (r"docker-compose up.*Do you want to proceed", "yes"),
+            (r"Start Docker containers.*Do you want to proceed", "yes"),
+            (r"Starting Docker containers", "yes"),
+            (r"Building Docker image", "yes"),
+            (r"Pulling Docker image", "yes"),
+            (r"Creating Docker network", "yes"),
+            (r"Creating Docker volume", "yes"),
+            (r"Starting container", "yes"),
+            (r"Stopping container", "yes"),
+        ] + self.docker_patterns
+        
+    def load_docker_patterns(self) -> List[Tuple[str, str]]:
+        """Load Docker patterns from settings.json if available"""
+        patterns = []
+        settings_paths = [
+            os.path.expanduser("~/.claude/settings.json"),
+            ".claude/settings.json"
         ]
         
+        for settings_path in settings_paths:
+            try:
+                if os.path.exists(settings_path):
+                    with open(settings_path, 'r') as f:
+                        settings = json.load(f)
+                        docker_config = settings.get('automation', {}).get('docker', {})
+                        if docker_config.get('enabled', False):
+                            # Add patterns from config
+                            for pattern in docker_config.get('patterns', []):
+                                patterns.append((pattern, "yes"))
+                        return patterns
+            except Exception:
+                # Continue to next path
+                continue
+        
+        return patterns
+    
     def setup_environment(self):
         """Set all automation environment variables"""
         env_vars = {
@@ -57,20 +102,28 @@ class ClaudeAutoWrapper:
             "CLAUDE_AUTO_EXECUTE_COMMANDS": "true",
             "CLAUDE_AUTO_SAVE_FILES": "true",
             "CLAUDE_SKIP_EDITOR_PROMPTS": "true",
+            "CLAUDE_AUTO_DOCKER": "true",
+            "CLAUDE_DOCKER_AUTO_START": "true",
+            "CLAUDE_DOCKER_SKIP_CONFIRM": "true",
         }
         
         for key, value in env_vars.items():
             os.environ[key] = value
     
-    def find_response(self, text):
+    def find_response(self, text: str) -> Optional[str]:
         """Find appropriate response for given text"""
         for pattern, response in self.response_patterns:
             if re.search(pattern, text, re.IGNORECASE):
                 return response
         return "yes"  # Default response
     
-    def run_claude(self, args):
+    def run_claude(self, args: List[str]) -> int:
         """Run Claude with automatic responses to prompts"""
+        # Validate args to prevent injection
+        if not args or not all(isinstance(arg, str) for arg in args):
+            print("Error: Invalid arguments provided")
+            return 1
+            
         # Build command
         cmd = ["claude", "--dangerously-skip-permissions", "--non-interactive"] + args
         
@@ -122,7 +175,7 @@ class ClaudeAutoWrapper:
                         
                         # Check if we need to respond
                         response = self.find_response(buffer)
-                        if response and time.time() - last_response_time > 0.1:
+                        if response and time.time() - last_response_time > RESPONSE_DEBOUNCE_TIME:
                             # Send response
                             process.stdin.write(response + "\n")
                             process.stdin.flush()
@@ -132,11 +185,11 @@ class ClaudeAutoWrapper:
                     pass
                 
                 # Small delay to prevent CPU spinning
-                time.sleep(0.01)
+                time.sleep(POLL_INTERVAL)
             
             # Wait for threads to finish
-            stdout_thread.join(timeout=1)
-            stderr_thread.join(timeout=1)
+            stdout_thread.join(timeout=THREAD_JOIN_TIMEOUT)
+            stderr_thread.join(timeout=THREAD_JOIN_TIMEOUT)
             
         except KeyboardInterrupt:
             process.terminate()

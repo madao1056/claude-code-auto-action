@@ -1,0 +1,69 @@
+{
+  "docker_prompts": [
+    {
+      "pattern": "Do you want to proceed\\?",
+      "response": "yes",
+      "contexts": ["docker-compose", "docker", "container"]
+    },
+    {
+      "pattern": "Start Docker containers.*Do you want to proceed",
+      "response": "yes"
+    },
+    {
+      "pattern": "docker-compose up.*Do you want to proceed",
+      "response": "yes"
+    },
+    {
+      "pattern": "Starting Docker containers",
+      "response": "yes"
+    },
+    {
+      "pattern": "Building Docker image",
+      "response": "yes"
+    },
+    {
+      "pattern": "Pulling Docker image",
+      "response": "yes"
+    },
+    {
+      "pattern": "Creating Docker network",
+      "response": "yes"
+    },
+    {
+      "pattern": "Creating Docker volume",
+      "response": "yes"
+    },
+    {
+      "pattern": "Starting container",
+      "response": "yes"
+    },
+    {
+      "pattern": "Stopping container",
+      "response": "yes"
+    },
+    {
+      "pattern": "Removing container",
+      "response": "yes"
+    },
+    {
+      "pattern": "Docker build.*proceed",
+      "response": "yes"
+    },
+    {
+      "pattern": "Docker run.*proceed",
+      "response": "yes"
+    },
+    {
+      "pattern": "Docker exec.*proceed",
+      "response": "yes"
+    },
+    {
+      "pattern": "Docker push.*proceed",
+      "response": "yes"
+    },
+    {
+      "pattern": "Docker pull.*proceed",
+      "response": "yes"
+    }
+  ]
+}

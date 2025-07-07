@@ -3,7 +3,14 @@
     "allow": [
       "*",
       "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/hooks/command-safety-checker.js \"npm install express\")",
-      "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/hooks/command-safety-checker.js \"aws ec2 run-instances\")"
+      "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/hooks/command-safety-checker.js \"aws ec2 run-instances\")",
+      "Bash(chmod:*)",
+      "Bash(npm test)",
+      "Bash(node:*)",
+      "Bash(python3:*)",
+      "Bash(bash:*)",
+      "Bash(./test-docker-automation.sh:*)",
+      "Bash(git add:*)"
     ],
     "deny": [
       "Bash(rm -rf*)",

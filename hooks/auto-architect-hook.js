@@ -8,8 +8,9 @@
  */
 
 const path = require('path');
-const { loadUserSettings } = require('../utils/settingsLoader');
-const { spawnProcess, waitForProcessReady, gracefulShutdown } = require('../utils/processManager');
+const configLoader = require('../utils/config-loader');
+const processManager = require('../utils/process-manager');
+const { TIMING } = require('../utils/constants');
 
 class AutoArchitectHook {
   constructor() {
@@ -23,8 +24,8 @@ class AutoArchitectHook {
    * @returns {Object} Auto-architect settings
    */
   loadSettings() {
-    const userSettings = loadUserSettings();
-    return userSettings.automation?.auto_architect || {};
+    const settings = configLoader.loadSettings();
+    return settings.automation?.auto_architect || {};
   }
 
   async initialize() {
@@ -37,7 +38,7 @@ class AutoArchitectHook {
 
     try {
       // マルチエージェントシステムを別プロセスで起動
-      this.multiAgentSystem = spawnProcess('node', [
+      this.multiAgentSystem = processManager.spawn('node', [
         path.join(__dirname, '../dist/src/main/ClaudeCodeAutoSystem.js'),
         '--mode', 'service',
         '--config', JSON.stringify(this.settings)
@@ -68,7 +69,15 @@ class AutoArchitectHook {
       });
 
       // 起動完了を待つ
-      await waitForProcessReady(this.multiAgentSystem, /ready/i, 30000);
+      const isReady = await processManager.waitForProcessReady(
+        this.multiAgentSystem,
+        /ready/i,
+        TIMING.PROCESS_READY_TIMEOUT
+      );
+      
+      if (!isReady) {
+        throw new Error('Multi-agent system failed to start');
+      }
       this.isEnabled = true;
       console.log('✅ Auto-Architect System ready');
 
@@ -186,7 +195,7 @@ class AutoArchitectHook {
    * @param {number} [timeout=300000] - Timeout in milliseconds (default: 5 minutes)
    * @returns {Promise<Object>} Result from Auto-Architect
    */
-  async waitForResult(requestData, timeout = 300000) {
+  async waitForResult(requestData, timeout = TIMING.TASK_RESULT_TIMEOUT) {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error('Auto-Architect processing timeout'));
@@ -222,10 +231,11 @@ class AutoArchitectHook {
     console.log('🛑 Shutting down Auto-Architect Hook...');
     
     if (this.multiAgentSystem) {
-      await gracefulShutdown(this.multiAgentSystem, {
-        shutdownMessage: { type: 'shutdown' },
-        timeout: 5000
-      });
+      // Send shutdown message
+      this.multiAgentSystem.stdin.write(JSON.stringify({ type: 'shutdown' }) + '\n');
+      
+      // Wait for graceful termination
+      await processManager.terminate(this.multiAgentSystem, 5000);
     }
   }
 }
@@ -247,7 +257,13 @@ async function main(args) {
       break;
       
     case 'intercept':
-      const taskData = JSON.parse(args[1] || '{}');
+      let taskData = {};
+      try {
+        taskData = JSON.parse(args[1] || '{}');
+      } catch (error) {
+        console.error('Invalid task data JSON:', error.message);
+        process.exit(1);
+      }
       const result = await autoArchitect.interceptTask(taskData);
       if (result) {
         console.log(JSON.stringify({ type: 'auto_architect_result', result }));

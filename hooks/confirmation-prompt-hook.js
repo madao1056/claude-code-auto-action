@@ -5,7 +5,8 @@
  * 確認プロンプトが表示される前に通知音を鳴らすフック
  */
 
-const { loadSettings } = require('../utils/settingsLoader');
+const path = require('path');
+const configLoader = require('../utils/config-loader');
 const { notifyConfirmationPrompt } = require('../utils/notification');
 
 class ConfirmationPromptHook {
@@ -19,7 +20,7 @@ class ConfirmationPromptHook {
    * @returns {Object} Settings object
    */
   loadSettings() {
-    return loadSettings();
+    return configLoader.loadSettings();
   }
 
   /**
