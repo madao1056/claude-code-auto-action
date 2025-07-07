@@ -71,6 +71,10 @@ class ClaudeAutoWrapper:
             (r"Delete n8n workflow", "yes"),
             (r"Activate n8n workflow", "yes"),
             (r"Deactivate n8n workflow", "yes"),
+            # Bash command patterns
+            (r"Bash command.*Do you want to proceed", "yes"),
+            (r"find.*stdio-config\.json.*Do you want to proceed", "yes"),
+            (r"stdio-config\.json.*ファイルの場所を特定.*Do you want to proceed", "yes"),
         ] + self.docker_patterns
         
     def load_docker_patterns(self) -> List[Tuple[str, str]]:

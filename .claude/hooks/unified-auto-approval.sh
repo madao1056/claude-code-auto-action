@@ -41,6 +41,7 @@ if is_auto_approval_enabled; then
                 exit 1  # Require manual approval
             else
                 log_operation "Bash command: $COMMAND"
+                # Auto-approve all safe bash commands including find
                 exit 0  # Auto-approve
             fi
             ;;

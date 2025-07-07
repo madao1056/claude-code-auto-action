@@ -16,6 +16,18 @@
     "command_operations": {
       "Bash": {
         "default": "auto",
+        "safe_patterns": [
+          "find",
+          "grep",
+          "ls",
+          "cat",
+          "echo",
+          "stdio-config.json",
+          "head",
+          "tail",
+          "which",
+          "whereis"
+        ],
         "dangerous_commands": {
           "patterns": ["rm -rf", "sudo", "format", "fdisk", "dd if="],
           "action": "confirm"

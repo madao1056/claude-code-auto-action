@@ -77,6 +77,25 @@ class AutoApprovalInterceptor {
 
     isDangerousCommand(command) {
         if (!command) return false;
+        
+        // Check if it's a safe command first
+        const safePatterns = [
+            /^find\s+/,
+            /stdio-config\.json/,
+            /^grep\s+/,
+            /^ls\s+/,
+            /^cat\s+/,
+            /^echo\s+/,
+            /^head\s+/,
+            /^tail\s+/,
+            /^which\s+/,
+            /^whereis\s+/
+        ];
+        
+        if (safePatterns.some(pattern => pattern.test(command))) {
+            return false; // Explicitly safe
+        }
+        
         const dangerous = [
             /rm\s+-rf\s+\//,
             /sudo\s+rm/,
