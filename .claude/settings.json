@@ -135,6 +135,26 @@
       "info": "Pop"
     }
   },
+  "git": {
+    "autoStage": true,
+    "autoCommit": true,
+    "autoPush": true,
+    "autoMerge": true,
+    "conflictStrategy": "local",
+    "mergeStrategy": "merge",
+    "commitInterval": 300,
+    "dangerousOperations": {
+      "allowForcePush": false,
+      "allowRebase": false,
+      "allowReset": false,
+      "requireConfirmation": ["force", "reset --hard", "clean -fd"]
+    },
+    "autoMessages": {
+      "commitPrefix": "auto: ",
+      "mergePrefix": "merge: ",
+      "useConventionalCommits": true
+    }
+  },
   "optimization": {
     "autoCompactOnMemoryPressure": true,
     "preferSonnetForImplementation": true,

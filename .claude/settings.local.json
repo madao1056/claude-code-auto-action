@@ -27,7 +27,14 @@
       "Bash(npm install)",
       "Bash(npm run package:*)",
       "Bash(npm run:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git remote add:*)",
+      "Bash(gh auth:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/scripts/git-auto-manager.sh auto)"
     ],
     "deny": []
   },
@@ -41,7 +48,29 @@
       "node*",
       "mkdir*",
       "touch*",
-      "echo*"
+      "echo*",
+      "git add*",
+      "git commit*",
+      "git push*",
+      "git pull*",
+      "git merge*",
+      "git checkout*",
+      "git branch*",
+      "git status",
+      "git log*",
+      "git diff*",
+      "git fetch*",
+      "git stash*",
+      "gh pr*",
+      "gh repo*",
+      "*"
+    ],
+    "excludePatterns": [
+      "git reset --hard*",
+      "git push --force*",
+      "git clean -fd*",
+      "rm -rf*",
+      "sudo*"
     ]
   },
   "yoloMode": true,

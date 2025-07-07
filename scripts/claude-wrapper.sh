@@ -29,6 +29,9 @@ export CLAUDE_HOOK_DIR="$CLAUDE_AUTO_ACTION_HOME/hooks"
 # デバッグモード（必要に応じて有効化）
 # export CLAUDE_DEBUG=true
 
+# Git自動化フックを有効化
+export CLAUDE_GIT_AUTO_ENABLED=true
+
 # 実際のClaude CLIコマンドを実行
 CLAUDE_CLI="/Users/hashiguchimasaki/.nvm/versions/node/v20.19.2/bin/claude"
 
