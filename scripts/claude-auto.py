@@ -62,6 +62,15 @@ class ClaudeAutoWrapper:
             (r"Creating Docker volume", "yes"),
             (r"Starting container", "yes"),
             (r"Stopping container", "yes"),
+            # n8n workflow patterns
+            (r"curl.*api/v1/workflows.*Do you want to proceed", "yes"),
+            (r"Import.*workflow.*Do you want to proceed", "yes"),
+            (r"n8n.*workflow.*operation", "yes"),
+            (r"Create n8n workflow", "yes"),
+            (r"Update n8n workflow", "yes"),
+            (r"Delete n8n workflow", "yes"),
+            (r"Activate n8n workflow", "yes"),
+            (r"Deactivate n8n workflow", "yes"),
         ] + self.docker_patterns
         
     def load_docker_patterns(self) -> List[Tuple[str, str]]:
@@ -82,6 +91,17 @@ class ClaudeAutoWrapper:
                             # Add patterns from config
                             for pattern in docker_config.get('patterns', []):
                                 patterns.append((pattern, "yes"))
+                        
+                        # Load n8n patterns
+                        n8n_config = settings.get('n8n', {})
+                        if n8n_config.get('auto_approve', False):
+                            patterns.extend([
+                                (r"n8n.*workflow", "yes"),
+                                (r"api/v1/workflows", "yes"),
+                                (r"workflow.*import", "yes"),
+                                (r"workflow.*create", "yes"),
+                                (r"workflow.*update", "yes"),
+                            ])
                         return patterns
             except Exception:
                 # Continue to next path

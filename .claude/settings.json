@@ -135,7 +135,19 @@
     "post_task": "node hooks/task-completion-hook.js",
     "post_run": "git add -A && git commit -m 'Claude checkpoint' || true && node hooks/auto-architect-hook.js shutdown",
     "pre_confirmation": "node hooks/confirmation-prompt-hook.js --prompt",
-    "pre_command": "node hooks/command-safety-checker.js"
+    "pre_command": "node hooks/command-safety-checker.js && .claude/hooks/n8n-auto-approve.sh"
+  },
+  "n8n": {
+    "auto_approve": true,
+    "api_key_env": "N8N_API_KEY",
+    "base_url": "http://localhost:5678",
+    "operations": {
+      "create": "auto",
+      "update": "auto",
+      "delete": "confirm",
+      "activate": "auto",
+      "deactivate": "auto"
+    }
   },
   "notifications": {
     "enabled": true,
