@@ -1,0 +1,19 @@
+{
+  "name": "@claude-code-auto-action/utils",
+  "version": "1.0.0",
+  "description": "Shared utilities for Claude Code Auto Action",
+  "main": "index.js",
+  "exports": {
+    "./settingsLoader": "./settingsLoader.js",
+    "./notification": "./notification.js",
+    "./commandBuilder": "./commandBuilder.js",
+    "./processManager": "./processManager.js"
+  },
+  "keywords": [
+    "claude",
+    "utilities",
+    "automation"
+  ],
+  "author": "Claude Code Auto Action",
+  "license": "MIT"
+}

@@ -118,8 +118,22 @@
   "hooks": {
     "pre_run": "echo '🐙 Claude Code session started at $(date)' >> logs/cc.log && node hooks/auto-architect-hook.js init",
     "pre_task": "node hooks/auto-architect-hook.js intercept",
-    "post_task": "/clear",
-    "post_run": "git add -A && git commit -m 'Claude checkpoint' || true && node hooks/auto-architect-hook.js shutdown"
+    "post_task": "node hooks/task-completion-hook.js",
+    "post_run": "git add -A && git commit -m 'Claude checkpoint' || true && node hooks/auto-architect-hook.js shutdown",
+    "pre_confirmation": "node hooks/confirmation-prompt-hook.js --prompt"
+  },
+  "notifications": {
+    "enabled": true,
+    "types": ["all"],
+    "sound": true,
+    "voice": false,
+    "desktop": true,
+    "sounds": {
+      "success": "Blow",
+      "error": "Basso",
+      "warning": "Tink",
+      "info": "Pop"
+    }
   },
   "optimization": {
     "autoCompactOnMemoryPressure": true,

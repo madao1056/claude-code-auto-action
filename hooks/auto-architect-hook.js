@@ -7,9 +7,9 @@
  * 複雑なタスクを検出してマルチエージェントシステムに転送します。
  */
 
-const { spawn } = require('child_process');
-const fs = require('fs');
 const path = require('path');
+const { loadUserSettings } = require('../utils/settingsLoader');
+const { spawnProcess, waitForProcessReady, gracefulShutdown } = require('../utils/processManager');
 
 class AutoArchitectHook {
   constructor() {
@@ -18,17 +18,13 @@ class AutoArchitectHook {
     this.settings = this.loadSettings();
   }
 
+  /**
+   * Load auto-architect settings from user configuration
+   * @returns {Object} Auto-architect settings
+   */
   loadSettings() {
-    try {
-      const claudeSettingsPath = path.join(process.env.HOME || process.env.USERPROFILE, '.claude', 'settings.json');
-      if (fs.existsSync(claudeSettingsPath)) {
-        const settings = JSON.parse(fs.readFileSync(claudeSettingsPath, 'utf8'));
-        return settings.automation?.auto_architect || {};
-      }
-    } catch (error) {
-      console.warn('Could not load Claude settings:', error.message);
-    }
-    return {};
+    const userSettings = loadUserSettings();
+    return userSettings.automation?.auto_architect || {};
   }
 
   async initialize() {
@@ -41,8 +37,8 @@ class AutoArchitectHook {
 
     try {
       // マルチエージェントシステムを別プロセスで起動
-      this.multiAgentSystem = spawn('node', [
-        path.join(__dirname, '../dist/main/ClaudeCodeAutoSystem.js'),
+      this.multiAgentSystem = spawnProcess('node', [
+        path.join(__dirname, '../dist/src/main/ClaudeCodeAutoSystem.js'),
         '--mode', 'service',
         '--config', JSON.stringify(this.settings)
       ], {
@@ -72,32 +68,21 @@ class AutoArchitectHook {
       });
 
       // 起動完了を待つ
-      await this.waitForStartup();
+      await waitForProcessReady(this.multiAgentSystem, /ready/i, 30000);
+      this.isEnabled = true;
+      console.log('✅ Auto-Architect System ready');
 
     } catch (error) {
       console.error('Failed to initialize Auto-Architect:', error);
     }
   }
 
-  async waitForStartup(timeout = 30000) {
-    return new Promise((resolve, reject) => {
-      const startTime = Date.now();
-      
-      const checkReady = () => {
-        if (this.isEnabled) {
-          resolve();
-        } else if (Date.now() - startTime > timeout) {
-          reject(new Error('Auto-Architect startup timeout'));
-        } else {
-          setTimeout(checkReady, 500);
-        }
-      };
-      
-      checkReady();
-    });
-  }
 
-  // Claude Code からのタスクをインターセプト
+  /**
+   * Intercept and route complex tasks to the Auto-Architect system
+   * @param {Object} taskData - Task data from Claude Code
+   * @returns {Promise<Object|null>} Result from Auto-Architect or null for fallback
+   */
   async interceptTask(taskData) {
     if (!this.isEnabled || !this.shouldUseAutoArchitect(taskData)) {
       return null; // 通常のClaude Code処理に任せる
@@ -130,6 +115,11 @@ class AutoArchitectHook {
     }
   }
 
+  /**
+   * Determine if a task should be handled by Auto-Architect
+   * @param {Object} taskData - Task data to evaluate
+   * @returns {boolean} True if task should use Auto-Architect
+   */
   shouldUseAutoArchitect(taskData) {
     const prompt = taskData.prompt || taskData.description || '';
     const fileCount = taskData.fileCount || 0;
@@ -154,6 +144,11 @@ class AutoArchitectHook {
     return complexityScore >= threshold;
   }
 
+  /**
+   * Determine the command type based on task description
+   * @param {Object} taskData - Task data containing prompt/description
+   * @returns {string} Command type identifier
+   */
   determineCommandType(taskData) {
     const prompt = (taskData.prompt || taskData.description || '').toLowerCase();
     
@@ -185,7 +180,13 @@ class AutoArchitectHook {
     return 'IMPLEMENT_FEATURE'; // デフォルト
   }
 
-  async waitForResult(requestData, timeout = 300000) { // 5分タイムアウト
+  /**
+   * Wait for result from the Auto-Architect system
+   * @param {Object} requestData - Request data sent to the system
+   * @param {number} [timeout=300000] - Timeout in milliseconds (default: 5 minutes)
+   * @returns {Promise<Object>} Result from Auto-Architect
+   */
+  async waitForResult(requestData, timeout = 300000) {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error('Auto-Architect processing timeout'));
@@ -213,19 +214,18 @@ class AutoArchitectHook {
     });
   }
 
+  /**
+   * Shutdown the Auto-Architect system gracefully
+   * @returns {Promise<void>}
+   */
   async shutdown() {
     console.log('🛑 Shutting down Auto-Architect Hook...');
     
     if (this.multiAgentSystem) {
-      // グレースフルシャットダウンを試行
-      this.multiAgentSystem.stdin.write(JSON.stringify({ type: 'shutdown' }) + '\n');
-      
-      // 5秒後に強制終了
-      setTimeout(() => {
-        if (this.multiAgentSystem) {
-          this.multiAgentSystem.kill('SIGTERM');
-        }
-      }, 5000);
+      await gracefulShutdown(this.multiAgentSystem, {
+        shutdownMessage: { type: 'shutdown' },
+        timeout: 5000
+      });
     }
   }
 }

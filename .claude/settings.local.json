@@ -9,8 +9,45 @@
       "Bash(npm pack)",
       "Bash(npx @vscode/vsce package:*)",
       "Bash(npm test)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm init:*)",
+      "Bash(python -m venv:*)",
+      "Bash(python:*)",
+      "Bash(env)",
+      "Bash(chmod:*)",
+      "Bash(osascript:*)",
+      "Bash(ls:*)",
+      "Bash(claude --version)",
+      "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/scripts/notify-completion.sh:*)",
+      "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/scripts/test-sounds.sh:*)",
+      "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/scripts/test-selected-sounds.sh:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm install)",
+      "Bash(npm run package:*)",
+      "Bash(npm run:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
+  },
+  "autoApprove": {
+    "enabled": true,
+    "patterns": [
+      "python -m venv*",
+      "python*",
+      "pip*",
+      "npm*",
+      "node*",
+      "mkdir*",
+      "touch*",
+      "echo*"
+    ]
+  },
+  "yoloMode": true,
+  "automation": {
+    "enabled": true,
+    "auto_approve": true,
+    "skip_confirmations": true
   }
 }

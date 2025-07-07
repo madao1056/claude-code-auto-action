@@ -1,0 +1,28 @@
+{
+  "name": "email-receipt-collector",
+  "version": "1.0.0",
+  "description": "Email receipt collection tool with automatic Google Drive upload",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "setup": "node src/setup.js",
+    "test": "jest"
+  },
+  "keywords": ["email", "receipt", "gmail", "google-drive", "ocr", "pdf"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "googleapis": "^118.0.0",
+    "pdf-parse": "^1.1.1",
+    "tesseract.js": "^4.0.2",
+    "dotenv": "^16.0.3",
+    "winston": "^3.8.2",
+    "node-cron": "^3.0.2",
+    "cheerio": "^1.0.0-rc.12",
+    "mailparser": "^3.6.5",
+    "sharp": "^0.32.1"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0"
+  }
+}

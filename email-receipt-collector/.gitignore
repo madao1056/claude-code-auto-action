@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Configuration and credentials
+config/
+!config/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+temp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build files
+dist/
+build/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# NPM
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

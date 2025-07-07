@@ -2,6 +2,9 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * Service for handling automatic edits and confirmations
+ */
 export class AutoEditService {
     private autoResponses: any;
     private pendingEdits: Map<string, string> = new Map();
@@ -11,10 +14,13 @@ export class AutoEditService {
         this.setupEditInterceptor();
     }
 
-    private loadAutoResponses() {
+    /**
+     * Load auto-response patterns from configuration
+     */
+    private loadAutoResponses(): void {
         try {
             const autoResponsePath = path.join(
-                process.env.HOME || '',
+                process.env.HOME || process.env.USERPROFILE || '',
                 '.claude',
                 'auto-responses.json'
             );
@@ -28,7 +34,10 @@ export class AutoEditService {
         }
     }
 
-    private setupEditInterceptor() {
+    /**
+     * Setup interceptor for edit confirmation dialogs
+     */
+    private setupEditInterceptor(): void {
         // Override the default showInformationMessage for edit confirmations
         const originalShowInfo = vscode.window.showInformationMessage;
         
@@ -41,11 +50,12 @@ export class AutoEditService {
                 const items = args.filter(arg => typeof arg === 'string');
                 
                 // Return the positive response
-                if (items.includes('Yes')) return 'Yes';
-                if (items.includes('yes')) return 'yes';
-                if (items.includes('Save')) return 'Save';
-                if (items.includes('Apply')) return 'Apply';
-                if (items.includes('Continue')) return 'Continue';
+                const positiveResponses = ['Yes', 'yes', 'Save', 'Apply', 'Continue'];
+                for (const response of positiveResponses) {
+                    if (items.includes(response)) {
+                        return response;
+                    }
+                }
                 
                 // Default to first option
                 return items[0];
@@ -56,6 +66,11 @@ export class AutoEditService {
         };
     }
 
+    /**
+     * Check if a message should be auto-confirmed
+     * @param {string} message - Dialog message
+     * @returns {boolean} Whether to auto-confirm
+     */
     private shouldAutoConfirm(message: string): boolean {
         const config = vscode.workspace.getConfiguration('claude');
         
@@ -88,38 +103,24 @@ export class AutoEditService {
         );
     }
 
+    /**
+     * Apply an edit directly to a file
+     * @param {string} filePath - Path to file
+     * @param {string} newContent - New file content
+     * @returns {Promise<boolean>} Success status
+     */
     public async applyDirectEdit(filePath: string, newContent: string): Promise<boolean> {
         try {
             const config = vscode.workspace.getConfiguration('claude');
             
             if (config.get('yoloMode')) {
                 // Direct file write in YOLO mode
-                fs.writeFileSync(filePath, newContent, 'utf8');
-                
-                // Force VSCode to reload the file
-                const uri = vscode.Uri.file(filePath);
-                const doc = vscode.workspace.textDocuments.find(d => d.uri.fsPath === filePath);
-                
-                if (doc) {
-                    // Close and reopen to force reload
-                    await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-                    await vscode.window.showTextDocument(uri);
-                }
-                
+                await this.writeFileDirectly(filePath, newContent);
+                await this.reloadDocument(filePath);
                 return true;
             } else {
                 // Use standard VSCode edit API
-                const uri = vscode.Uri.file(filePath);
-                const document = await vscode.workspace.openTextDocument(uri);
-                const editor = await vscode.window.showTextDocument(document);
-                
-                return await editor.edit(editBuilder => {
-                    const fullRange = new vscode.Range(
-                        document.positionAt(0),
-                        document.positionAt(document.getText().length)
-                    );
-                    editBuilder.replace(fullRange, newContent);
-                });
+                return await this.applyVSCodeEdit(filePath, newContent);
             }
         } catch (error) {
             console.error('Failed to apply direct edit:', error);
@@ -127,10 +128,54 @@ export class AutoEditService {
         }
     }
 
-    public async handleCursorEditPrompt(): Promise<void> {
-        // This method can be called when Cursor shows edit prompts
-        // It will automatically click "Yes" or equivalent positive responses
+    /**
+     * Write file directly to filesystem
+     * @param {string} filePath - File path
+     * @param {string} content - File content
+     */
+    private async writeFileDirectly(filePath: string, content: string): Promise<void> {
+        fs.writeFileSync(filePath, content, 'utf8');
+    }
+
+    /**
+     * Reload document in VSCode
+     * @param {string} filePath - File path
+     */
+    private async reloadDocument(filePath: string): Promise<void> {
+        const uri = vscode.Uri.file(filePath);
+        const doc = vscode.workspace.textDocuments.find(d => d.uri.fsPath === filePath);
         
+        if (doc) {
+            // Close and reopen to force reload
+            await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+            await vscode.window.showTextDocument(uri);
+        }
+    }
+
+    /**
+     * Apply edit using VSCode API
+     * @param {string} filePath - File path
+     * @param {string} newContent - New content
+     * @returns {Promise<boolean>} Success status
+     */
+    private async applyVSCodeEdit(filePath: string, newContent: string): Promise<boolean> {
+        const uri = vscode.Uri.file(filePath);
+        const document = await vscode.workspace.openTextDocument(uri);
+        const editor = await vscode.window.showTextDocument(document);
+        
+        return await editor.edit(editBuilder => {
+            const fullRange = new vscode.Range(
+                document.positionAt(0),
+                document.positionAt(document.getText().length)
+            );
+            editBuilder.replace(fullRange, newContent);
+        });
+    }
+
+    /**
+     * Handle Cursor edit prompts automatically
+     */
+    public async handleCursorEditPrompt(): Promise<void> {
         const config = vscode.workspace.getConfiguration('claude');
         if (!config.get('yoloMode')) {
             return;
@@ -143,10 +188,18 @@ export class AutoEditService {
         await vscode.commands.executeCommand('type', { text: '\n' });
     }
 
-    public setPendingEdit(filePath: string, content: string) {
+    /**
+     * Add an edit to pending queue
+     * @param {string} filePath - File path
+     * @param {string} content - File content
+     */
+    public setPendingEdit(filePath: string, content: string): void {
         this.pendingEdits.set(filePath, content);
     }
 
+    /**
+     * Apply all pending edits
+     */
     public async applyPendingEdits(): Promise<void> {
         for (const [filePath, content] of this.pendingEdits) {
             await this.applyDirectEdit(filePath, content);

@@ -1,9 +1,18 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process');
-const readline = require('readline');
+/**
+ * @file claude-auto-node.js
+ * @description Automatic response handler for Claude CLI prompts
+ */
 
-// Auto-response patterns
+const readline = require('readline');
+const { spawnProcess } = require('../utils/processManager');
+const { buildEnvironment } = require('../utils/commandBuilder');
+
+/**
+ * Auto-response patterns for Claude CLI prompts
+ * @type {Array<{pattern: RegExp, response: string}>}
+ */
 const responsePatterns = [
   { pattern: /Do you want to proceed\?/i, response: 'yes' },
   { pattern: /Do you want to make this edit/i, response: 'yes' },
@@ -30,23 +39,21 @@ const responsePatterns = [
   { pattern: /Remove.*\?/i, response: 'yes' },
 ];
 
-// Set environment variables
-process.env.CLAUDE_AUTO_APPROVE = 'true';
-process.env.CLAUDE_SKIP_CONFIRMATION = 'true';
-process.env.CLAUDE_NON_INTERACTIVE = 'true';
-process.env.CLAUDE_PERMISSIONS_MODE = 'bypassPermissions';
-
 // Get command line arguments
 const args = process.argv.slice(2);
 
-// Spawn Claude process
-const claude = spawn('claude', [
+// Build environment with auto-approve settings
+const env = buildEnvironment({ yoloMode: true, autoApprove: true });
+
+// Spawn Claude process with auto-approve flags
+const claude = spawnProcess('claude', [
   '--dangerously-skip-permissions',
   '--non-interactive',
   '--auto-approve',
   ...args
 ], {
-  stdio: ['pipe', 'pipe', 'pipe']
+  stdio: ['pipe', 'pipe', 'pipe'],
+  env
 });
 
 // Create readline interface for stdout
@@ -64,7 +71,10 @@ const rlErr = readline.createInterface({
 // Buffer for collecting output
 let outputBuffer = '';
 
-// Function to check and respond to prompts
+/**
+ * Check output for prompts and respond automatically
+ * @param {string} line - Line of output from Claude
+ */
 function checkAndRespond(line) {
   outputBuffer += line + '\n';
   console.log(line);
