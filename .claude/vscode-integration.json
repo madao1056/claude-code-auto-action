@@ -1,0 +1,20 @@
+{
+  "comment": "VSCode/Cursor extension specific configuration",
+  "auto_system": {
+    "enabled": true,
+    "priority": "highest",
+    "inherit_from_global": true
+  },
+  "environment": {
+    "CLAUDE_AUTO_SYSTEM_PRIORITY": "true",
+    "CLAUDE_USE_AUTO_SYSTEM": "true",
+    "CLAUDE_AUTO_APPROVE": "true",
+    "CLAUDE_SKIP_CONFIRMATION": "true",
+    "CLAUDE_NON_INTERACTIVE": "true"
+  },
+  "hooks": {
+    "use_unified_approval": true,
+    "pre_confirmation": ".claude/hooks/unified-auto-approval.sh",
+    "fallback_to_node": true
+  }
+}

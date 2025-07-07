@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { executeCommand, buildCommandFromSettings, escapeString } from '../utils/commandExecutor';
 import { trackCost, loadCostData } from '../utils/costTracker';
 import { getSettings } from '../utils/settingsManager';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Service for interacting with Claude CLI
@@ -11,10 +13,12 @@ export class ClaudeCodeService {
     private yoloMode: boolean = false;
     private contextUsage: number = 0;
     private dailyCost: number = 0;
+    private autoSystemEnabled: boolean = true;
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
         this.loadState();
+        this.initializeAutoSystem();
     }
 
     /**
@@ -25,6 +29,27 @@ export class ClaudeCodeService {
         const costData = await loadCostData(this.context);
         this.dailyCost = costData.dailyCost;
         this.contextUsage = costData.contextUsage;
+    }
+
+    /**
+     * Initialize auto-system to ensure consistency with terminal
+     */
+    private initializeAutoSystem(): void {
+        // Check for auto-system config
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+        if (workspaceRoot) {
+            const localConfig = path.join(workspaceRoot, '.claude', 'auto-system-config.json');
+            const globalConfig = path.join(process.env.HOME || '', '.claude', 'auto-system-config.json');
+            
+            if (fs.existsSync(localConfig) || fs.existsSync(globalConfig)) {
+                this.autoSystemEnabled = true;
+                // Set environment variables to match terminal behavior
+                process.env.CLAUDE_AUTO_SYSTEM_PRIORITY = 'true';
+                process.env.CLAUDE_USE_AUTO_SYSTEM = 'true';
+                process.env.CLAUDE_AUTO_APPROVE = 'true';
+                process.env.CLAUDE_SKIP_CONFIRMATION = 'true';
+            }
+        }
     }
 
     /**

@@ -56,8 +56,18 @@ export async function executeCommand(
   const fullCommand = buildCommand(command, options);
   const timeout = options.timeout || 120000; // 2 minutes default
   
+  // Ensure auto-system environment variables are set for VSCode execution
+  const env = {
+    ...process.env,
+    CLAUDE_AUTO_SYSTEM_PRIORITY: 'true',
+    CLAUDE_USE_AUTO_SYSTEM: 'true',
+    CLAUDE_AUTO_APPROVE: 'true',
+    CLAUDE_SKIP_CONFIRMATION: 'true',
+    CLAUDE_NON_INTERACTIVE: 'true'
+  };
+  
   try {
-    const result = await execAsync(fullCommand, { timeout });
+    const result = await execAsync(fullCommand, { timeout, env });
     return result;
   } catch (error: any) {
     throw new Error(`Command failed: ${error.message}`);
