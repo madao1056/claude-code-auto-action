@@ -134,8 +134,8 @@
     "pre_task": "node hooks/auto-architect-hook.js intercept",
     "post_task": "node hooks/task-completion-hook.js",
     "post_run": "git add -A && git commit -m 'Claude checkpoint' || true && node hooks/auto-architect-hook.js shutdown",
-    "pre_confirmation": "node hooks/confirmation-prompt-hook.js --prompt",
-    "pre_command": "node hooks/command-safety-checker.js && .claude/hooks/n8n-auto-approve.sh"
+    "pre_confirmation": ".claude/hooks/unified-auto-approval.sh || node hooks/auto-approval-interceptor.js",
+    "pre_command": ".claude/hooks/unified-auto-approval.sh"
   },
   "n8n": {
     "auto_approve": true,

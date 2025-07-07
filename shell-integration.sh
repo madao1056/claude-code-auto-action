@@ -8,15 +8,19 @@
 
 # Main Claude wrapper with all automation flags
 claude() {
-    if [ "$CLAUDE_AUTO_MODE" = "true" ]; then
+    # ALWAYS prioritize auto-system over individual settings
+    export CLAUDE_AUTO_SYSTEM_PRIORITY=true
+    export CLAUDE_USE_AUTO_SYSTEM=true
+    
+    if [ "$CLAUDE_AUTO_MODE" = "true" ] || [ -f ".claude/auto-system-config.json" ] || [ -f "$HOME/.claude/auto-system-config.json" ]; then
         # Use Python wrapper for complete automation
         if [ -f "$CLAUDE_AUTO_ARCHITECT_HOME/scripts/claude-auto.py" ]; then
-            python3 "$CLAUDE_AUTO_ARCHITECT_HOME/scripts/claude-auto.py" "$@"
+            CLAUDE_AUTO_SYSTEM_PRIORITY=true python3 "$CLAUDE_AUTO_ARCHITECT_HOME/scripts/claude-auto.py" "$@"
         elif [ -f "$CLAUDE_AUTO_ARCHITECT_HOME/scripts/claude-auto-wrapper.sh" ]; then
-            "$CLAUDE_AUTO_ARCHITECT_HOME/scripts/claude-auto-wrapper.sh" "$@"
+            CLAUDE_AUTO_SYSTEM_PRIORITY=true "$CLAUDE_AUTO_ARCHITECT_HOME/scripts/claude-auto-wrapper.sh" "$@"
         else
-            # Fallback to basic automation
-            yes | command claude \
+            # Fallback to basic automation with auto-system priority
+            yes | CLAUDE_AUTO_SYSTEM_PRIORITY=true command claude \
                 --dangerously-skip-permissions \
                 --non-interactive \
                 --auto-approve \
@@ -24,7 +28,8 @@ claude() {
                 "$@"
         fi
     else
-        command claude "$@"
+        # Even in non-auto mode, prioritize auto-system if configured
+        CLAUDE_AUTO_SYSTEM_PRIORITY=true command claude "$@"
     fi
 }
 
@@ -87,11 +92,14 @@ ccmobile() { ccnew "$1" "mobile application with React Native, TypeScript, navig
 # Enable full automation mode
 claude-auto-on() {
     export CLAUDE_AUTO_MODE=true
+    export CLAUDE_AUTO_SYSTEM_PRIORITY=true
+    export CLAUDE_USE_AUTO_SYSTEM=true
     export CLAUDE_AUTO_DOCKER=true
     export CLAUDE_DOCKER_AUTO_START=true
     export CLAUDE_DOCKER_SKIP_CONFIRM=true
     source ~/.claude-auto-env
     echo "Claude automation mode: ON"
+    echo "Auto-system has priority over individual settings"
     echo "All prompts will be auto-approved (including Docker)"
 }
 
@@ -129,6 +137,8 @@ claude-docker-off() {
 claude-status() {
     echo "Claude Automation Status:"
     echo "========================"
+    echo "Auto System Priority: ${CLAUDE_AUTO_SYSTEM_PRIORITY:-true}"
+    echo "Use Auto System: ${CLAUDE_USE_AUTO_SYSTEM:-true}"
     echo "Auto Mode: ${CLAUDE_AUTO_MODE:-false}"
     echo "Auto Approve: ${CLAUDE_AUTO_APPROVE:-false}"
     echo "Docker Auto: ${CLAUDE_AUTO_DOCKER:-false}"
@@ -137,6 +147,15 @@ claude-status() {
     echo "Permissions Mode: ${CLAUDE_PERMISSIONS_MODE:-ask}"
     echo "Daily Cost Limit: \$${CLAUDE_COST_LIMIT_PER_DAY:-8}"
     echo "Config File: ${CLAUDE_CONFIG_FILE:-~/.claude/config.json}"
+    
+    # Check for auto-system config
+    if [ -f ".claude/auto-system-config.json" ]; then
+        echo "Auto-System Config: Found (local)"
+    elif [ -f "$HOME/.claude/auto-system-config.json" ]; then
+        echo "Auto-System Config: Found (global)"
+    else
+        echo "Auto-System Config: Not found"
+    fi
 }
 
 # ========================================

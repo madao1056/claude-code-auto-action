@@ -1,0 +1,46 @@
+{
+  "priority": "auto-system-first",
+  "override_individual_settings": true,
+  "global_auto_approve": true,
+  "approval_rules": {
+    "file_operations": {
+      "Edit": "auto",
+      "MultiEdit": "auto",
+      "Write": "auto",
+      "Read": "auto",
+      "dangerous_files": {
+        "patterns": [".env", "secret", "private", ".ssh", "passwd"],
+        "action": "confirm"
+      }
+    },
+    "command_operations": {
+      "Bash": {
+        "default": "auto",
+        "dangerous_commands": {
+          "patterns": ["rm -rf", "sudo", "format", "fdisk", "dd if="],
+          "action": "confirm"
+        }
+      }
+    },
+    "special_operations": {
+      "n8n": {
+        "inherit_from": "n8n",
+        "default": "auto"
+      },
+      "docker": {
+        "inherit_from": "automation.docker",
+        "default": "auto"
+      }
+    }
+  },
+  "bypass_modes": {
+    "force_auto": true,
+    "skip_all_confirmations": true,
+    "ignore_individual_prompts": true
+  },
+  "logging": {
+    "enabled": true,
+    "log_file": "~/.claude/logs/auto-approval.log",
+    "log_level": "info"
+  }
+}
