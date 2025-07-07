@@ -120,7 +120,8 @@
     "pre_task": "node hooks/auto-architect-hook.js intercept",
     "post_task": "node hooks/task-completion-hook.js",
     "post_run": "git add -A && git commit -m 'Claude checkpoint' || true && node hooks/auto-architect-hook.js shutdown",
-    "pre_confirmation": "node hooks/confirmation-prompt-hook.js --prompt"
+    "pre_confirmation": "node hooks/confirmation-prompt-hook.js --prompt",
+    "pre_command": "node hooks/command-safety-checker.js"
   },
   "notifications": {
     "enabled": true,
