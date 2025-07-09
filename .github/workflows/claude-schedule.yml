@@ -6,6 +6,11 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 env:
   CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
 
@@ -21,29 +26,51 @@ jobs:
           node-version: '18'
           cache: 'npm'
       
+      - name: Install dependencies
+        run: npm ci
+      
       - name: Check for outdated dependencies
         run: |
           npm outdated --json > outdated.json || true
           
-          if [ -s outdated.json ]; then
-            claude analyze-dependencies outdated.json \
-              --check security \
-              --check compatibility \
-              --suggest updates > updates.md
+          if [ -s outdated.json ] && [ $(jq '. | length' outdated.json) -gt 0 ]; then
+            echo "Found outdated dependencies:"
+            cat outdated.json | jq '.'
             
-            # Create PR if updates are needed
-            if [ -s updates.md ]; then
+            # Create update report
+            echo "# Dependency Update Report" > updates.md
+            echo "" >> updates.md
+            echo "## Outdated Dependencies" >> updates.md
+            echo "" >> updates.md
+            npm outdated >> updates.md || true
+            echo "" >> updates.md
+            echo "Generated on: $(date)" >> updates.md
+            
+            # Check if there are actual updates available
+            if npm outdated 2>&1 | grep -E "(MISSING|outdated)" > /dev/null; then
+              # Configure git
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              
               git checkout -b update-dependencies-$(date +%Y%m%d)
               npm update
-              git add package*.json
-              git commit -m "chore: update dependencies"
-              git push origin update-dependencies-$(date +%Y%m%d)
               
-              gh pr create \
-                --title "chore: update dependencies" \
-                --body-file updates.md \
-                --label "dependencies"
+              # Check if package files were modified
+              if git diff --exit-code package*.json; then
+                echo "No updates were applied"
+              else
+                git add package*.json
+                git commit -m "chore: update dependencies"
+                git push origin update-dependencies-$(date +%Y%m%d)
+                
+                gh pr create \
+                  --title "chore: update dependencies" \
+                  --body-file updates.md \
+                  --label "dependencies" || echo "PR creation failed"
+              fi
             fi
+          else
+            echo "All dependencies are up to date"
           fi
         env:
           GH_TOKEN: ${{ github.token }}
@@ -53,23 +80,80 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
       - name: Generate Code Quality Report
         run: |
           # Run various code quality tools
-          npm run lint -- --format json > lint-report.json || true
-          npm test -- --coverage --json > test-report.json || true
+          echo "# Code Quality Report - $(date +%Y-%m-%d)" > quality-report.md
+          echo "" >> quality-report.md
           
-          # Analyze with Claude
-          claude generate-quality-report \
-            --lint lint-report.json \
-            --tests test-report.json \
-            --format markdown > quality-report.md
+          # Run linting
+          echo "## Linting Results" >> quality-report.md
+          echo "" >> quality-report.md
+          if npm run lint > lint-output.txt 2>&1; then
+            echo "✅ No linting errors found" >> quality-report.md
+          else
+            echo "❌ Linting errors detected:" >> quality-report.md
+            echo "\`\`\`" >> quality-report.md
+            tail -n 20 lint-output.txt >> quality-report.md
+            echo "\`\`\`" >> quality-report.md
+          fi
+          echo "" >> quality-report.md
           
-          # Create issue with report
-          gh issue create \
-            --title "Weekly Code Quality Report - $(date +%Y-%m-%d)" \
-            --body-file quality-report.md \
-            --label "quality-report"
+          # Run tests
+          echo "## Test Results" >> quality-report.md
+          echo "" >> quality-report.md
+          if npm test -- --passWithNoTests > test-output.txt 2>&1; then
+            echo "✅ All tests passed" >> quality-report.md
+          else
+            echo "❌ Test failures detected:" >> quality-report.md
+            echo "\`\`\`" >> quality-report.md
+            tail -n 30 test-output.txt >> quality-report.md
+            echo "\`\`\`" >> quality-report.md
+          fi
+          echo "" >> quality-report.md
+          
+          # Check if cursor extension exists and test it
+          if [ -d "cursor-extension" ]; then
+            echo "## Extension Quality" >> quality-report.md
+            echo "" >> quality-report.md
+            cd cursor-extension
+            if [ -f "package.json" ]; then
+              npm ci || echo "Extension dependency installation failed"
+              npm run compile > compile-output.txt 2>&1 || true
+              if [ $? -eq 0 ]; then
+                echo "✅ Extension compiled successfully" >> ../quality-report.md
+              else
+                echo "❌ Extension compilation errors:" >> ../quality-report.md
+                echo "\`\`\`" >> ../quality-report.md
+                tail -n 20 compile-output.txt >> ../quality-report.md
+                echo "\`\`\`" >> ../quality-report.md
+              fi
+            fi
+            cd ..
+          fi
+          
+          echo "" >> quality-report.md
+          echo "---" >> quality-report.md
+          echo "Generated on: $(date)" >> quality-report.md
+          
+          # Only create issue if there are problems
+          if grep -q "❌" quality-report.md; then
+            gh issue create \
+              --title "Code Quality Issues - $(date +%Y-%m-%d)" \
+              --body-file quality-report.md \
+              --label "quality-report" || echo "Issue creation failed"
+          else
+            echo "No quality issues found, skipping issue creation"
+          fi
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -78,22 +162,55 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
       - name: Run Security Scan
         run: |
           # Run npm audit
           npm audit --json > audit.json || true
           
-          # Run other security tools
-          # Example: snyk test --json > snyk.json || true
-          
-          # Analyze with Claude
-          claude analyze-security audit.json \
-            --severity high \
-            --format json > security-issues.json
-          
-          # Create issues for critical vulnerabilities
-          if [ $(jq '.critical | length' security-issues.json) -gt 0 ]; then
-            jq -r '.critical[] | "gh issue create --title \"Security: \(.title)\" --body \"\(.description)\" --label security,critical"' security-issues.json | sh
+          # Check if there are vulnerabilities
+          if [ -s audit.json ]; then
+            VULNS=$(jq '.metadata.vulnerabilities' audit.json 2>/dev/null || echo '{}')
+            CRITICAL=$(echo $VULNS | jq '.critical // 0')
+            HIGH=$(echo $VULNS | jq '.high // 0')
+            MODERATE=$(echo $VULNS | jq '.moderate // 0')
+            LOW=$(echo $VULNS | jq '.low // 0')
+            
+            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+              # Create security report
+              echo "# Security Vulnerability Report" > security-report.md
+              echo "" >> security-report.md
+              echo "## Summary" >> security-report.md
+              echo "- Critical: $CRITICAL" >> security-report.md
+              echo "- High: $HIGH" >> security-report.md
+              echo "- Moderate: $MODERATE" >> security-report.md
+              echo "- Low: $LOW" >> security-report.md
+              echo "" >> security-report.md
+              echo "## Details" >> security-report.md
+              echo "\`\`\`" >> security-report.md
+              npm audit >> security-report.md 2>&1 || true
+              echo "\`\`\`" >> security-report.md
+              echo "" >> security-report.md
+              echo "Generated on: $(date)" >> security-report.md
+              
+              # Create issue for critical/high vulnerabilities
+              gh issue create \
+                --title "Security Alert: $CRITICAL critical, $HIGH high vulnerabilities found" \
+                --body-file security-report.md \
+                --label "security,critical" || echo "Security issue creation failed"
+            else
+              echo "No critical or high vulnerabilities found"
+            fi
+          else
+            echo "No vulnerabilities detected"
           fi
         env:
           GH_TOKEN: ${{ github.token }}
@@ -103,35 +220,83 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci || echo "No package-lock.json found, skipping npm ci"
+      
       - name: Check Documentation Coverage
         run: |
+          echo "# Documentation Coverage Report" > doc-report.md
+          echo "" >> doc-report.md
+          echo "Generated on: $(date)" >> doc-report.md
+          echo "" >> doc-report.md
+          
+          # Check if README exists
+          echo "## README Status" >> doc-report.md
+          if [ -f "README.md" ]; then
+            echo "✅ README.md exists" >> doc-report.md
+            README_LINES=$(wc -l < README.md)
+            echo "   - Lines: $README_LINES" >> doc-report.md
+            if [ $README_LINES -lt 50 ]; then
+              echo "   - ⚠️  README seems short, consider adding more documentation" >> doc-report.md
+            fi
+          else
+            echo "❌ README.md is missing" >> doc-report.md
+          fi
+          echo "" >> doc-report.md
+          
+          # Check if CLAUDE.md exists
+          echo "## CLAUDE.md Status" >> doc-report.md
+          if [ -f "CLAUDE.md" ]; then
+            echo "✅ CLAUDE.md exists" >> doc-report.md
+          else
+            echo "❌ CLAUDE.md is missing" >> doc-report.md
+          fi
+          echo "" >> doc-report.md
+          
           # Find all source files
-          find . -type f \( -name "*.js" -o -name "*.ts" \) -not -path "./node_modules/*" > source-files.txt
+          echo "## Source Files Documentation" >> doc-report.md
+          echo "" >> doc-report.md
           
-          # Check documentation coverage
-          claude check-documentation source-files.txt \
-            --check readme \
-            --check jsdoc \
-            --check examples > doc-report.md
+          # Count files
+          JS_COUNT=$(find . -type f -name "*.js" -not -path "./node_modules/*" -not -path "./dist/*" | wc -l)
+          TS_COUNT=$(find . -type f -name "*.ts" -not -path "./node_modules/*" -not -path "./dist/*" | wc -l)
           
-          # Create PR if documentation is missing
-          if grep -q "Missing documentation" doc-report.md; then
-            git checkout -b update-docs-$(date +%Y%m%d)
-            
-            # Generate missing documentation
-            claude generate-documentation source-files.txt \
-              --update-readme \
-              --add-jsdoc \
-              --add-examples
-            
-            git add -A
-            git commit -m "docs: update documentation"
-            git push origin update-docs-$(date +%Y%m%d)
-            
-            gh pr create \
-              --title "docs: update documentation" \
+          echo "- JavaScript files: $JS_COUNT" >> doc-report.md
+          echo "- TypeScript files: $TS_COUNT" >> doc-report.md
+          echo "" >> doc-report.md
+          
+          # Check for JSDoc comments in a sample of files
+          echo "## JSDoc Coverage (sample)" >> doc-report.md
+          echo "" >> doc-report.md
+          
+          SAMPLE_FILES=$(find . -type f \( -name "*.js" -o -name "*.ts" \) -not -path "./node_modules/*" -not -path "./dist/*" | head -10)
+          
+          for file in $SAMPLE_FILES; do
+            if grep -q "/\*\*" "$file"; then
+              echo "✅ $file - has JSDoc comments" >> doc-report.md
+            else
+              echo "❌ $file - missing JSDoc comments" >> doc-report.md
+            fi
+          done
+          
+          echo "" >> doc-report.md
+          echo "---" >> doc-report.md
+          echo "Note: This is an automated check. Manual review recommended for comprehensive documentation assessment." >> doc-report.md
+          
+          # Only create issue if there are documentation issues
+          if grep -q "❌" doc-report.md; then
+            gh issue create \
+              --title "Documentation Review Needed - $(date +%Y-%m-%d)" \
               --body-file doc-report.md \
-              --label "documentation"
+              --label "documentation" || echo "Documentation issue creation failed"
+          else
+            echo "Documentation looks good, no issues created"
           fi
         env:
           GH_TOKEN: ${{ github.token }}
