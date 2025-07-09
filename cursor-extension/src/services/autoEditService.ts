@@ -95,7 +95,9 @@ export class AutoEditService {
             'Opened changes in Cursor',
             'Apply these changes',
             'Would you like to apply',
-            'Confirm edit'
+            'Confirm edit',
+            'Do you want to proceed',
+            'Kill existing process and restart'
         ];
 
         return cursorPatterns.some(pattern => 
