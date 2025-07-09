@@ -1,5 +1,7 @@
 # Claude Code Auto Action
 
+**Version 1.1.0** - [バージョン履歴](VERSION_HISTORY.md)
+
 **クリック地獄とトークン爆食いを同時に撲滅** - Claude Codeの権限確認を自動化し、コンテキスト使用を最適化する統合システム
 
 ## 主要機能
@@ -20,6 +22,12 @@
 - **Auto-test** - コミット前に自動テスト実行
 - **Auto-optimize** - importの自動整理
 - **Auto-edit** - Cursorの「Do you want to make this edit?」ダイアログを自動確認
+
+### 🧠 思考モードシステム (v1.1.0 NEW!)
+- **Default Mode: think_hard (10,000 tokens)** - 全タスクで高品質な思考
+- **Auto-escalation** - 2回以上の修正で自動的に ultrathink (31,999 tokens) に昇格
+- **Context-aware** - タスクの種類に応じた最適な思考モード選択
+- **4段階の思考レベル**: think → think_hard → think_harder → ultrathink
 
 ### 🏗️ 階層的エージェントシステム (NEW!)
 - **Auto-architect** - 「〇〇するシステムを作りたい」という要求から完全なシステムを自動生成

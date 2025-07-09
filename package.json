@@ -1,6 +1,6 @@
 {
   "name": "claude-code-auto-action",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Automated development workflow integration with Claude AI",
   "main": "index.js",
   "scripts": {
