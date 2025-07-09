@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import WebSocket from 'ws';
 import { v4 as uuidv4 } from 'uuid';
+import { thinkingModeManager } from '../thinking/ThinkingModeManager';
 
 export interface Message {
   id: string;
@@ -12,6 +13,8 @@ export interface Message {
   priority: 'high' | 'medium' | 'low';
   requires_response: boolean;
   correlation_id?: string;
+  thinking_mode?: string;
+  thinking_tokens?: number;
 }
 
 export enum MessageType {
@@ -19,6 +22,7 @@ export enum MessageType {
   TASK_UPDATE = 'task_update',
   TASK_COMPLETION = 'task_completion',
   TASK_FAILURE = 'task_failure',
+  TASK_REVISION = 'task_revision',
   STATUS_REQUEST = 'status_request',
   STATUS_RESPONSE = 'status_response',
   COORDINATION_REQUEST = 'coordination_request',
@@ -26,6 +30,8 @@ export enum MessageType {
   RESOURCE_REQUEST = 'resource_request',
   RESOURCE_RESPONSE = 'resource_response',
   ERROR_REPORT = 'error_report',
+  THINKING_MODE_UPDATE = 'thinking_mode_update',
+  THINKING_MODE_STATUS = 'thinking_mode_status',
   HEARTBEAT = 'heartbeat',
   SHUTDOWN = 'shutdown'
 }
@@ -157,6 +163,18 @@ export class AgentCommunicationHub extends EventEmitter {
       
       case MessageType.TASK_FAILURE:
         this.handleTaskFailure(message);
+        break;
+      
+      case MessageType.TASK_REVISION:
+        this.handleTaskRevision(message);
+        break;
+      
+      case MessageType.THINKING_MODE_UPDATE:
+        this.handleThinkingModeUpdate(message);
+        break;
+      
+      case MessageType.THINKING_MODE_STATUS:
+        this.handleThinkingModeStatus(message);
         break;
       
       case MessageType.COORDINATION_REQUEST:
@@ -348,11 +366,24 @@ export class AgentCommunicationHub extends EventEmitter {
       throw new Error(`Agent ${agentId} not found or not connected`);
     }
 
+    // Add thinking mode information for task-related messages
+    let thinkingMode: any = null;
+    if (messageData.type === MessageType.TASK_ASSIGNMENT || 
+        messageData.type === MessageType.TASK_UPDATE ||
+        messageData.type === MessageType.TASK_REVISION) {
+      
+      const taskId = messageData.payload?.task_id || messageData.payload?.id || agentId;
+      const context = messageData.type === MessageType.TASK_REVISION ? 'codeRevision' : 'default';
+      thinkingMode = thinkingModeManager.getThinkingMode(taskId, context);
+    }
+
     const message: Message = {
       ...messageData,
       id: uuidv4(),
       timestamp: new Date(),
-      from: 'hub'
+      from: 'hub',
+      thinking_mode: thinkingMode?.mode,
+      thinking_tokens: thinkingMode?.maxTokens
     };
 
     if (messageData.requires_response) {
@@ -377,10 +408,23 @@ export class AgentCommunicationHub extends EventEmitter {
   }
 
   broadcastMessage(messageData: Omit<Message, 'id' | 'timestamp'>): void {
+    // Add thinking mode information for task-related broadcasts
+    let thinkingMode: any = null;
+    if (messageData.type === MessageType.TASK_ASSIGNMENT || 
+        messageData.type === MessageType.TASK_UPDATE ||
+        messageData.type === MessageType.TASK_REVISION) {
+      
+      const taskId = messageData.payload?.task_id || messageData.payload?.id || 'broadcast';
+      const context = messageData.type === MessageType.TASK_REVISION ? 'codeRevision' : 'default';
+      thinkingMode = thinkingModeManager.getThinkingMode(taskId, context);
+    }
+
     const message: Message = {
       ...messageData,
       id: uuidv4(),
-      timestamp: new Date()
+      timestamp: new Date(),
+      thinking_mode: thinkingMode?.mode,
+      thinking_tokens: thinkingMode?.maxTokens
     };
 
     for (const agent of this.agents.values()) {
@@ -471,6 +515,90 @@ export class AgentCommunicationHub extends EventEmitter {
     }
 
     console.log('Communication Hub shut down');
+  }
+
+  private handleTaskRevision(message: Message): void {
+    const taskId = message.payload.task_id;
+    if (taskId) {
+      thinkingModeManager.trackRevision(taskId);
+      
+      // Get updated thinking mode after revision tracking
+      const thinkingMode = thinkingModeManager.getThinkingMode(taskId, 'codeRevision');
+      
+      // Broadcast thinking mode update to all agents
+      this.broadcastMessage({
+        type: MessageType.THINKING_MODE_UPDATE,
+        from: 'hub',
+        to: 'broadcast',
+        payload: {
+          task_id: taskId,
+          thinking_mode: thinkingMode.mode,
+          max_tokens: thinkingMode.maxTokens,
+          description: thinkingMode.description,
+          revision_count: thinkingModeManager.getRevisionCount(taskId)
+        },
+        priority: 'medium',
+        requires_response: false
+      });
+    }
+    
+    this.emit('task_revision', message);
+  }
+
+  private handleThinkingModeUpdate(message: Message): void {
+    console.log(`🧠 思考モード更新: ${JSON.stringify(message.payload)}`);
+    this.emit('thinking_mode_update', message);
+  }
+
+  private handleThinkingModeStatus(message: Message): void {
+    const status = thinkingModeManager.getThinkingModeStatus();
+    
+    const response: Omit<Message, 'id' | 'timestamp'> = {
+      type: MessageType.THINKING_MODE_STATUS,
+      from: 'hub',
+      to: message.from,
+      payload: status,
+      priority: 'low',
+      requires_response: false
+    };
+    
+    this.sendMessageToAgent(message.from, response);
+    this.emit('thinking_mode_status', message);
+  }
+
+  // Public methods for thinking mode management
+  public setThinkingMode(taskId: string, mode: string): void {
+    thinkingModeManager.setMode(mode);
+    
+    this.broadcastMessage({
+      type: MessageType.THINKING_MODE_UPDATE,
+      from: 'hub',
+      to: 'broadcast',
+      payload: {
+        task_id: taskId,
+        thinking_mode: mode,
+        max_tokens: thinkingModeManager.getAllModes()[mode]?.maxTokens || 4000,
+        description: thinkingModeManager.getAllModes()[mode]?.description || 'Unknown mode'
+      },
+      priority: 'medium',
+      requires_response: false
+    });
+  }
+
+  public getThinkingModeForTask(taskId: string, context: 'codeRevision' | 'complexTask' | 'errorHandling' | 'default' = 'default'): {
+    mode: string;
+    maxTokens: number;
+    description: string;
+  } {
+    return thinkingModeManager.getThinkingMode(taskId, context);
+  }
+
+  public resetTaskRevisionCount(taskId: string): void {
+    thinkingModeManager.resetRevisionCount(taskId);
+  }
+
+  public getThinkingModeStatus(): any {
+    return thinkingModeManager.getThinkingModeStatus();
   }
 
   getHubStats(): any {

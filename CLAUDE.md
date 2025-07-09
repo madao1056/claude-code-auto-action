@@ -47,6 +47,19 @@ hooks/                     # Git hooks
 - **Auto-test**: Run tests before commits
 - **Import optimization**: Organize and clean imports
 
+### Thinking Mode System
+- **Adaptive Intelligence**: AI思考レベルを自動調整
+- **Default Mode**: think_hard (10,000 tokens) - 高品質な思考
+- **Auto-escalation**: 2回以上の修正で ultrathink (31,999 tokens) に自動昇格
+- **Context-aware**: タスクの種類に応じた思考モード選択
+- **Revision Tracking**: 修正回数の自動追跡とエスカレーション
+
+#### 思考モード一覧
+- `think`: 4,000 tokens - 基本的な思考
+- `think_hard`: 10,000 tokens - より深い思考（デフォルト）
+- `think_harder`: 20,000 tokens - さらに深い思考
+- `ultrathink`: 31,999 tokens - 最強思考モード
+
 ### Safety Features
 - File system permission controls
 - Command execution restrictions
@@ -84,6 +97,16 @@ hooks/                     # Git hooks
 - `performance.parallel_execution`: Enable parallel operations
 - `safety.require_approval_for_destructive`: Require confirmation
 
+### Thinking Mode Settings (.claude/settings.local.json)
+- `thinkingMode.enabled`: Enable/disable thinking mode system
+- `thinkingMode.defaultMode`: Default thinking mode (think_hard)
+- `thinkingMode.autoEscalation.enabled`: Enable auto-escalation
+- `thinkingMode.autoEscalation.revisionThreshold`: Revision count threshold (2)
+- `thinkingMode.autoEscalation.maxMode`: Maximum escalation mode (ultrathink)
+- `thinkingMode.triggers.codeRevision.mode`: Mode for code revisions
+- `thinkingMode.triggers.complexTask.mode`: Mode for complex tasks
+- `thinkingMode.triggers.errorHandling.mode`: Mode for error handling
+
 ### Permissions (.claude/permissions.json)
 - `file_system.allowed_paths`: Allowed file paths
 - `file_system.blocked_paths`: Blocked file paths
@@ -102,12 +125,26 @@ claude-code generate-tests file.js
 
 # Start file watcher
 claude-code watch
+
+# Set thinking mode manually
+claude-code set-thinking-mode ultrathink
+
+# Get thinking mode status
+claude-code thinking-status
 ```
 
 ### VSCode/Cursor
 - `Cmd+Shift+A`: Ask Claude a question
 - `Cmd+Shift+C`: Auto-commit changes
 - Right-click menu: Access Claude features
+- Status bar: Show current thinking mode
+
+### Thinking Mode Usage
+The system automatically manages thinking modes based on:
+- **Default**: All tasks start with `think_hard` mode (10,000 tokens)
+- **Auto-escalation**: 2+ revisions trigger `ultrathink` mode (31,999 tokens)
+- **Context-aware**: Code revisions automatically use higher thinking modes
+- **Manual override**: Set specific modes for complex tasks
 
 ## Custom Commands
 

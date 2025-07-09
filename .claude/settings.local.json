@@ -123,5 +123,46 @@
     "enabled": true,
     "auto_approve": true,
     "skip_confirmations": true
+  },
+  "thinkingMode": {
+    "enabled": true,
+    "defaultMode": "think_hard",
+    "autoEscalation": {
+      "enabled": true,
+      "revisionThreshold": 2,
+      "maxMode": "ultrathink"
+    },
+    "modes": {
+      "think": {
+        "maxTokens": 4000,
+        "description": "基本的な思考モード"
+      },
+      "think_hard": {
+        "maxTokens": 10000,
+        "description": "より深い思考モード（デフォルト）"
+      },
+      "think_harder": {
+        "maxTokens": 20000,
+        "description": "さらに深い思考モード"
+      },
+      "ultrathink": {
+        "maxTokens": 31999,
+        "description": "最強思考モード（自動エスカレーション時）"
+      }
+    },
+    "triggers": {
+      "codeRevision": {
+        "enabled": true,
+        "mode": "ultrathink"
+      },
+      "complexTask": {
+        "enabled": true,
+        "mode": "think_harder"
+      },
+      "errorHandling": {
+        "enabled": true,
+        "mode": "think_hard"
+      }
+    }
   }
 }
