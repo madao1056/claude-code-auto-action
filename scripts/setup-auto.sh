@@ -47,8 +47,7 @@ export CLAUDE_DEFAULT_RESPONSE=yes
 # 自動化モード切り替え
 claude-auto-on() {
   export CLAUDE_AUTO_MODE=true
-  echo "✅ Claude自動化モードが有効になりました (v1.1.0)"
-  echo "🧠 思考モード: think_hard (10,000 tokens) → 自動エスカレーション対応"
+  echo "✅ Claude自動化 v1.1.0 有効 (思考: think_hard)"
 }
 
 claude-auto-off() {
