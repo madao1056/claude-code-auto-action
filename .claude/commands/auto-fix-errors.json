@@ -1,0 +1,39 @@
+{
+  "name": "auto-fix-errors",
+  "description": "Automatically detect and fix build, lint, and type errors",
+  "trigger": {
+    "on_error": true,
+    "on_save": false,
+    "manual": true,
+    "patterns": [
+      "npm run build",
+      "npm run lint",
+      "npm run typecheck",
+      "tsc",
+      "eslint"
+    ]
+  },
+  "actions": [
+    {
+      "type": "script",
+      "path": "scripts/auto-fix-errors.sh",
+      "args": ["{{error_type}}", "{{error_output}}"]
+    },
+    {
+      "type": "claude",
+      "prompt": "Analyze the following error and provide a fix:\n{{error_output}}\n\nProvide the exact code changes needed.",
+      "mode": "think_hard",
+      "escalate_on_retry": true
+    }
+  ],
+  "config": {
+    "maxRetries": 3,
+    "escalateToUltrathink": true,
+    "autoCommit": true,
+    "notifications": {
+      "onSuccess": "✅ エラーを自動修正しました",
+      "onFailure": "❌ 自動修正に失敗しました",
+      "onEscalate": "🧠 より高度な思考モードに切り替えています"
+    }
+  }
+}

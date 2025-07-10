@@ -1,0 +1,24 @@
+{
+  "name": "learning-update",
+  "description": "承認学習システムの更新",
+  "trigger": {
+    "schedule": "0 * * * *",
+    "manual": true,
+    "command": "claude-code learning-update"
+  },
+  "actions": [
+    {
+      "type": "bash",
+      "command": "/Users/hashiguchimasaki/project/claude-code-auto-action/scripts/auto-learning-update.sh --auto"
+    }
+  ],
+  "options": {
+    "silent": false,
+    "background": true,
+    "notification": {
+      "enabled": true,
+      "onSuccess": "🎆 学習システムが更新されました",
+      "onFailure": "❌ 学習システムの更新に失敗しました"
+    }
+  }
+}

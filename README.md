@@ -318,11 +318,199 @@ export ANTHROPIC_API_KEY=your_key_here           # APIキー
    - VSCode再起動
    - `npm run compile` でリビルド
 
-## 参考資料
+## 🆕 高度な自動化機能 (v1.2.0)
 
+### 自動エラー修正システム
+- **TypeScript型エラー**の自動解決
+- **ESLint/Prettier**エラーの自動修正
+- **ビルドエラー**の検知と修正
+- 思考モードの自動エスカレーション（2回失敗でultrathink）
+
+### 依存関係の自動管理
+```bash
+claude-code auto-deps analyze   # 依存関係を分析
+claude-code auto-deps install   # 不足パッケージを自動インストール
+claude-code auto-deps clean     # 未使用パッケージを削除
+claude-code auto-deps fix       # 脆弱性を修正
+```
+
+### 自動リファクタリング
+- 重複コードの検出と共通化
+- 長いメソッドの分割提案
+- 複雑な条件式の簡略化
+- デッドコードの削除
+- インポートの最適化
+
+### 自動ドキュメント生成
+```bash
+claude-code generate-docs       # すべてのドキュメントを生成
+# 生成されるドキュメント:
+# - API仕様書 (OpenAPI形式)
+# - JSDocコメント
+# - README.md更新
+# - CHANGELOG.md
+```
+
+### テストカバレッジ自動改善
+- カバレッジ不足箇所の検出
+- テストケースの自動生成
+- 失敗テストの自動修正
+- E2Eテストの生成
+
+### PR/コードレビュー自動化
+```bash
+claude-code create-pr --auto-review    # PR作成とレビュー
+claude-code handle-review-comments     # レビューコメントへの自動対応
+```
+
+### 環境構築の完全自動化
+```bash
+claude-code setup-env --auto-detect
+# 自動検出・生成:
+# - プロジェクトタイプ（Node.js, Python, Ruby, Go等）
+# - Dockerfile
+# - docker-compose.yml
+# - CI/CDパイプライン
+# - 環境変数設定
+# - データベース構成
+```
+
+### 学習型コード補完
+- 個人のコーディングパターンを学習
+- チーム規約の自動適用
+- よく使うコードスニペットの提案
+- コーディングスタイルの自動検出
+
+### 自動バージョン管理
+```bash
+claude-code version --auto      # Conventional Commitsに基づく自動バージョニング
+claude-code release            # リリースノートとタグの自動生成
+```
+
+### 監視・アラート統合
+- パフォーマンス回帰の自動検知
+- バンドルサイズ増加の警告
+- セキュリティ脆弱性の即時通知
+- システムリソース監視（CPU、メモリ、ディスク）
+
+## 📋 重要な設定ポイント
+
+### 学習システムの設定
+```json
+{
+  "approvalLearning": {
+    "enabled": true,
+    "autoUpdate": true,
+    "updateInterval": 3600,  // 1時間ごとに学習更新
+    "minUsageCountForAutoApproval": 3  // 3回使用で自動承認
+  }
+}
+```
+
+### 自動化の優先順位設定
+```json
+{
+  "automation": {
+    "priorities": {
+      "errorFix": "high",      // エラー修正を最優先
+      "security": "high",      // セキュリティも高優先度
+      "performance": "medium", // パフォーマンスは中優先度
+      "style": "low"          // スタイル修正は低優先度
+    }
+  }
+}
+```
+
+## 📚 ドキュメント
+
+- **[できることカタログ](./docs/FEATURES.md)** - Claude Code Auto Actionでできることの完全ガイド 🌟
+- [アーキテクチャ](./docs/ARCHITECTURE.md) - システム構成と設計思想
+- [自動化機能詳細](./docs/AUTOMATION.md) - 各自動化機能の詳細説明
+- [学習システム仕様](./docs/LEARNING_SYSTEM.md) - 学習システムの技術仕様
+- [移行ガイド](./docs/MIGRATION_GUIDE.md) - v1.2.0への移行手順
+- [統合ガイド](./docs/INTEGRATION.md) - 他システムとの連携方法
+- [FAQ](./docs/FAQ.md) - よくある質問
+- [変更履歴](./CHANGELOG.md) - バージョンごとの変更内容
+
+## 🔧 メンテナンスコマンド
+
+```bash
+# 学習データのエクスポート/インポート
+./scripts/auto-learning-update.sh --export
+./scripts/auto-learning-update.sh --import backup.json
+
+# システム状態の確認
+claude-code system-status       # 全システムの状態確認
+claude-code monitor report      # 監視レポート生成
+
+# キャッシュとログのクリーンアップ
+claude-code cleanup --all       # 全データクリーンアップ
+claude-code cleanup --logs      # ログのみクリーンアップ
+```
+
+## 📊 パフォーマンス最適化のヒント
+
+1. **並列処理の活用**
+   - `parallel_agents: 10` で最大10エージェント並列実行
+   - 大規模プロジェクトでは並列数を調整
+
+2. **モデル選択の最適化**
+   - 設計・計画: Opus（高品質）
+   - 実装・コーディング: Sonnet（高速）
+   - 簡単なタスク: Haiku（最速）
+
+3. **コンテキスト管理**
+   - 90%で自動圧縮が発動
+   - 定期的な `/clear` でメモリ解放
+   - 不要なファイルは `.claudeignore` に追加
+
+## 🚨 トラブルシューティング（追加）
+
+### 自動化が動作しない
+```bash
+# 権限を確認
+cat .claude/permissions.json
+
+# ログを確認
+tail -f .claude/logs/automation.log
+
+# プロセスを再起動
+claude-code restart-services
+```
+
+### 学習データが反映されない
+```bash
+# 学習データを手動更新
+./scripts/auto-learning-update.sh --force
+
+# 統計情報を確認
+node src/autofix/approval-interceptor.js --stats
+```
+
+### ビルドエラーが続く
+```bash
+# TypeScriptの型チェック
+npm run typecheck
+
+# 依存関係の整合性確認
+npm ls
+
+# キャッシュクリア
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## 🔗 関連リンク
+
+### 外部リソース
 - [公式仕様書](https://docs.anthropic.com/claude-code)
 - [YOLO Mode詳細](https://spiess.dev/blog/how-i-use-claude-code)
 - [ベストプラクティス](https://www.anthropic.com/engineering/claude-code-best-practices)
+
+### プロジェクトリソース
+- [GitHub リポジトリ](https://github.com/yourusername/claude-code-auto-action)
+- [Issue トラッカー](https://github.com/yourusername/claude-code-auto-action/issues)
+- [ディスカッション](https://github.com/yourusername/claude-code-auto-action/discussions)
 
 ## ライセンス
 

@@ -1,0 +1,30 @@
+{
+  "name": "generate-docs",
+  "description": "自動ドキュメント生成",
+  "aliases": ["docs", "documentation"],
+  "commands": {
+    "all": {
+      "description": "すべてのドキュメントを生成",
+      "script": "scripts/generate-docs.sh"
+    },
+    "api": {
+      "description": "API仕様書のみ生成",
+      "script": "scripts/generate-docs.sh --api-only"
+    },
+    "readme": {
+      "description": "README.mdを更新",
+      "script": "scripts/generate-docs.sh --readme-only"
+    }
+  },
+  "options": {
+    "format": {
+      "description": "出力形式",
+      "choices": ["markdown", "html", "json"],
+      "default": "markdown"
+    },
+    "output": {
+      "description": "出力ディレクトリ",
+      "default": "./docs"
+    }
+  }
+}

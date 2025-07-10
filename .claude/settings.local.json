@@ -33,7 +33,12 @@
       "Bash(git -C /Users/hashiguchimasaki/project/claude-code-auto-action push)",
       "Bash(npm run build:*)",
       "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/scripts/update-version.sh:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(./scripts/setup-auto.sh:*)",
+      "Bash(sed:*)",
+      "Bash(find:*)",
+      "Bash(./scripts/quick-fix-ts-errors.sh:*)",
+      "Bash(./scripts/force-build.sh:*)"
     ],
     "deny": [
       "Bash(rm -rf*)",

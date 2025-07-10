@@ -50,6 +50,14 @@ export interface AgentEndpoint {
 }
 
 export class AgentCommunicationHub extends EventEmitter {
+  private createMessage(data: Omit<Message, 'id' | 'timestamp'>): Message {
+    return {
+      ...data,
+      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date()
+    };
+  }
+
   private agents: Map<string, AgentEndpoint> = new Map();
   private messageQueue: Message[] = [];
   private responseCallbacks: Map<string, {
@@ -219,7 +227,7 @@ export class AgentCommunicationHub extends EventEmitter {
       correlation_id: message.id
     };
 
-    this.sendMessage(response, ws);
+    this.sendMessage(this.createMessage(response), ws);
   }
 
   private handleTaskUpdate(message: Message): void {
@@ -342,7 +350,7 @@ export class AgentCommunicationHub extends EventEmitter {
         correlation_id: message.id
       };
 
-      this.sendMessage(response, ws);
+      this.sendMessage(this.createMessage(response), ws);
     }
   }
 
@@ -407,7 +415,10 @@ export class AgentCommunicationHub extends EventEmitter {
     }
   }
 
-  broadcastMessage(messageData: Omit<Message, 'id' | 'timestamp'>): void {
+  broadcastMessage(messageData: Message | Omit<Message, 'id' | 'timestamp'>): void {
+    const message = 'id' in messageData && 'timestamp' in messageData 
+      ? messageData 
+      : this.createMessage(messageData as Omit<Message, 'id' | 'timestamp'>);
     // Add thinking mode information for task-related broadcasts
     let thinkingMode: any = null;
     if (messageData.type === MessageType.TASK_ASSIGNMENT || 
