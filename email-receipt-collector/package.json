@@ -8,7 +8,14 @@
     "setup": "node src/setup.js",
     "test": "jest"
   },
-  "keywords": ["email", "receipt", "gmail", "google-drive", "ocr", "pdf"],
+  "keywords": [
+    "email",
+    "receipt",
+    "gmail",
+    "google-drive",
+    "ocr",
+    "pdf"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {

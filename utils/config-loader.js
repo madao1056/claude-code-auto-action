@@ -7,13 +7,13 @@ class ConfigLoader {
     this.configPaths = [
       path.join(process.env.HOME, '.claude', 'settings.json'),
       path.join(process.cwd(), '.claude', 'settings.json'),
-      path.join(__dirname, '..', '.claude', 'settings.json')
+      path.join(__dirname, '..', '.claude', 'settings.json'),
     ];
   }
 
   loadSettings(forceReload = false) {
     const cacheKey = 'settings';
-    
+
     if (!forceReload && this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
@@ -44,17 +44,17 @@ class ConfigLoader {
         docker: {
           enabled: false,
           skip_confirmation: false,
-          patterns: []
-        }
+          patterns: [],
+        },
       },
       notifications: {
         enabled: true,
-        sound: true
+        sound: true,
       },
       permissions: {
         allow: ['*'],
-        deny: []
-      }
+        deny: [],
+      },
     };
   }
 

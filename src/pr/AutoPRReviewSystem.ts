@@ -48,7 +48,7 @@ export class AutoPRReviewSystem {
   private config: PRConfig;
   private octokit: Octokit | null = null;
   private projectRoot: string;
-  
+
   constructor(projectRoot: string, config?: Partial<PRConfig>) {
     this.projectRoot = projectRoot;
     this.config = {
@@ -65,14 +65,14 @@ export class AutoPRReviewSystem {
         'ドキュメントが更新されている',
         'パフォーマンスへの影響を考慮している',
         'セキュリティリスクがない',
-        'エラーハンドリングが適切'
+        'エラーハンドリングが適切',
       ],
-      ...config
+      ...config,
     };
-    
+
     this.initializeGitHub();
   }
-  
+
   private async initializeGitHub(): Promise<void> {
     try {
       const token = process.env.GITHUB_TOKEN;
@@ -83,66 +83,66 @@ export class AutoPRReviewSystem {
       console.warn('GitHub APIの初期化に失敗しました:', error);
     }
   }
-  
+
   async createPR(targetBranch: string = 'main'): Promise<void> {
     console.log('🚀 Pull Requestを作成中...');
-    
+
     // 現在のブランチを取得
     const currentBranch = await this.getCurrentBranch();
     if (currentBranch === targetBranch) {
       throw new Error('現在のブランチがターゲットブランチと同じです');
     }
-    
+
     // 変更を解析
     const analysis = await this.analyzeChanges(targetBranch);
-    
+
     // PR説明を生成
     const description = await this.generatePRDescription(analysis, currentBranch, targetBranch);
-    
+
     // PRを作成
     if (this.octokit) {
       await this.createGitHubPR(description, currentBranch, targetBranch);
     } else {
       await this.createLocalPR(description, currentBranch, targetBranch);
     }
-    
+
     console.log('✅ Pull Requestが作成されました');
   }
-  
+
   private async getCurrentBranch(): Promise<string> {
     const { stdout } = await execAsync('git branch --show-current', { cwd: this.projectRoot });
     return stdout.trim();
   }
-  
+
   private async analyzeChanges(targetBranch: string): Promise<ChangeAnalysis> {
-    const { stdout: diffStat } = await execAsync(
-      `git diff ${targetBranch}...HEAD --stat`,
-      { cwd: this.projectRoot }
-    );
-    
-    const { stdout: diffContent } = await execAsync(
-      `git diff ${targetBranch}...HEAD`,
-      { cwd: this.projectRoot }
-    );
-    
+    const { stdout: diffStat } = await execAsync(`git diff ${targetBranch}...HEAD --stat`, {
+      cwd: this.projectRoot,
+    });
+
+    const { stdout: diffContent } = await execAsync(`git diff ${targetBranch}...HEAD`, {
+      cwd: this.projectRoot,
+    });
+
     // 統計情報を解析
-    const statMatch = diffStat.match(/(\d+) files? changed(?:, (\d+) insertions?\(\+\))?(?:, (\d+) deletions?\(-\))?/);
+    const statMatch = diffStat.match(
+      /(\d+) files? changed(?:, (\d+) insertions?\(\+\))?(?:, (\d+) deletions?\(-\))?/
+    );
     const filesChanged = parseInt(statMatch?.[1] || '0');
     const additions = parseInt(statMatch?.[2] || '0');
     const deletions = parseInt(statMatch?.[3] || '0');
-    
+
     // 変更タイプを推定
     const changeType = this.detectChangeType(diffContent);
-    
+
     // 破壊的変更をチェック
     const breakingChanges = this.detectBreakingChanges(diffContent);
-    
+
     // テストの有無をチェック
     const testsCoverage = diffContent.includes('.test.') || diffContent.includes('.spec.');
-    
+
     // 複雑度を計算
     const complexity = this.calculateComplexity(filesChanged, additions, deletions);
-    
+
     return {
       filesChanged,
       additions,
@@ -150,10 +150,10 @@ export class AutoPRReviewSystem {
       changeType,
       breakingChanges,
       testsCoverage,
-      complexity
+      complexity,
     };
   }
-  
+
   private detectChangeType(diffContent: string): ChangeAnalysis['changeType'] {
     if (diffContent.includes('fix:') || diffContent.includes('bugfix:')) {
       return 'bugfix';
@@ -163,26 +163,34 @@ export class AutoPRReviewSystem {
       return 'refactor';
     } else if (diffContent.includes('docs:') || diffContent.includes('.md')) {
       return 'docs';
-    } else if (diffContent.includes('test:') || diffContent.includes('.test.') || diffContent.includes('.spec.')) {
+    } else if (
+      diffContent.includes('test:') ||
+      diffContent.includes('.test.') ||
+      diffContent.includes('.spec.')
+    ) {
       return 'test';
     }
     return 'chore';
   }
-  
+
   private detectBreakingChanges(diffContent: string): boolean {
     const breakingPatterns = [
       /BREAKING CHANGE:/i,
       /removed\s+public\s+API/i,
       /changed\s+signature/i,
-      /deprecated/i
+      /deprecated/i,
     ];
-    
-    return breakingPatterns.some(pattern => pattern.test(diffContent));
+
+    return breakingPatterns.some((pattern) => pattern.test(diffContent));
   }
-  
-  private calculateComplexity(filesChanged: number, additions: number, deletions: number): 'low' | 'medium' | 'high' {
+
+  private calculateComplexity(
+    filesChanged: number,
+    additions: number,
+    deletions: number
+  ): 'low' | 'medium' | 'high' {
     const totalChanges = additions + deletions;
-    
+
     if (filesChanged > 20 || totalChanges > 500) {
       return 'high';
     } else if (filesChanged > 10 || totalChanges > 200) {
@@ -190,7 +198,7 @@ export class AutoPRReviewSystem {
     }
     return 'low';
   }
-  
+
   private async generatePRDescription(
     analysis: ChangeAnalysis,
     sourceBranch: string,
@@ -201,54 +209,54 @@ export class AutoPRReviewSystem {
       `git log ${targetBranch}..HEAD --pretty=format:"%s" --reverse`,
       { cwd: this.projectRoot }
     );
-    
+
     const commitList = commits.split('\n').filter(Boolean);
-    
+
     // タイトルを生成
     const title = this.generateTitle(commitList, analysis);
-    
+
     // 本文を生成
     const body = this.generateBody(analysis, commitList);
-    
+
     // ラベルを決定
     const labels = this.determineLabels(analysis);
-    
+
     // レビュアーを選定
     const reviewers = await this.selectReviewers(analysis);
-    
+
     return {
       title,
       body,
       labels,
       reviewers,
-      assignees: []
+      assignees: [],
     };
   }
-  
+
   private generateTitle(commits: string[], analysis: ChangeAnalysis): string {
     if (commits.length === 1) {
       return commits[0];
     }
-    
+
     const typeEmoji = {
       feature: '✨',
       bugfix: '🐛',
       refactor: '♻️',
       docs: '📚',
       test: '🧪',
-      chore: '🔧'
+      chore: '🔧',
     };
-    
+
     const emoji = typeEmoji[analysis.changeType] || '🚀';
     const type = analysis.changeType.charAt(0).toUpperCase() + analysis.changeType.slice(1);
-    
+
     return `${emoji} ${type}: ${this.summarizeCommits(commits)}`;
   }
-  
+
   private summarizeCommits(commits: string[]): string {
     // コミットメッセージから共通のテーマを抽出
     const keywords = new Map<string, number>();
-    
+
     for (const commit of commits) {
       const words = commit.toLowerCase().split(/\s+/);
       for (const word of words) {
@@ -257,29 +265,29 @@ export class AutoPRReviewSystem {
         }
       }
     }
-    
+
     // 最も頻出するキーワードを使用
     const sortedKeywords = Array.from(keywords.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
       .map(([word]) => word);
-    
+
     return sortedKeywords.join(', ') || 'Multiple improvements';
   }
-  
+
   private generateBody(analysis: ChangeAnalysis, commits: string[]): string {
     let body = '## Summary\n\n';
-    
+
     // 変更の概要
     body += `This PR includes ${analysis.filesChanged} file(s) with +${analysis.additions}/-${analysis.deletions} changes.\n\n`;
-    
+
     // 変更内容
     body += '## Changes\n\n';
     for (const commit of commits) {
       body += `- ${commit}\n`;
     }
     body += '\n';
-    
+
     // チェックリスト
     if (this.config.reviewChecklist.length > 0) {
       body += '## Checklist\n\n';
@@ -289,38 +297,38 @@ export class AutoPRReviewSystem {
       }
       body += '\n';
     }
-    
+
     // 追加情報
     if (analysis.breakingChanges) {
       body += '## ⚠️ Breaking Changes\n\n';
       body += 'This PR contains breaking changes. Please review carefully.\n\n';
     }
-    
+
     if (!analysis.testsCoverage) {
       body += '## 📝 Note\n\n';
       body += 'No test changes detected. Please ensure adequate test coverage.\n\n';
     }
-    
+
     // フッター
     body += '---\n';
     body += '🤖 Generated with Claude Code Auto Action\n';
-    
+
     return body;
   }
-  
+
   private checkItem(item: string, analysis: ChangeAnalysis): boolean {
     if (item.includes('テスト') && analysis.testsCoverage) return true;
     if (item.includes('ドキュメント') && analysis.changeType === 'docs') return true;
     if (item.includes('コードスタイル')) return true; // 自動フォーマット済みと仮定
     return false;
   }
-  
+
   private determineLabels(analysis: ChangeAnalysis): string[] {
     const labels: string[] = [];
-    
+
     // 変更タイプ
     labels.push(analysis.changeType);
-    
+
     // 複雑度
     if (analysis.complexity === 'high') {
       labels.push('large-pr');
@@ -329,39 +337,39 @@ export class AutoPRReviewSystem {
     } else {
       labels.push('small-pr');
     }
-    
+
     // 特殊なラベル
     if (analysis.breakingChanges) {
       labels.push('breaking-change');
     }
-    
+
     if (!analysis.testsCoverage) {
       labels.push('needs-tests');
     }
-    
+
     return labels;
   }
-  
+
   private async selectReviewers(analysis: ChangeAnalysis): Promise<string[]> {
     if (!this.config.autoAssignReviewers) {
       return [];
     }
-    
+
     // CODEOWNERSファイルを確認
     const codeownersPath = path.join(this.projectRoot, '.github', 'CODEOWNERS');
     if (fs.existsSync(codeownersPath)) {
       const owners = await this.parseCodeowners(codeownersPath);
       return owners.slice(0, 2); // 最大2人
     }
-    
+
     // チームメンバーから選定（設定から取得）
     return [];
   }
-  
+
   private async parseCodeowners(filePath: string): Promise<string[]> {
     const content = fs.readFileSync(filePath, 'utf-8');
     const owners = new Set<string>();
-    
+
     const lines = content.split('\n');
     for (const line of lines) {
       if (!line.startsWith('#') && line.trim()) {
@@ -373,10 +381,10 @@ export class AutoPRReviewSystem {
         }
       }
     }
-    
+
     return Array.from(owners);
   }
-  
+
   private async createGitHubPR(
     description: PRDescription,
     sourceBranch: string,
@@ -385,17 +393,17 @@ export class AutoPRReviewSystem {
     if (!this.octokit) {
       throw new Error('GitHub APIが初期化されていません');
     }
-    
+
     // リポジトリ情報を取得
     const { stdout } = await execAsync('git remote get-url origin', { cwd: this.projectRoot });
     const match = stdout.match(/github\.com[:/](.+?)\/(.+?)(?:\.git)?$/);
-    
+
     if (!match) {
       throw new Error('GitHubリポジトリのURLを解析できません');
     }
-    
+
     const [, owner, repo] = match;
-    
+
     // PRを作成
     const { data: pr } = await this.octokit.pulls.create({
       owner,
@@ -403,32 +411,32 @@ export class AutoPRReviewSystem {
       title: description.title,
       head: sourceBranch,
       base: targetBranch,
-      body: description.body
+      body: description.body,
     });
-    
+
     // ラベルを追加
     if (description.labels.length > 0) {
       await this.octokit.issues.addLabels({
         owner,
         repo: repo.replace('.git', ''),
         issue_number: pr.number,
-        labels: description.labels
+        labels: description.labels,
       });
     }
-    
+
     // レビュアーを追加
     if (description.reviewers.length > 0) {
       await this.octokit.pulls.requestReviewers({
         owner,
         repo: repo.replace('.git', ''),
         pull_number: pr.number,
-        reviewers: description.reviewers
+        reviewers: description.reviewers,
       });
     }
-    
+
     console.log(`✅ PR #${pr.number} が作成されました: ${pr.html_url}`);
   }
-  
+
   private async createLocalPR(
     description: PRDescription,
     sourceBranch: string,
@@ -439,7 +447,7 @@ export class AutoPRReviewSystem {
     if (!fs.existsSync(prDir)) {
       fs.mkdirSync(prDir, { recursive: true });
     }
-    
+
     const prData = {
       title: description.title,
       body: description.body,
@@ -447,46 +455,46 @@ export class AutoPRReviewSystem {
       target: targetBranch,
       labels: description.labels,
       reviewers: description.reviewers,
-      created: new Date().toISOString()
+      created: new Date().toISOString(),
     };
-    
+
     const prFile = path.join(prDir, `${sourceBranch}-to-${targetBranch}.json`);
     fs.writeFileSync(prFile, JSON.stringify(prData, null, 2));
-    
+
     console.log(`✅ ローカルPR情報が保存されました: ${prFile}`);
   }
-  
+
   async reviewPR(prNumber: number): Promise<ReviewComment[]> {
     console.log(`🔍 PR #${prNumber} をレビュー中...`);
-    
+
     const comments: ReviewComment[] = [];
-    
+
     // PRの変更を取得
     const changes = await this.getPRChanges(prNumber);
-    
+
     // 各ファイルをレビュー
     for (const file of changes) {
       const fileComments = await this.reviewFile(file);
       comments.push(...fileComments);
     }
-    
+
     // 自動レビューコメントを投稿
     if (this.config.autoReview && comments.length > 0) {
       await this.postReviewComments(prNumber, comments);
     }
-    
+
     return comments;
   }
-  
+
   private async getPRChanges(prNumber: number): Promise<any[]> {
     // 実際の実装ではGitHub APIまたはローカルgitを使用
     return [];
   }
-  
+
   private async reviewFile(file: any): Promise<ReviewComment[]> {
     const comments: ReviewComment[] = [];
     const content = file.patch || '';
-    
+
     // コードスタイルチェック
     if (file.filename.endsWith('.js') || file.filename.endsWith('.ts')) {
       // インデントチェック
@@ -497,99 +505,99 @@ export class AutoPRReviewSystem {
             path: file.filename,
             line: index + 1,
             message: 'タブの代わりにスペースを使用してください',
-            severity: 'warning'
+            severity: 'warning',
           });
         }
       });
-      
+
       // console.logチェック
       if (content.includes('console.log')) {
         comments.push({
           path: file.filename,
           line: 1,
           message: 'console.logが残っています。削除してください',
-          severity: 'warning'
+          severity: 'warning',
         });
       }
-      
+
       // TODOコメントチェック
       if (content.includes('TODO')) {
         comments.push({
           path: file.filename,
           line: 1,
           message: 'TODOコメントがあります。issueを作成することを検討してください',
-          severity: 'info'
+          severity: 'info',
         });
       }
     }
-    
+
     // セキュリティチェック
     const securityPatterns = [
       { pattern: /password\s*=\s*["']/, message: 'ハードコードされたパスワードが検出されました' },
       { pattern: /api[_-]?key\s*=\s*["']/, message: 'ハードコードされたAPIキーが検出されました' },
-      { pattern: /eval\(/, message: 'eval()の使用は避けてください' }
+      { pattern: /eval\(/, message: 'eval()の使用は避けてください' },
     ];
-    
+
     for (const { pattern, message } of securityPatterns) {
       if (pattern.test(content)) {
         comments.push({
           path: file.filename,
           line: 1,
           message,
-          severity: 'error'
+          severity: 'error',
         });
       }
     }
-    
+
     return comments;
   }
-  
+
   private async postReviewComments(prNumber: number, comments: ReviewComment[]): Promise<void> {
     if (!this.octokit) return;
-    
+
     // コメントをグループ化
-    const reviewComments = comments.map(comment => ({
+    const reviewComments = comments.map((comment) => ({
       path: comment.path,
       line: comment.line,
-      body: `${this.getSeverityEmoji(comment.severity)} ${comment.message}`
+      body: `${this.getSeverityEmoji(comment.severity)} ${comment.message}`,
     }));
-    
+
     // レビューを投稿（実際の実装）
     console.log(`📝 ${comments.length}件のレビューコメントを投稿しました`);
   }
-  
+
   private getSeverityEmoji(severity: ReviewComment['severity']): string {
     const emojis = {
       info: 'ℹ️',
       warning: '⚠️',
-      error: '❌'
+      error: '❌',
     };
     return emojis[severity];
   }
-  
+
   async handleReviewComments(prNumber: number): Promise<void> {
     console.log(`💬 PR #${prNumber} のレビューコメントに対応中...`);
-    
+
     // レビューコメントを取得
     const comments = await this.getReviewComments(prNumber);
-    
+
     // 各コメントに対して自動修正を試みる
     for (const comment of comments) {
       await this.handleSingleComment(comment);
     }
-    
+
     console.log('✅ レビューコメントへの対応が完了しました');
   }
-  
+
   private async getReviewComments(prNumber: number): Promise<any[]> {
     // 実際の実装ではGitHub APIを使用
     return [];
   }
-  
+
   private async handleSingleComment(comment: any): Promise<void> {
     // コメントの内容から修正方法を判断
     const message = comment.body.toLowerCase();
-    
+
     if (message.includes('スペース') || message.includes('indent')) {
       // インデント修正
       await this.fixIndentation(comment.path);
@@ -601,7 +609,7 @@ export class AutoPRReviewSystem {
       console.log('テストの追加が必要です');
     }
   }
-  
+
   private async fixIndentation(filePath: string): Promise<void> {
     const fullPath = path.join(this.projectRoot, filePath);
     if (fs.existsSync(fullPath)) {
@@ -610,7 +618,7 @@ export class AutoPRReviewSystem {
       fs.writeFileSync(fullPath, fixed);
     }
   }
-  
+
   private async removeConsoleLogs(filePath: string): Promise<void> {
     const fullPath = path.join(this.projectRoot, filePath);
     if (fs.existsSync(fullPath)) {
@@ -619,36 +627,35 @@ export class AutoPRReviewSystem {
       fs.writeFileSync(fullPath, fixed);
     }
   }
-  
+
   async checkMergeability(prNumber: number): Promise<boolean> {
     console.log(`🔍 PR #${prNumber} のマージ可能性をチェック中...`);
-    
+
     const checks = {
       conflicts: false,
       testsPass: false,
       approved: false,
-      ciPassed: false
+      ciPassed: false,
     };
-    
+
     // コンフリクトチェック
     if (this.config.checkConflicts) {
       checks.conflicts = await this.checkConflicts(prNumber);
     }
-    
+
     // テスト実行
     if (this.config.runTestsBeforeMerge) {
       checks.testsPass = await this.runTests();
     }
-    
+
     // 承認チェック
     checks.approved = await this.checkApprovals(prNumber);
-    
+
     // CI/CDチェック
     checks.ciPassed = await this.checkCIStatus(prNumber);
-    
-    const canMerge = !checks.conflicts && checks.testsPass && 
-                     checks.approved && checks.ciPassed;
-    
+
+    const canMerge = !checks.conflicts && checks.testsPass && checks.approved && checks.ciPassed;
+
     if (canMerge) {
       console.log('✅ PRはマージ可能です');
     } else {
@@ -658,15 +665,15 @@ export class AutoPRReviewSystem {
       if (!checks.approved) console.log('  - 承認が不足しています');
       if (!checks.ciPassed) console.log('  - CI/CDが失敗しています');
     }
-    
+
     return canMerge;
   }
-  
+
   private async checkConflicts(prNumber: number): Promise<boolean> {
     // 実際の実装ではGitHub APIまたはgitコマンドを使用
     return false;
   }
-  
+
   private async runTests(): Promise<boolean> {
     try {
       await execAsync('npm test', { cwd: this.projectRoot });
@@ -675,12 +682,12 @@ export class AutoPRReviewSystem {
       return false;
     }
   }
-  
+
   private async checkApprovals(prNumber: number): Promise<boolean> {
     // 実際の実装ではGitHub APIを使用
     return true;
   }
-  
+
   private async checkCIStatus(prNumber: number): Promise<boolean> {
     // 実際の実装ではGitHub APIを使用
     return true;

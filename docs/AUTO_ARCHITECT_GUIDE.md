@@ -71,6 +71,7 @@ cc-create -r "タスク管理システムを作りたい。カンバンボード
 ```
 
 生成されるもの:
+
 - Frontend: React + TypeScript + Socket.io
 - Backend: Node.js + Express + JWT認証
 - Database: PostgreSQL + Redis
@@ -86,6 +87,7 @@ cc-create -r "ECサイトを作りたい。商品管理、カート、決済、�
 ```
 
 生成されるもの:
+
 - Frontend: Next.js + Tailwind CSS
 - Backend: Next.js API Routes
 - Database: PostgreSQL + Prisma ORM
@@ -101,6 +103,7 @@ cc-create -r "マイクロサービス構成のREST APIを作りたい。認証�
 ```
 
 生成されるもの:
+
 - API Gateway: Kong/Express Gateway
 - 認証サービス: JWT + OAuth2
 - ファイルサービス: S3互換ストレージ
@@ -121,6 +124,7 @@ cc-create -r "マイクロサービス構成のREST APIを作りたい。認証�
 - **"clean architecture"** - クリーンアーキテクチャ
 
 例:
+
 ```bash
 cc-create -r "scalableでsecureなAPIを作りたい。clean architectureで実装して"
 ```
@@ -130,11 +134,13 @@ cc-create -r "scalableでsecureなAPIを作りたい。clean architectureで実�
 ### エラーが出る場合
 
 1. Claude CLIがインストールされているか確認
+
    ```bash
    claude --version
    ```
 
 2. APIキーが設定されているか確認
+
    ```bash
    echo $ANTHROPIC_API_KEY
    ```
@@ -154,6 +160,7 @@ cc-create -r "scalableでsecureなAPIを作りたい。clean architectureで実�
 ### コスト制限に達した場合
 
 - 日次制限を確認
+
   ```bash
   claude /cost
   ```
@@ -162,7 +169,7 @@ cc-create -r "scalableでsecureなAPIを作りたい。clean architectureで実�
   ```json
   {
     "costControl": {
-      "dailyLimit": 15  // $15に変更
+      "dailyLimit": 15 // $15に変更
     }
   }
   ```
@@ -193,12 +200,14 @@ cc-create -r "scalableでsecureなAPIを作りたい。clean architectureで実�
 
 ```markdown
 # my-architecture.md
+
 Always use Domain-Driven Design principles.
 Implement CQRS pattern for complex domains.
 Use event sourcing for audit trails.
 ```
 
 使用:
+
 ```bash
 cc-create -r "..." --prompt my-architecture
 ```

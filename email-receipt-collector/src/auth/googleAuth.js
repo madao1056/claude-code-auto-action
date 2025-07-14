@@ -6,7 +6,7 @@ const logger = require('../utils/logger');
 
 const SCOPES = [
   'https://www.googleapis.com/auth/gmail.readonly',
-  'https://www.googleapis.com/auth/drive.file'
+  'https://www.googleapis.com/auth/drive.file',
 ];
 
 const TOKEN_PATH = path.join(__dirname, '../../config/token.json');
@@ -55,7 +55,7 @@ class GoogleAuth {
     });
 
     console.log('Authorize this app by visiting this url:', authUrl);
-    
+
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,

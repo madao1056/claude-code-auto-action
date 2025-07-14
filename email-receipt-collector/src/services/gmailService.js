@@ -12,7 +12,7 @@ class GmailService {
       const response = await this.gmail.users.messages.list({
         userId: 'me',
         q: query,
-        maxResults: maxResults
+        maxResults: maxResults,
       });
 
       if (!response.data.messages) {
@@ -32,7 +32,7 @@ class GmailService {
     try {
       const response = await this.gmail.users.messages.get({
         userId: 'me',
-        id: messageId
+        id: messageId,
       });
 
       return response.data;
@@ -46,21 +46,21 @@ class GmailService {
     const attachments = [];
 
     const parts = this.getMessageParts(email.payload);
-    
+
     for (const part of parts) {
       if (part.filename && part.body.attachmentId) {
         try {
           const attachment = await this.gmail.users.messages.attachments.get({
             userId: 'me',
             messageId: messageId,
-            id: part.body.attachmentId
+            id: part.body.attachmentId,
           });
 
           attachments.push({
             filename: part.filename,
             mimeType: part.mimeType,
             data: attachment.data.data,
-            size: attachment.data.size
+            size: attachment.data.size,
           });
 
           logger.info(`Retrieved attachment: ${part.filename}`);
@@ -100,15 +100,15 @@ class GmailService {
     return {
       html: htmlContent,
       text: textContent,
-      headers: this.extractHeaders(email.payload.headers)
+      headers: this.extractHeaders(email.payload.headers),
     };
   }
 
   extractHeaders(headers) {
     const result = {};
     const importantHeaders = ['Subject', 'From', 'To', 'Date'];
-    
-    headers.forEach(header => {
+
+    headers.forEach((header) => {
       if (importantHeaders.includes(header.name)) {
         result[header.name.toLowerCase()] = header.value;
       }
@@ -131,7 +131,7 @@ class GmailService {
           id: message.id,
           threadId: message.threadId,
           content,
-          attachments
+          attachments,
         });
       } catch (error) {
         logger.error(`Error processing email ${message.id}:`, error);

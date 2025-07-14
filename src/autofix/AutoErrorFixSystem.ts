@@ -47,9 +47,9 @@ export class AutoErrorFixSystem {
         enabled: true,
         triggers: ['build_error', 'lint_error', 'type_error', 'test_error'],
         maxRetries: 3,
-        escalateToUltrathink: true
+        escalateToUltrathink: true,
       },
-      ...config
+      ...config,
     };
     this.thinkingModeManager = new ThinkingModeManager();
     this.initializeErrorPatterns();
@@ -61,26 +61,26 @@ export class AutoErrorFixSystem {
       {
         pattern: /error TS(\d+): (.+)/,
         type: 'type',
-        fixStrategy: this.fixTypeScriptError.bind(this)
+        fixStrategy: this.fixTypeScriptError.bind(this),
       },
       // ESLintエラー
       {
         pattern: /(\d+):(\d+)\s+error\s+(.+)\s+(.+)/,
         type: 'lint',
-        fixStrategy: this.fixLintError.bind(this)
+        fixStrategy: this.fixLintError.bind(this),
       },
       // モジュール不足エラー
       {
         pattern: /Cannot find module '(.+)'|Module not found: Error: Can't resolve '(.+)'/,
         type: 'build',
-        fixStrategy: this.fixMissingModule.bind(this)
+        fixStrategy: this.fixMissingModule.bind(this),
       },
       // テストエラー
       {
         pattern: /(\d+) failing|Test failed: (.+)/,
         type: 'test',
-        fixStrategy: this.fixTestError.bind(this)
-      }
+        fixStrategy: this.fixTestError.bind(this),
+      },
     ];
   }
 
@@ -90,7 +90,7 @@ export class AutoErrorFixSystem {
     }
 
     console.log(`🔍 自動エラー修正システム: ${trigger} を検出`);
-    
+
     const errors = this.parseErrors(output);
     if (errors.length === 0) {
       return true;
@@ -112,7 +112,7 @@ export class AutoErrorFixSystem {
 
     // エラーを修正
     const fixed = await this.fixErrors(errors);
-    
+
     if (!fixed) {
       this.retryCount.set(errorKey, currentRetries + 1);
     } else {
@@ -124,39 +124,39 @@ export class AutoErrorFixSystem {
 
   private parseErrors(output: string): ErrorContext[] {
     const errors: ErrorContext[] = [];
-    
+
     for (const pattern of this.config.patterns || []) {
       const matches = output.matchAll(new RegExp(pattern.pattern, 'gm'));
-      
+
       for (const match of matches) {
         const context: ErrorContext = {
           errorMessage: match[0],
-          fullOutput: output
+          fullOutput: output,
         };
-        
+
         // ファイル名、行番号などを抽出（パターンに応じて）
         if (pattern.type === 'lint' && match.length >= 4) {
           context.line = parseInt(match[1]);
           context.column = parseInt(match[2]);
         }
-        
+
         errors.push(context);
       }
     }
-    
+
     return errors;
   }
 
   private async fixErrors(errors: ErrorContext[]): Promise<boolean> {
     let allFixed = true;
-    
+
     for (const error of errors) {
       const pattern = this.findMatchingPattern(error.errorMessage);
       if (!pattern) continue;
-      
+
       try {
         const fixActions = await pattern.fixStrategy(error.errorMessage, error);
-        
+
         for (const action of fixActions) {
           await this.applyFix(action);
           this.fixHistory.push(action);
@@ -166,30 +166,30 @@ export class AutoErrorFixSystem {
         allFixed = false;
       }
     }
-    
+
     return allFixed;
   }
 
   private findMatchingPattern(errorMessage: string): ErrorPattern | undefined {
-    return this.config.patterns?.find(p => p.pattern.test(errorMessage));
+    return this.config.patterns?.find((p) => p.pattern.test(errorMessage));
   }
 
   private async applyFix(action: FixAction): Promise<void> {
     console.log(`🔧 修正を適用: ${action.description}`);
-    
+
     switch (action.type) {
       case 'edit':
         if (action.target && action.content) {
           await writeFile(action.target, action.content);
         }
         break;
-        
+
       case 'install':
         if (action.command) {
           await execAsync(action.command);
         }
         break;
-        
+
       case 'command':
         if (action.command) {
           await execAsync(action.command);
@@ -200,49 +200,55 @@ export class AutoErrorFixSystem {
 
   private async fixTypeScriptError(error: string, context: ErrorContext): Promise<FixAction[]> {
     const fixes: FixAction[] = [];
-    
+
     // 型エラーのパターンに応じた修正
-    if (error.includes("Property") && error.includes("does not exist")) {
+    if (error.includes('Property') && error.includes('does not exist')) {
       fixes.push({
         type: 'edit',
         description: '不足しているプロパティを追加',
         // 実際の修正ロジックはClaude APIと連携
       });
     }
-    
+
     return fixes;
   }
 
   private async fixLintError(error: string, context: ErrorContext): Promise<FixAction[]> {
     // ESLintの自動修正を実行
-    return [{
-      type: 'command',
-      command: 'npx eslint --fix .',
-      description: 'ESLintの自動修正を実行'
-    }];
+    return [
+      {
+        type: 'command',
+        command: 'npx eslint --fix .',
+        description: 'ESLintの自動修正を実行',
+      },
+    ];
   }
 
   private async fixMissingModule(error: string, context: ErrorContext): Promise<FixAction[]> {
     const moduleMatch = error.match(/Cannot find module '(.+?)'|Can't resolve '(.+?)'/);
     const moduleName = moduleMatch?.[1] || moduleMatch?.[2];
-    
+
     if (!moduleName) return [];
-    
+
     // パッケージをインストール
-    return [{
-      type: 'install',
-      command: `npm install ${moduleName}`,
-      description: `不足パッケージ ${moduleName} をインストール`
-    }];
+    return [
+      {
+        type: 'install',
+        command: `npm install ${moduleName}`,
+        description: `不足パッケージ ${moduleName} をインストール`,
+      },
+    ];
   }
 
   private async fixTestError(error: string, context: ErrorContext): Promise<FixAction[]> {
     // テストエラーは複雑なので、思考モードを使用
-    return [{
-      type: 'command',
-      command: 'npm test -- --updateSnapshot',
-      description: 'スナップショットを更新'
-    }];
+    return [
+      {
+        type: 'command',
+        command: 'npm test -- --updateSnapshot',
+        description: 'スナップショットを更新',
+      },
+    ];
   }
 
   private generateErrorKey(error: ErrorContext): string {

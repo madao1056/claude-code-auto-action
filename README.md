@@ -7,16 +7,19 @@
 ## 主要機能
 
 ### 🚀 YOLO Mode (権限自動承認)
+
 - `--dangerously-skip-permissions` フラグで全権限を自動承認
 - Allow/Denyリストによる細かい制御
 - Git checkpoint自動作成で安全性確保
 
 ### 💰 トークン最適化
+
 - コンテキスト90%で自動圧縮
 - 日次コスト上限設定（デフォルト$8）
 - Sonnet/Opus自動切り替えで費用削減
 
 ### 🤖 自動化機能
+
 - **Auto-commit** - AIが適切なコミットメッセージを生成
 - **Auto-format** - 保存時に自動整形
 - **Auto-test** - コミット前に自動テスト実行
@@ -24,12 +27,14 @@
 - **Auto-edit** - Cursorの「Do you want to make this edit?」ダイアログを自動確認
 
 ### 🧠 思考モードシステム (v1.1.0 NEW!)
+
 - **Default Mode: think_hard (10,000 tokens)** - 全タスクで高品質な思考
 - **Auto-escalation** - 2回以上の修正で自動的に ultrathink (31,999 tokens) に昇格
 - **Context-aware** - タスクの種類に応じた最適な思考モード選択
 - **4段階の思考レベル**: think → think_hard → think_harder → ultrathink
 
 ### 🏗️ 階層的エージェントシステム (NEW!)
+
 - **Auto-architect** - 「〇〇するシステムを作りたい」という要求から完全なシステムを自動生成
 - **3層構造のエージェント階層**:
   - **Architect (トップ層)** - システム設計とタスク分解
@@ -39,6 +44,7 @@
 - **Deep Thinking自動適用** - step-by-step reasoning、edge cases考慮、trade-off評価を自動実行
 
 ### 🎨 IDE統合
+
 - VSCode/Cursor拡張機能
 - ステータスバーでYOLOモード表示
 - キーボードショートカット対応
@@ -65,6 +71,7 @@ cc-yolo "このディレクトリのファイルを教えて"
 ### 基本的な使い方
 
 #### YOLO Mode (権限自動承認)
+
 ```bash
 # エイリアスで簡単実行
 cc-yolo "package.jsonの依存関係を最新版に更新して"
@@ -77,6 +84,7 @@ cc-safe "重要なファイルを編集する"
 ```
 
 #### 自動化コマンド
+
 ```bash
 # ファイル監視と自動コミット
 scripts/claude-auto.sh watch
@@ -101,6 +109,7 @@ cc-edit-yolo
 ```
 
 #### 階層的エージェントシステム (Auto-architect)
+
 ```bash
 # システムを要件から自動生成
 cc-create -r "タスク管理システムを作りたい。リアルタイム更新機能付き"
@@ -121,12 +130,14 @@ cc-create -r "REST APIを作りたい。ユーザー認証とファイルアッ�
 ```
 
 階層的エージェントシステムは以下のフェーズで動作します:
+
 1. **分析フェーズ** (5-10分) - Architectが要件を分析し、システム設計を作成
 2. **計画フェーズ** (10-15分) - 5つのManagerが並列で実装計画を策定
 3. **実装フェーズ** (30-60分) - 最大10のWorkerが並列でコード生成
 4. **統合フェーズ** (10-15分) - 最終的な統合とドキュメント生成
 
 #### 既存プロジェクトの改良 (NEW!)
+
 ```bash
 # プロジェクトを分析して改善点を発見
 cc-architect analyze
@@ -151,6 +162,7 @@ cc-architect upgrade -r "マイクロサービス化" -t refactor
 ```
 
 **既存プロジェクト改良の特徴:**
+
 - 🔍 **自動分析** - コード品質、セキュリティ、パフォーマンスを総合評価
 - 🔧 **スマート改良** - 既存コードを壊さずに機能追加・最適化
 - 📊 **詳細レポート** - 改善提案を優先順位付きで提示
@@ -159,9 +171,11 @@ cc-architect upgrade -r "マイクロサービス化" -t refactor
 ## Cursor自動編集機能 🆕
 
 ### 概要
+
 Cursorの編集確認ダイアログ（「Do you want to make this edit to line.ts?」など）を自動的に処理し、開発フローを中断させません。
 
 ### 使い方
+
 ```bash
 # 自動編集ハンドラを開始
 cursor-auto-edit start
@@ -181,6 +195,7 @@ cursor-auto-edit stop
 ```
 
 ### 実装方式
+
 1. **Direct Edit Mode** - ファイルを直接書き換えて確認ダイアログを回避
 2. **AppleScript Handler** - macOSでダイアログボタンを自動クリック
 3. **Python Auto-Save Daemon** - ファイル変更を監視して自動保存
@@ -215,52 +230,48 @@ cursor-auto-edit stop
 
 ```json
 {
-  "defaultMode": "bypassPermissions",     // YOLO Modeをデフォルトに
-  "contextAutoCompactThreshold": 0.9,      // 90%で自動圧縮
-  "preferredModel": "sonnet",              // 実装はSonnet
-  "planningModel": "opus",                 // 設計はOpus
+  "defaultMode": "bypassPermissions", // YOLO Modeをデフォルトに
+  "contextAutoCompactThreshold": 0.9, // 90%で自動圧縮
+  "preferredModel": "sonnet", // 実装はSonnet
+  "planningModel": "opus", // 設計はOpus
   "costControl": {
-    "dailyLimit": 8,                       // 日次上限$8
-    "warningThreshold": 6,                 // $6で警告
-    "autoLogoutOnLimit": true              // 上限で自動ログアウト
+    "dailyLimit": 8, // 日次上限$8
+    "warningThreshold": 6, // $6で警告
+    "autoLogoutOnLimit": true // 上限で自動ログアウト
   },
   "hooks": {
-    "post_task": "/clear",                 // タスク後に履歴クリア
+    "post_task": "/clear", // タスク後に履歴クリア
     "post_run": "git add -A && git commit -m 'Claude checkpoint' || true"
   },
   "automation": {
     "auto_architect": {
-      "enabled": true,                     // 階層的エージェントシステム有効化
-      "parallel_agents": 10,               // 最大並列エージェント数
-      "hierarchical_execution": true       // 階層的実行モード
+      "enabled": true, // 階層的エージェントシステム有効化
+      "parallel_agents": 10, // 最大並列エージェント数
+      "hierarchical_execution": true // 階層的実行モード
     },
     "auto_edit": {
-      "enabled": true,                     // 自動編集確認有効化
-      "yolo_mode": false,                  // YOLOモード（全自動確認）
-      "save_delay": 1.0                    // 自動保存の遅延（秒）
+      "enabled": true, // 自動編集確認有効化
+      "yolo_mode": false, // YOLOモード（全自動確認）
+      "save_delay": 1.0 // 自動保存の遅延（秒）
     }
   },
   "agent_hierarchy": {
     "architect": {
-      "model": "opus",                     // アーキテクトはOpusを使用
+      "model": "opus", // アーキテクトはOpusを使用
       "system_prompts": ["deep-thinking", "architecture-first"]
     },
     "managers": {
-      "model": "opus",                     // マネージャーもOpusを使用
+      "model": "opus", // マネージャーもOpusを使用
       "system_prompts": ["step-by-step", "context-aware"]
     },
     "workers": {
-      "model": "sonnet",                   // ワーカーはSonnetで高速化
+      "model": "sonnet", // ワーカーはSonnetで高速化
       "system_prompts": ["implementation-focused", "clean-code"]
     }
   },
   "deep_thinking": {
-    "enabled": true,                       // Deep Thinking自動適用
-    "keywords": [
-      "step-by-step reasoning",
-      "consider edge cases",
-      "evaluate trade-offs"
-    ]
+    "enabled": true, // Deep Thinking自動適用
+    "keywords": ["step-by-step reasoning", "consider edge cases", "evaluate trade-offs"]
   }
 }
 ```
@@ -283,11 +294,7 @@ export ANTHROPIC_API_KEY=your_key_here           # APIキー
   "mode": "bypassPermissions",
   "rules": {
     "allow": ["npm*", "git*", "Edit(**)", "Write(**)"],
-    "deny": [
-      "Bash(rm -rf /*)",
-      "Edit(.env*)",
-      "Write(**/*secret*)"
-    ]
+    "deny": ["Bash(rm -rf /*)", "Edit(.env*)", "Write(**/*secret*)"]
   }
 }
 ```
@@ -304,11 +311,13 @@ export ANTHROPIC_API_KEY=your_key_here           # APIキー
 ### よくある問題
 
 1. **権限エラーが出る**
+
    ```bash
    export CLAUDE_PERMISSIONS_MODE=bypassPermissions
    ```
 
 2. **コスト上限に達した**
+
    ```bash
    claude /clear  # 履歴をクリア
    claude /compact summary=dot_points  # コンテキスト圧縮
@@ -321,12 +330,14 @@ export ANTHROPIC_API_KEY=your_key_here           # APIキー
 ## 🆕 高度な自動化機能 (v1.2.0)
 
 ### 自動エラー修正システム
+
 - **TypeScript型エラー**の自動解決
 - **ESLint/Prettier**エラーの自動修正
 - **ビルドエラー**の検知と修正
 - 思考モードの自動エスカレーション（2回失敗でultrathink）
 
 ### 依存関係の自動管理
+
 ```bash
 claude-code auto-deps analyze   # 依存関係を分析
 claude-code auto-deps install   # 不足パッケージを自動インストール
@@ -335,6 +346,7 @@ claude-code auto-deps fix       # 脆弱性を修正
 ```
 
 ### 自動リファクタリング
+
 - 重複コードの検出と共通化
 - 長いメソッドの分割提案
 - 複雑な条件式の簡略化
@@ -342,6 +354,7 @@ claude-code auto-deps fix       # 脆弱性を修正
 - インポートの最適化
 
 ### 自動ドキュメント生成
+
 ```bash
 claude-code generate-docs       # すべてのドキュメントを生成
 # 生成されるドキュメント:
@@ -352,18 +365,21 @@ claude-code generate-docs       # すべてのドキュメントを生成
 ```
 
 ### テストカバレッジ自動改善
+
 - カバレッジ不足箇所の検出
 - テストケースの自動生成
 - 失敗テストの自動修正
 - E2Eテストの生成
 
 ### PR/コードレビュー自動化
+
 ```bash
 claude-code create-pr --auto-review    # PR作成とレビュー
 claude-code handle-review-comments     # レビューコメントへの自動対応
 ```
 
 ### 環境構築の完全自動化
+
 ```bash
 claude-code setup-env --auto-detect
 # 自動検出・生成:
@@ -376,18 +392,21 @@ claude-code setup-env --auto-detect
 ```
 
 ### 学習型コード補完
+
 - 個人のコーディングパターンを学習
 - チーム規約の自動適用
 - よく使うコードスニペットの提案
 - コーディングスタイルの自動検出
 
 ### 自動バージョン管理
+
 ```bash
 claude-code version --auto      # Conventional Commitsに基づく自動バージョニング
 claude-code release            # リリースノートとタグの自動生成
 ```
 
 ### 監視・アラート統合
+
 - パフォーマンス回帰の自動検知
 - バンドルサイズ増加の警告
 - セキュリティ脆弱性の即時通知
@@ -396,26 +415,28 @@ claude-code release            # リリースノートとタグの自動生成
 ## 📋 重要な設定ポイント
 
 ### 学習システムの設定
+
 ```json
 {
   "approvalLearning": {
     "enabled": true,
     "autoUpdate": true,
-    "updateInterval": 3600,  // 1時間ごとに学習更新
-    "minUsageCountForAutoApproval": 3  // 3回使用で自動承認
+    "updateInterval": 3600, // 1時間ごとに学習更新
+    "minUsageCountForAutoApproval": 3 // 3回使用で自動承認
   }
 }
 ```
 
 ### 自動化の優先順位設定
+
 ```json
 {
   "automation": {
     "priorities": {
-      "errorFix": "high",      // エラー修正を最優先
-      "security": "high",      // セキュリティも高優先度
+      "errorFix": "high", // エラー修正を最優先
+      "security": "high", // セキュリティも高優先度
       "performance": "medium", // パフォーマンスは中優先度
-      "style": "low"          // スタイル修正は低優先度
+      "style": "low" // スタイル修正は低優先度
     }
   }
 }
@@ -467,6 +488,7 @@ claude-code cleanup --logs      # ログのみクリーンアップ
 ## 🚨 トラブルシューティング（追加）
 
 ### 自動化が動作しない
+
 ```bash
 # 権限を確認
 cat .claude/permissions.json
@@ -479,6 +501,7 @@ claude-code restart-services
 ```
 
 ### 学習データが反映されない
+
 ```bash
 # 学習データを手動更新
 ./scripts/auto-learning-update.sh --force
@@ -488,6 +511,7 @@ node src/autofix/approval-interceptor.js --stats
 ```
 
 ### ビルドエラーが続く
+
 ```bash
 # TypeScriptの型チェック
 npm run typecheck
@@ -503,14 +527,120 @@ npm install
 ## 🔗 関連リンク
 
 ### 外部リソース
+
 - [公式仕様書](https://docs.anthropic.com/claude-code)
 - [YOLO Mode詳細](https://spiess.dev/blog/how-i-use-claude-code)
 - [ベストプラクティス](https://www.anthropic.com/engineering/claude-code-best-practices)
 
 ### プロジェクトリソース
+
 - [GitHub リポジトリ](https://github.com/yourusername/claude-code-auto-action)
 - [Issue トラッカー](https://github.com/yourusername/claude-code-auto-action/issues)
 - [ディスカッション](https://github.com/yourusername/claude-code-auto-action/discussions)
+
+## Shell設定 (.zshrc)
+
+プロジェクトを最大限活用するために、以下の設定を`.zshrc`に追加することを推奨します：
+
+### 基本設定
+
+```bash
+# Claude Code Auto Action基本パス
+export CLAUDE_AUTO_ACTION_HOME="/Users/hashiguchimasaki/project/claude-code-auto-action"
+
+# グローバル設定
+export CLAUDE_GLOBAL_CONFIG="$HOME/.claude/global-settings.json"
+export CLAUDE_PERMISSIONS_MODE=bypassPermissions
+export CLAUDE_COST_LIMIT_PER_DAY=8
+
+# プロジェクトディレクトリの自動検出
+claude_auto_detect() {
+    local current_dir=$(pwd)
+    if [[ "$current_dir" == /Users/hashiguchimasaki/project/* ]]; then
+        export CLAUDE_PROJECT_MODE="auto"
+        if [ -f ".claude/settings.json" ]; then
+            export CLAUDE_PROJECT_CONFIG="$(pwd)/.claude/settings.json"
+        fi
+    fi
+}
+```
+
+### 便利なエイリアス
+
+```bash
+# 基本コマンド
+alias cc='claude --config ${CLAUDE_PROJECT_CONFIG:-~/.claude/global-settings.json}'
+alias cc-yolo='claude --dangerously-skip-permissions'
+
+# 思考モード別
+alias cc-think='claude --thinking-mode think'
+alias cc-hard='claude --thinking-mode think_hard'
+alias cc-harder='claude --thinking-mode think_harder'
+alias cc-ultra='claude --thinking-mode ultrathink'
+
+# プロジェクト管理
+alias cc-status="$CLAUDE_AUTO_ACTION_HOME/scripts/claude-auto.sh status"
+alias cc-watch="$CLAUDE_AUTO_ACTION_HOME/scripts/claude-auto.sh watch"
+alias cc-commit="$CLAUDE_AUTO_ACTION_HOME/scripts/claude-auto.sh commit"
+
+# ウェブ制作特化
+alias cc-web='cc "ウェブ制作プロジェクトの自動化タスクを実行"'
+alias cc-report='cc "クライアントレポートを生成"'
+alias cc-monitor='cc "ウェブサイト監視状況をチェック"'
+```
+
+## セキュリティベストプラクティス
+
+### APIキー管理
+
+```bash
+# ❌ 悪い例: .zshrcに直接記載
+export OPENAI_API_KEY=sk-proj-xxxxx
+
+# ✅ 良い例: 環境変数ファイルを使用
+source ~/.env_private  # APIキーは別ファイルで管理
+```
+
+### 権限設定
+
+1. `/Users/hashiguchimasaki/project`配下のみ自動権限を有効化
+2. それ以外のディレクトリでは確認モード
+3. 破壊的操作には必ず確認を要求
+
+## よくある問題と解決策
+
+### 1. Claude Codeが応答しない
+
+```bash
+# プロセスを確認
+ps aux | grep claude
+
+# キャッシュをクリア
+rm -rf ~/.claude/cache/*
+
+# 設定をリセット
+cc-setup --reset
+```
+
+### 2. 思考モードが機能しない
+
+```bash
+# 現在の設定を確認
+cc-info
+
+# 思考モードを手動設定
+export CLAUDE_THINKING_MODE=think_hard
+```
+
+### 3. Git自動コミットが失敗する
+
+```bash
+# Gitフックの権限を確認
+ls -la .git/hooks/
+
+# フックを再インストール
+./scripts/install.sh --git-hooks
+```
 
 ## ライセンス
 

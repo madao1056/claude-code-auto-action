@@ -33,11 +33,6 @@
     "cleanBeforeInstall": false,
     "checkVulnerabilities": true,
     "updateStrategy": "minor",
-    "excludePackages": [
-      "typescript",
-      "eslint",
-      "prettier",
-      "@types/node"
-    ]
+    "excludePackages": ["typescript", "eslint", "prettier", "@types/node"]
   }
 }

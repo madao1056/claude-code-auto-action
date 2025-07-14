@@ -22,13 +22,13 @@ const gitAutoCommands = [
   'git reset',
   'git revert',
   'git cherry-pick',
-  'git clean'
+  'git clean',
 ];
 
 // コマンドがGit操作かチェック
 function isGitCommand(command) {
   const normalizedCmd = command.trim().toLowerCase();
-  return gitAutoCommands.some(gitCmd => normalizedCmd.startsWith(gitCmd));
+  return gitAutoCommands.some((gitCmd) => normalizedCmd.startsWith(gitCmd));
 }
 
 // メイン処理

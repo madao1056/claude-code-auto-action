@@ -11,34 +11,34 @@ export class ErrorDetector {
 
   async detectAllErrors(): Promise<ErrorInfo[]> {
     const errors: ErrorInfo[] = [];
-    
+
     // Run all error detection in parallel
     const [typeErrors, lintErrors, testErrors] = await Promise.all([
       this.detectTypeScriptErrors(),
       this.detectLintErrors(),
-      this.detectTestErrors()
+      this.detectTestErrors(),
     ]);
-    
+
     return [...typeErrors, ...lintErrors, ...testErrors];
   }
 
   async detectTypeScriptErrors(): Promise<ErrorInfo[]> {
     const result = await SafeExecUtil.execSafe('npx tsc --noEmit --pretty false', {
-      cwd: this.projectRoot
+      cwd: this.projectRoot,
     });
-    
+
     if (!result || !result.stdout) return [];
-    
+
     return this.parseTypeScriptErrors(result.stdout);
   }
 
   async detectLintErrors(): Promise<ErrorInfo[]> {
     const result = await SafeExecUtil.execSafe('npx eslint . --format json', {
-      cwd: this.projectRoot
+      cwd: this.projectRoot,
     });
-    
+
     if (!result || !result.stdout) return [];
-    
+
     try {
       const lintResults = JSON.parse(result.stdout);
       return this.parseLintResults(lintResults);
@@ -49,18 +49,18 @@ export class ErrorDetector {
 
   async detectTestErrors(): Promise<ErrorInfo[]> {
     const result = await SafeExecUtil.execSafe('npm test -- --json', {
-      cwd: this.projectRoot
+      cwd: this.projectRoot,
     });
-    
+
     if (!result || !result.stdout) return [];
-    
+
     return this.parseTestErrors(result.stdout);
   }
 
   private parseTypeScriptErrors(output: string): ErrorInfo[] {
     const errors: ErrorInfo[] = [];
     const lines = output.split('\n');
-    
+
     for (const line of lines) {
       const match = line.match(/^(.+)\((\d+),(\d+)\): error TS(\d+): (.+)$/);
       if (match) {
@@ -72,17 +72,17 @@ export class ErrorDetector {
           column: parseInt(columnStr),
           message,
           code: `TS${code}`,
-          severity: 'error'
+          severity: 'error',
         });
       }
     }
-    
+
     return errors;
   }
 
   private parseLintResults(results: any[]): ErrorInfo[] {
     const errors: ErrorInfo[] = [];
-    
+
     for (const fileResult of results) {
       for (const message of fileResult.messages || []) {
         errors.push({
@@ -92,17 +92,17 @@ export class ErrorDetector {
           column: message.column,
           message: message.message,
           code: message.ruleId,
-          severity: message.severity === 2 ? 'error' : 'warning'
+          severity: message.severity === 2 ? 'error' : 'warning',
         });
       }
     }
-    
+
     return errors;
   }
 
   private parseTestErrors(output: string): ErrorInfo[] {
     const errors: ErrorInfo[] = [];
-    
+
     try {
       const testResult = JSON.parse(output);
       if (testResult.testResults) {
@@ -112,7 +112,7 @@ export class ErrorDetector {
               type: 'test',
               file: suite.name,
               message: suite.message || 'Test failed',
-              severity: 'error'
+              severity: 'error',
             });
           }
         }
@@ -124,11 +124,11 @@ export class ErrorDetector {
           type: 'test',
           file: 'unknown',
           message: 'Test suite failed',
-          severity: 'error'
+          severity: 'error',
         });
       }
     }
-    
+
     return errors;
   }
 }

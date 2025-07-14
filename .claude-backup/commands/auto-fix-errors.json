@@ -5,13 +5,7 @@
     "on_error": true,
     "on_save": false,
     "manual": true,
-    "patterns": [
-      "npm run build",
-      "npm run lint",
-      "npm run typecheck",
-      "tsc",
-      "eslint"
-    ]
+    "patterns": ["npm run build", "npm run lint", "npm run typecheck", "tsc", "eslint"]
   },
   "actions": [
     {

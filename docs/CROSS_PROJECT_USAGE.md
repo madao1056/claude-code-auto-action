@@ -53,12 +53,15 @@ $CLAUDE_AUTO_ACTION_HOME/scripts/claude-auto.sh watch
   "claude.configPath": "/Users/hashiguchimasaki/project/claude-code-auto-action/.claude/settings.json",
   "claude.permissionsPath": "/Users/hashiguchimasaki/project/claude-code-auto-action/.claude/permissions.json",
   "claude.scriptsPath": "/Users/hashiguchimasaki/project/claude-code-auto-action/scripts",
-  
+
   // タスク自動実行
   "task.autoDetect": "on",
   "terminal.integrated.automationProfile.osx": {
     "path": "/bin/zsh",
-    "args": ["-c", "source /Users/hashiguchimasaki/project/claude-code-auto-action/scripts/setup-project.sh --link"]
+    "args": [
+      "-c",
+      "source /Users/hashiguchimasaki/project/claude-code-auto-action/scripts/setup-project.sh --link"
+    ]
   }
 }
 ```
@@ -139,6 +142,7 @@ vi .claude/settings.json
 ## トラブルシューティング
 
 ### パスが見つからない場合
+
 ```bash
 # 絶対パスを確認
 echo $CLAUDE_AUTO_ACTION_HOME
@@ -146,12 +150,14 @@ realpath /Users/hashiguchimasaki/project/claude-code-auto-action
 ```
 
 ### 権限エラー
+
 ```bash
 # 実行権限を付与
 chmod +x /Users/hashiguchimasaki/project/claude-code-auto-action/scripts/*.sh
 ```
 
 ### 設定が反映されない
+
 ```bash
 # キャッシュをクリア
 rm -rf ~/.claude/cache

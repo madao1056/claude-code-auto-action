@@ -81,14 +81,14 @@ export class ParallelProcessController extends EventEmitter {
     this.orchestrator = orchestrator;
     this.communicationHub = communicationHub;
     this.reportingSystem = reportingSystem;
-    
+
     this.resourceLimits = {
       max_concurrent_tasks: 50,
       max_memory_per_process: 2048,
       max_cpu_percentage: 80,
       max_execution_time: 3600,
       max_processes_per_pool: 10,
-      ...limits
+      ...limits,
     };
 
     this.resourceMonitor = new ResourceMonitor(this.resourceLimits);
@@ -108,8 +108,8 @@ export class ParallelProcessController extends EventEmitter {
         scale_down_threshold: 30,
         scale_up_cooldown: 300000, // 5 minutes
         scale_down_cooldown: 600000, // 10 minutes
-        auto_scaling_enabled: true
-      }
+        auto_scaling_enabled: true,
+      },
     });
 
     // Manager Pool - for coordination and oversight tasks
@@ -123,8 +123,8 @@ export class ParallelProcessController extends EventEmitter {
         scale_down_threshold: 25,
         scale_up_cooldown: 180000, // 3 minutes
         scale_down_cooldown: 300000, // 5 minutes
-        auto_scaling_enabled: true
-      }
+        auto_scaling_enabled: true,
+      },
     });
 
     // Worker Pool - for implementation and execution tasks
@@ -138,8 +138,8 @@ export class ParallelProcessController extends EventEmitter {
         scale_down_threshold: 20,
         scale_up_cooldown: 120000, // 2 minutes
         scale_down_cooldown: 240000, // 4 minutes
-        auto_scaling_enabled: true
-      }
+        auto_scaling_enabled: true,
+      },
     });
 
     // Utility Pool - for background tasks and monitoring
@@ -153,16 +153,19 @@ export class ParallelProcessController extends EventEmitter {
         scale_down_threshold: 15,
         scale_up_cooldown: 60000, // 1 minute
         scale_down_cooldown: 180000, // 3 minutes
-        auto_scaling_enabled: true
-      }
+        auto_scaling_enabled: true,
+      },
     });
   }
 
-  private createProcessPool(poolId: string, config: {
-    type: ProcessPool['type'];
-    capacity: number;
-    scaling_policy: ScalingPolicy;
-  }): void {
+  private createProcessPool(
+    poolId: string,
+    config: {
+      type: ProcessPool['type'];
+      capacity: number;
+      scaling_policy: ScalingPolicy;
+    }
+  ): void {
     const pool: ProcessPool = {
       id: poolId,
       type: config.type,
@@ -175,9 +178,9 @@ export class ParallelProcessController extends EventEmitter {
           total_requests: 0,
           successful_assignments: 0,
           failed_assignments: 0,
-          average_response_time: 0
-        }
-      }
+          average_response_time: 0,
+        },
+      },
     };
 
     this.processPools.set(poolId, pool);
@@ -188,7 +191,9 @@ export class ParallelProcessController extends EventEmitter {
       this.createProcess(poolId);
     }
 
-    console.log(`Created process pool: ${poolId} with ${config.scaling_policy.min_processes} initial processes`);
+    console.log(
+      `Created process pool: ${poolId} with ${config.scaling_policy.min_processes} initial processes`
+    );
   }
 
   private async createProcess(poolId: string): Promise<string | null> {
@@ -227,20 +232,28 @@ export class ParallelProcessController extends EventEmitter {
 
   private async createClaudeInstance(processId: string, poolId: string): Promise<ProcessInfo> {
     // Create a new Claude Code process instance
-    const claudeProcess = spawn('claude-code', [
-      '--agent-mode',
-      '--agent-id', processId,
-      '--pool-id', poolId,
-      '--communication-hub', `ws://localhost:8765`,
-      '--config', JSON.stringify(this.getClaudeConfig(poolId))
-    ], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      env: {
-        ...process.env,
-        CLAUDE_AGENT_ID: processId,
-        CLAUDE_POOL_ID: poolId
+    const claudeProcess = spawn(
+      'claude-code',
+      [
+        '--agent-mode',
+        '--agent-id',
+        processId,
+        '--pool-id',
+        poolId,
+        '--communication-hub',
+        `ws://localhost:8765`,
+        '--config',
+        JSON.stringify(this.getClaudeConfig(poolId)),
+      ],
+      {
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: {
+          ...process.env,
+          CLAUDE_AGENT_ID: processId,
+          CLAUDE_POOL_ID: poolId,
+        },
       }
-    });
+    );
 
     const processInfo: ProcessInfo = {
       id: processId,
@@ -254,8 +267,8 @@ export class ParallelProcessController extends EventEmitter {
         average_duration: 0,
         error_rate: 0,
         cpu_usage: 0,
-        memory_usage: 0
-      }
+        memory_usage: 0,
+      },
     };
 
     // Set up process event handlers
@@ -282,8 +295,8 @@ export class ParallelProcessController extends EventEmitter {
       workerData: {
         processId,
         poolId,
-        config: this.getWorkerConfig(poolId)
-      }
+        config: this.getWorkerConfig(poolId),
+      },
     });
 
     const processInfo: ProcessInfo = {
@@ -297,8 +310,8 @@ export class ParallelProcessController extends EventEmitter {
         average_duration: 0,
         error_rate: 0,
         cpu_usage: 0,
-        memory_usage: 0
-      }
+        memory_usage: 0,
+      },
     };
 
     worker.on('message', (message) => {
@@ -322,8 +335,8 @@ export class ParallelProcessController extends EventEmitter {
       env: {
         ...process.env,
         PROCESS_ID: processId,
-        POOL_ID: poolId
-      }
+        POOL_ID: poolId,
+      },
     });
 
     const processInfo: ProcessInfo = {
@@ -338,8 +351,8 @@ export class ParallelProcessController extends EventEmitter {
         average_duration: 0,
         error_rate: 0,
         cpu_usage: 0,
-        memory_usage: 0
-      }
+        memory_usage: 0,
+      },
     };
 
     child.stdout?.on('data', (data) => {
@@ -358,11 +371,14 @@ export class ParallelProcessController extends EventEmitter {
     return processInfo;
   }
 
-  async assignTaskToProcess(task: Task, requiredCapabilities: string[] = []): Promise<string | null> {
+  async assignTaskToProcess(
+    task: Task,
+    requiredCapabilities: string[] = []
+  ): Promise<string | null> {
     // Determine the appropriate pool based on task type and requirements
     const poolId = this.selectAppropriatePool(task, requiredCapabilities);
     const pool = this.processPools.get(poolId);
-    
+
     if (!pool) {
       console.error(`Pool not found: ${poolId}`);
       return null;
@@ -370,12 +386,12 @@ export class ParallelProcessController extends EventEmitter {
 
     // Find the best available process using load balancing
     const processId = await this.selectBestProcess(pool, task);
-    
+
     if (!processId) {
       // Add to queue if no process available
       pool.queue.push(task.id);
       this.emit('task_queued', { taskId: task.id, poolId });
-      
+
       // Try to scale up if auto-scaling is enabled
       await this.tryScaleUp(poolId);
       return null;
@@ -386,14 +402,14 @@ export class ParallelProcessController extends EventEmitter {
     const processInfo = pool.active_processes.get(processId)!;
     processInfo.status = 'busy';
     processInfo.current_task = task.id;
-    
+
     // Send task to process
     await this.sendTaskToProcess(processId, task);
-    
+
     // Update metrics
     pool.load_balancer.metrics.total_requests++;
     pool.load_balancer.metrics.successful_assignments++;
-    
+
     this.emit('task_assigned', { taskId: task.id, processId, poolId });
     return processId;
   }
@@ -403,18 +419,19 @@ export class ParallelProcessController extends EventEmitter {
     if (task.type === 'analysis' || requiredCapabilities.includes('architecture_design')) {
       return 'claude_architects';
     }
-    
+
     if (task.priority === 'high' || requiredCapabilities.includes('task_coordination')) {
       return 'claude_managers';
     }
-    
+
     return 'claude_workers';
   }
 
   private async selectBestProcess(pool: ProcessPool, task: Task): Promise<string | null> {
-    const availableProcesses = Array.from(pool.active_processes.values())
-      .filter(p => p.status === 'idle');
-    
+    const availableProcesses = Array.from(pool.active_processes.values()).filter(
+      (p) => p.status === 'idle'
+    );
+
     if (availableProcesses.length === 0) {
       return null;
     }
@@ -440,7 +457,7 @@ export class ParallelProcessController extends EventEmitter {
 
   private selectLeastLoaded(processes: ProcessInfo[]): string {
     // Select process with lowest CPU/memory usage
-    return processes.reduce((best, current) => 
+    return processes.reduce((best, current) =>
       current.performance_metrics.cpu_usage < best.performance_metrics.cpu_usage ? current : best
     ).id;
   }
@@ -462,13 +479,13 @@ export class ParallelProcessController extends EventEmitter {
 
   private calculatePerformanceScore(process: ProcessInfo, task: Task): number {
     const metrics = process.performance_metrics;
-    
+
     // Weighted score based on multiple factors
     const speedScore = metrics.average_duration > 0 ? 1 / metrics.average_duration : 1;
     const reliabilityScore = 1 - metrics.error_rate;
-    const efficiencyScore = 1 - (metrics.cpu_usage / 100);
-    
-    return (speedScore * 0.4) + (reliabilityScore * 0.4) + (efficiencyScore * 0.2);
+    const efficiencyScore = 1 - metrics.cpu_usage / 100;
+
+    return speedScore * 0.4 + reliabilityScore * 0.4 + efficiencyScore * 0.2;
   }
 
   private async sendTaskToProcess(processId: string, task: Task): Promise<void> {
@@ -480,7 +497,7 @@ export class ParallelProcessController extends EventEmitter {
     const taskMessage = {
       type: 'task_assignment',
       task: task,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     if (processInfo.worker) {
@@ -495,7 +512,7 @@ export class ParallelProcessController extends EventEmitter {
   private async tryScaleUp(poolId: string): Promise<void> {
     const pool = this.processPools.get(poolId);
     const policy = this.scalingPolicies.get(poolId);
-    
+
     if (!pool || !policy || !policy.auto_scaling_enabled) {
       return;
     }
@@ -503,10 +520,10 @@ export class ParallelProcessController extends EventEmitter {
     const currentLoad = this.calculatePoolLoad(pool);
     const currentProcessCount = pool.active_processes.size;
 
-    if (currentLoad >= policy.scale_up_threshold && 
-        currentProcessCount < policy.max_processes) {
-      
-      console.log(`Scaling up pool ${poolId}: load=${currentLoad}%, processes=${currentProcessCount}`);
+    if (currentLoad >= policy.scale_up_threshold && currentProcessCount < policy.max_processes) {
+      console.log(
+        `Scaling up pool ${poolId}: load=${currentLoad}%, processes=${currentProcessCount}`
+      );
       await this.createProcess(poolId);
     }
   }
@@ -514,7 +531,7 @@ export class ParallelProcessController extends EventEmitter {
   private async tryScaleDown(poolId: string): Promise<void> {
     const pool = this.processPools.get(poolId);
     const policy = this.scalingPolicies.get(poolId);
-    
+
     if (!pool || !policy || !policy.auto_scaling_enabled) {
       return;
     }
@@ -522,19 +539,20 @@ export class ParallelProcessController extends EventEmitter {
     const currentLoad = this.calculatePoolLoad(pool);
     const currentProcessCount = pool.active_processes.size;
 
-    if (currentLoad <= policy.scale_down_threshold && 
-        currentProcessCount > policy.min_processes) {
-      
-      console.log(`Scaling down pool ${poolId}: load=${currentLoad}%, processes=${currentProcessCount}`);
+    if (currentLoad <= policy.scale_down_threshold && currentProcessCount > policy.min_processes) {
+      console.log(
+        `Scaling down pool ${poolId}: load=${currentLoad}%, processes=${currentProcessCount}`
+      );
       await this.terminateIdleProcess(poolId);
     }
   }
 
   private calculatePoolLoad(pool: ProcessPool): number {
     const totalProcesses = pool.active_processes.size;
-    const busyProcesses = Array.from(pool.active_processes.values())
-      .filter(p => p.status === 'busy').length;
-    
+    const busyProcesses = Array.from(pool.active_processes.values()).filter(
+      (p) => p.status === 'busy'
+    ).length;
+
     return totalProcesses > 0 ? (busyProcesses / totalProcesses) * 100 : 0;
   }
 
@@ -542,13 +560,14 @@ export class ParallelProcessController extends EventEmitter {
     const pool = this.processPools.get(poolId);
     if (!pool) return;
 
-    const idleProcesses = Array.from(pool.active_processes.values())
-      .filter(p => p.status === 'idle');
-    
+    const idleProcesses = Array.from(pool.active_processes.values()).filter(
+      (p) => p.status === 'idle'
+    );
+
     if (idleProcesses.length === 0) return;
 
     // Terminate the oldest idle process
-    const processToTerminate = idleProcesses.reduce((oldest, current) => 
+    const processToTerminate = idleProcesses.reduce((oldest, current) =>
       current.start_time < oldest.start_time ? current : oldest
     );
 
@@ -601,9 +620,10 @@ export class ParallelProcessController extends EventEmitter {
   private processQueues(): void {
     for (const [poolId, pool] of this.processPools) {
       while (pool.queue.length > 0) {
-        const idleProcesses = Array.from(pool.active_processes.values())
-          .filter(p => p.status === 'idle');
-        
+        const idleProcesses = Array.from(pool.active_processes.values()).filter(
+          (p) => p.status === 'idle'
+        );
+
         if (idleProcesses.length === 0) break;
 
         const taskId = pool.queue.shift()!;
@@ -622,10 +642,7 @@ export class ParallelProcessController extends EventEmitter {
 
   private updateMetrics(): void {
     const metrics = this.collectSystemMetrics();
-    this.reportingSystem.reportAgentStatus(
-      this.createSystemAgent(),
-      metrics
-    );
+    this.reportingSystem.reportAgentStatus(this.createSystemAgent(), metrics);
   }
 
   private collectSystemMetrics(): any {
@@ -637,7 +654,7 @@ export class ParallelProcessController extends EventEmitter {
       quality_score: 0.85,
       resource_utilization: this.calculateOverallResourceUtilization(),
       error_rate: this.calculateOverallErrorRate(),
-      throughput: this.calculateOverallThroughput()
+      throughput: this.calculateOverallThroughput(),
     };
   }
 
@@ -665,7 +682,7 @@ export class ParallelProcessController extends EventEmitter {
       last_heartbeat: new Date(),
       capabilities: ['process_management', 'load_balancing', 'resource_monitoring'],
       current_tasks: [],
-      load: this.calculateSystemLoad()
+      load: this.calculateSystemLoad(),
     };
   }
 
@@ -675,8 +692,9 @@ export class ParallelProcessController extends EventEmitter {
 
     for (const pool of this.processPools.values()) {
       totalProcesses += pool.active_processes.size;
-      busyProcesses += Array.from(pool.active_processes.values())
-        .filter(p => p.status === 'busy').length;
+      busyProcesses += Array.from(pool.active_processes.values()).filter(
+        (p) => p.status === 'busy'
+      ).length;
     }
 
     return totalProcesses > 0 ? busyProcesses / totalProcesses : 0;
@@ -722,7 +740,7 @@ export class ParallelProcessController extends EventEmitter {
     return {
       model: poolId.includes('architect') ? 'opus' : 'sonnet',
       temperature: poolId.includes('architect') ? 0.7 : 0.5,
-      max_tokens: poolId.includes('architect') ? 4000 : 2000
+      max_tokens: poolId.includes('architect') ? 4000 : 2000,
     };
   }
 
@@ -730,14 +748,14 @@ export class ParallelProcessController extends EventEmitter {
     // Return worker thread configuration
     return {
       pool_type: poolId,
-      resource_limits: this.resourceLimits
+      resource_limits: this.resourceLimits,
     };
   }
 
   // Public API methods
   getSystemStatus(): any {
     const poolStatuses = new Map();
-    
+
     for (const [poolId, pool] of this.processPools) {
       poolStatuses.set(poolId, {
         type: pool.type,
@@ -745,19 +763,23 @@ export class ParallelProcessController extends EventEmitter {
         active_processes: pool.active_processes.size,
         queue_size: pool.queue.length,
         load_percentage: this.calculatePoolLoad(pool),
-        metrics: pool.load_balancer.metrics
+        metrics: pool.load_balancer.metrics,
       });
     }
 
     return {
       total_pools: this.processPools.size,
-      total_processes: Array.from(this.processPools.values())
-        .reduce((sum, pool) => sum + pool.active_processes.size, 0),
-      total_queued_tasks: Array.from(this.processPools.values())
-        .reduce((sum, pool) => sum + pool.queue.length, 0),
+      total_processes: Array.from(this.processPools.values()).reduce(
+        (sum, pool) => sum + pool.active_processes.size,
+        0
+      ),
+      total_queued_tasks: Array.from(this.processPools.values()).reduce(
+        (sum, pool) => sum + pool.queue.length,
+        0
+      ),
       pool_statuses: Object.fromEntries(poolStatuses),
       resource_limits: this.resourceLimits,
-      system_metrics: this.collectSystemMetrics()
+      system_metrics: this.collectSystemMetrics(),
     };
   }
 

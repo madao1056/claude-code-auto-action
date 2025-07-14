@@ -35,12 +35,14 @@ The Claude Code Auto Action system is a sophisticated multi-agent automation fra
 **Responsibility**: Central coordination of all agents and high-level task management.
 
 **Key Features**:
+
 - Agent lifecycle management
 - Task creation and assignment
 - Project analysis and decomposition
 - Session management and state tracking
 
 **Agent Hierarchy**:
+
 - **Architect Agents**: High-level design, architecture decisions, complex reasoning
 - **Manager Agents**: Task coordination, quality oversight, resource allocation
 - **Worker Agents**: Implementation, testing, documentation, specific tasks
@@ -50,12 +52,14 @@ The Claude Code Auto Action system is a sophisticated multi-agent automation fra
 **Responsibility**: Intelligent task distribution and load balancing across agents.
 
 **Key Features**:
+
 - Template-based task generation
 - Capability-based agent selection
 - Performance-aware load balancing
 - Dynamic priority adjustment
 
 **Distribution Strategies**:
+
 - `capability_based`: Match tasks to agent capabilities
 - `load_balanced`: Distribute based on current load
 - `performance_based`: Use historical performance data
@@ -66,12 +70,14 @@ The Claude Code Auto Action system is a sophisticated multi-agent automation fra
 **Responsibility**: Real-time communication between system components and agents.
 
 **Key Features**:
+
 - WebSocket-based messaging
 - Heartbeat monitoring
 - Message routing and queuing
 - Agent registration and discovery
 
 **Message Types**:
+
 - Task assignment and updates
 - Status reports and coordination
 - Resource requests and responses
@@ -82,12 +88,14 @@ The Claude Code Auto Action system is a sophisticated multi-agent automation fra
 **Responsibility**: High-level command processing and execution strategies.
 
 **Key Features**:
+
 - Command type classification
 - Execution strategy management
 - Quality gate enforcement
 - Progress tracking and reporting
 
 **Command Types**:
+
 - `ANALYZE_PROJECT`: Comprehensive project analysis
 - `IMPLEMENT_FEATURE`: Feature development workflow
 - `FIX_ISSUES`: Bug fixing and troubleshooting
@@ -99,12 +107,14 @@ The Claude Code Auto Action system is a sophisticated multi-agent automation fra
 **Responsibility**: Comprehensive reporting, metrics collection, and dashboard updates.
 
 **Key Features**:
+
 - Real-time progress tracking
 - Performance metrics aggregation
 - Issue detection and escalation
 - Dashboard data management
 
 **Report Types**:
+
 - Task-level progress reports
 - Agent performance metrics
 - Command execution summaries
@@ -115,12 +125,14 @@ The Claude Code Auto Action system is a sophisticated multi-agent automation fra
 **Responsibility**: Process pool management, auto-scaling, and resource optimization.
 
 **Key Features**:
+
 - Dynamic process pool management
 - Auto-scaling based on load
 - Resource monitoring and limits
 - Load balancing across pools
 
 **Process Pools**:
+
 - **Claude Architects**: 1-3 instances for complex reasoning
 - **Claude Managers**: 2-5 instances for coordination
 - **Claude Workers**: 3-10 instances for implementation
@@ -210,7 +222,7 @@ interface SystemConfig {
       "system_prompts": ["deep-thinking", "architecture-first"]
     },
     "managers": {
-      "model": "opus", 
+      "model": "opus",
       "temperature": 0.6,
       "max_tokens": 3000,
       "system_prompts": ["step-by-step", "context-aware"]
@@ -230,6 +242,7 @@ interface SystemConfig {
 ### Auto-Scaling Strategy
 
 The system automatically scales agent pools based on:
+
 - **Load thresholds**: Scale up when load exceeds 70-80%
 - **Performance metrics**: Scale based on task completion rates
 - **Resource utilization**: Monitor CPU, memory, and network usage
@@ -248,6 +261,7 @@ The system automatically scales agent pools based on:
 ### Quality Gates
 
 Each command type has defined quality gates:
+
 - **Analysis completeness**: Ensure thorough project analysis
 - **Code review**: Automated code quality checks
 - **Test coverage**: Minimum coverage requirements
@@ -282,6 +296,7 @@ Each command type has defined quality gates:
 ### Claude Code Integration
 
 The system integrates with Claude Code through:
+
 - **CLI spawning**: Launch Claude Code instances as child processes
 - **Configuration injection**: Pass agent-specific configurations
 - **Communication protocols**: WebSocket-based messaging

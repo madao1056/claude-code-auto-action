@@ -3,6 +3,7 @@
 ## 🚀 開発作業の完全自動化
 
 ### 1. コードを書いてもらう
+
 ```bash
 # 新しい機能を実装
 cc-yolo "ユーザー認証機能を実装して。JWT使用、リフレッシュトークン対応"
@@ -15,6 +16,7 @@ cc-yolo "メモリリークを見つけて修正して"
 ```
 
 ### 2. システム全体を自動生成
+
 ```bash
 # タスク管理アプリを30分で構築
 cc-create -r "タスク管理システムを作って。リアルタイム同期、複数ユーザー対応、通知機能付き"
@@ -34,6 +36,7 @@ cc-create -r "タスク管理システムを作って。リアルタイム同期
 ## 🔧 エラーとバグの自動修正
 
 ### 1. ビルドエラーを自動解決
+
 ```bash
 # TypeScriptのエラーを全部修正
 scripts/auto-fix-errors.sh
@@ -46,6 +49,7 @@ scripts/auto-fix-errors.sh
 ```
 
 ### 2. テストの自動修正と生成
+
 ```bash
 # 失敗しているテストを修正
 cc-yolo "テストが失敗してるから直して"
@@ -57,6 +61,7 @@ claude-code generate-tests --coverage-threshold 90
 ## 📦 依存関係の完全管理
 
 ### 1. パッケージの自動管理
+
 ```bash
 # 不足しているパッケージを検出してインストール
 scripts/auto-deps.sh auto
@@ -69,6 +74,7 @@ scripts/auto-deps.sh auto
 ```
 
 ### 2. セキュリティ脆弱性の自動修正
+
 ```bash
 # 脆弱性をスキャンして修正
 claude-code auto-deps fix
@@ -80,6 +86,7 @@ claude-code auto-deps fix
 ## 📝 ドキュメントの自動生成
 
 ### 1. コードからドキュメントを生成
+
 ```bash
 # API仕様書を自動生成
 claude-code generate-docs
@@ -92,6 +99,7 @@ claude-code generate-docs
 ```
 
 ### 2. READMEとChangelogの自動更新
+
 ```bash
 # READMEを最新の状態に更新
 cc-yolo "READMEを現在のコードに合わせて更新して"
@@ -103,6 +111,7 @@ claude-code version --auto
 ## 🎯 コード品質の自動改善
 
 ### 1. リファクタリング提案と実行
+
 ```bash
 # コードの問題を検出
 claude-code refactor analyze
@@ -119,6 +128,7 @@ claude-code refactor apply
 ```
 
 ### 2. コーディングスタイルの統一
+
 ```bash
 # プロジェクト全体のスタイルを統一
 cc-yolo "コーディングスタイルを統一して。ESLint設定も作成"
@@ -127,6 +137,7 @@ cc-yolo "コーディングスタイルを統一して。ESLint設定も作成"
 ## 🤖 AI学習による個人最適化
 
 ### 1. あなたのコーディングパターンを学習
+
 ```bash
 # 学習統計を確認
 claude-code learning stats
@@ -139,6 +150,7 @@ claude-code learning stats
 ```
 
 ### 2. チーム規約の自動適用
+
 ```bash
 # チームの規約をインポート
 claude-code learning import team-conventions.json
@@ -152,6 +164,7 @@ claude-code learning import team-conventions.json
 ## 🚨 監視とアラート
 
 ### 1. パフォーマンス監視
+
 ```bash
 # 監視を開始
 claude-code monitor start
@@ -164,6 +177,7 @@ claude-code monitor start
 ```
 
 ### 2. セキュリティ監視
+
 ```bash
 # リアルタイムでセキュリティをチェック
 # - 新しい脆弱性の検出
@@ -175,6 +189,7 @@ claude-code monitor start
 ## 🔄 Git操作の自動化
 
 ### 1. インテリジェントなコミット
+
 ```bash
 # AIが適切なコミットメッセージを生成
 scripts/claude-auto.sh commit
@@ -187,6 +202,7 @@ scripts/claude-auto.sh commit
 ```
 
 ### 2. PR作成とレビュー
+
 ```bash
 # PRを自動作成
 claude-code create-pr --auto-review
@@ -201,6 +217,7 @@ claude-code create-pr --auto-review
 ## 🐳 環境構築の完全自動化
 
 ### 1. Docker環境を自動生成
+
 ```bash
 # プロジェクトを分析してDocker化
 claude-code setup-env --auto-detect
@@ -213,6 +230,7 @@ claude-code setup-env --auto-detect
 ```
 
 ### 2. CI/CDパイプラインの自動構築
+
 ```bash
 # GitHub Actionsを自動設定
 cc-yolo "GitHub ActionsでCI/CDを設定して。テスト、ビルド、デプロイまで"
@@ -221,6 +239,7 @@ cc-yolo "GitHub ActionsでCI/CDを設定して。テスト、ビルド、デプ�
 ## 💡 インテリジェントな提案
 
 ### 1. コード最適化の提案
+
 ```bash
 # パフォーマンス改善提案
 cc-yolo "このコードのパフォーマンスを改善する方法を教えて"
@@ -233,6 +252,7 @@ cc-yolo "このコードのパフォーマンスを改善する方法を教え�
 ```
 
 ### 2. アーキテクチャ改善
+
 ```bash
 # 現在の構造を分析
 cc-architect analyze
@@ -244,6 +264,7 @@ cc-architect upgrade -r "マイクロサービス化して水平スケーリン�
 ## 🎮 対話的な開発支援
 
 ### 1. ペアプログラミング
+
 ```bash
 # Claudeとペアプロ
 cc-yolo "一緒にこの機能を実装しよう。まず設計から相談したい"
@@ -256,6 +277,7 @@ cc-yolo "一緒にこの機能を実装しよう。まず設計から相談し�
 ```
 
 ### 2. デバッグ支援
+
 ```bash
 # バグの原因を一緒に探す
 cc-yolo "このエラーが解決できない。一緒にデバッグして"
@@ -270,6 +292,7 @@ cc-yolo "このエラーが解決できない。一緒にデバッグして"
 ## 🌟 特殊な使い方
 
 ### 1. レガシーコードの現代化
+
 ```bash
 # jQuery → React移行
 cc-yolo "このjQueryコードをReactに書き換えて"
@@ -279,6 +302,7 @@ cc-architect upgrade -r "全体をTypeScriptに移行。型定義も追加"
 ```
 
 ### 2. 多言語対応
+
 ```bash
 # i18n対応を追加
 cc-yolo "国際化対応を追加。日本語、英語、中国語をサポート"
@@ -290,6 +314,7 @@ cc-yolo "国際化対応を追加。日本語、英語、中国語をサポー�
 ```
 
 ### 3. アクセシビリティ改善
+
 ```bash
 # WCAG 2.1 AA準拠に
 cc-yolo "アクセシビリティを改善。スクリーンリーダー対応も"
@@ -298,6 +323,7 @@ cc-yolo "アクセシビリティを改善。スクリーンリーダー対応�
 ## 🔥 上級者向け機能
 
 ### 1. カスタムコマンドの作成
+
 ```json
 // .claude/commands/my-command.json
 {
@@ -313,12 +339,14 @@ cc-yolo "アクセシビリティを改善。スクリーンリーダー対応�
 ```
 
 ### 2. ワークフローの自動化
+
 ```bash
 # 複雑なワークフローを定義
 cc-yolo "朝9時に自動でテストを実行、問題があればSlackに通知するワークフローを作って"
 ```
 
 ### 3. AIモデルの使い分け
+
 ```bash
 # 設計はOpus、実装はSonnetで高速化
 claude-code config set planningModel opus
@@ -330,17 +358,20 @@ claude-code config set implementationModel sonnet
 ## 📈 生産性向上の実例
 
 ### Before（手動作業）
+
 1. エラーを見つける → 5分
 2. 原因を調査 → 15分
 3. 修正方法を検討 → 10分
 4. コードを修正 → 20分
 5. テストを書く → 30分
-**合計: 80分**
+   **合計: 80分**
 
 ### After（Claude Code Auto Action）
+
 ```bash
 cc-yolo "エラーを修正してテストも追加して"
 ```
+
 **合計: 5分** 🚀
 
 ## まとめ

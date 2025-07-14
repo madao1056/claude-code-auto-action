@@ -5,6 +5,7 @@
 ### 日次タスク
 
 #### 1. ログの確認
+
 ```bash
 # エラーログの確認
 tail -f .claude/logs/error.log
@@ -17,6 +18,7 @@ tail -f .claude/logs/learning.log
 ```
 
 #### 2. システム状態の確認
+
 ```bash
 # 全体的な状態確認
 claude-code system-status
@@ -31,6 +33,7 @@ claude-code learning stats
 ### 週次タスク
 
 #### 1. パフォーマンス最適化
+
 ```bash
 # 学習データの最適化
 claude-code optimize-learning
@@ -43,6 +46,7 @@ scripts/auto-deps.sh clean
 ```
 
 #### 2. セキュリティチェック
+
 ```bash
 # 脆弱性スキャン
 npm audit
@@ -57,6 +61,7 @@ cat .claude/permissions.json | jq .
 ### 月次タスク
 
 #### 1. データのバックアップ
+
 ```bash
 # 学習データのバックアップ
 tar -czf backup-learning-$(date +%Y%m%d).tar.gz .claude/learning/
@@ -69,6 +74,7 @@ tar -czf backup-metrics-$(date +%Y%m%d).tar.gz .claude/metrics/
 ```
 
 #### 2. ストレージの最適化
+
 ```bash
 # 古いログの削除
 find .claude/logs -name "*.log" -mtime +30 -delete
@@ -85,6 +91,7 @@ rm -rf .claude/tmp/*
 ### 問題: 自動修正が無限ループする
 
 #### 診断
+
 ```bash
 # 修正履歴を確認
 cat .claude/fix-history.json | jq '.[-10:]'
@@ -94,6 +101,7 @@ cat .claude/settings.json | jq '.automation.errorFix'
 ```
 
 #### 解決策
+
 ```bash
 # 修正履歴をクリア
 rm -f .claude/fix-history.json
@@ -108,6 +116,7 @@ claude-code config set automation.errorFix.enabled false
 ### 問題: メモリ使用量が高い
 
 #### 診断
+
 ```bash
 # プロセスの確認
 ps aux | grep node | grep claude
@@ -117,6 +126,7 @@ node -e "console.log(process.memoryUsage())"
 ```
 
 #### 解決策
+
 ```bash
 # 監視を軽量モードに
 claude-code config set monitoring.lightweight true
@@ -131,6 +141,7 @@ claude-code restart-services
 ### 問題: API使用料が高い
 
 #### 診断
+
 ```bash
 # 本日の使用量
 claude-code cost --today
@@ -140,6 +151,7 @@ claude-code cost --breakdown
 ```
 
 #### 解決策
+
 ```bash
 # モデルをSonnetに変更
 claude-code config set preferredModel sonnet
@@ -218,6 +230,7 @@ echo "======================================"
 ```
 
 ### 実行
+
 ```bash
 chmod +x scripts/health-check.sh
 ./scripts/health-check.sh
@@ -306,10 +319,14 @@ monitor.on('metric', (metric) => {
   if (metric.name === 'build_time' && metric.value > 300000) {
     console.error('⚠️ ビルド時間が長すぎます:', metric.value / 1000, '秒');
   }
-  
+
   // メモリ使用量が1GBを超えたらアラート
   if (metric.name === 'memory_usage' && metric.value > 1024 * 1024 * 1024) {
-    console.error('⚠️ メモリ使用量が高すぎます:', (metric.value / 1024 / 1024 / 1024).toFixed(2), 'GB');
+    console.error(
+      '⚠️ メモリ使用量が高すぎます:',
+      (metric.value / 1024 / 1024 / 1024).toFixed(2),
+      'GB'
+    );
   }
 });
 ```

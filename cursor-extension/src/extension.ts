@@ -13,37 +13,37 @@ import { createStatusBar } from './statusBar';
  * @param {vscode.ExtensionContext} context - Extension context
  */
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Claude Code Integration is now active!');
+  console.log('Claude Code Integration is now active!');
 
-    // Initialize services
-    const services = initializeServices(context);
-    
-    // Register providers
-    registerProviders(services);
-    
-    // Register all commands
-    const commandDisposables = registerCommands(services, context);
-    
-    // Register file watchers
-    const watcherDisposables = registerFileWatchers(services);
-    
-    // Create status bar
-    const statusBar = createStatusBar(context);
-    
-    // Start context monitoring
-    const contextMonitor = startContextMonitoring(services.claudeService);
-    
-    // Handle save events
-    const saveHandler = registerSaveHandler(services.claudeService);
-    
-    // Add all disposables
-    context.subscriptions.push(
-        ...commandDisposables,
-        ...watcherDisposables,
-        statusBar,
-        contextMonitor,
-        saveHandler
-    );
+  // Initialize services
+  const services = initializeServices(context);
+
+  // Register providers
+  registerProviders(services);
+
+  // Register all commands
+  const commandDisposables = registerCommands(services, context);
+
+  // Register file watchers
+  const watcherDisposables = registerFileWatchers(services);
+
+  // Create status bar
+  const statusBar = createStatusBar(context);
+
+  // Start context monitoring
+  const contextMonitor = startContextMonitoring(services.claudeService);
+
+  // Handle save events
+  const saveHandler = registerSaveHandler(services.claudeService);
+
+  // Add all disposables
+  context.subscriptions.push(
+    ...commandDisposables,
+    ...watcherDisposables,
+    statusBar,
+    contextMonitor,
+    saveHandler
+  );
 }
 
 /**
@@ -52,23 +52,23 @@ export function activate(context: vscode.ExtensionContext) {
  * @returns {Object} Services object
  */
 function initializeServices(context: vscode.ExtensionContext) {
-    const claudeService = new ClaudeCodeService(context);
-    const taskProvider = new TaskProvider(claudeService);
-    const historyProvider = new HistoryProvider(claudeService);
-    const autoEditService = new AutoEditService();
+  const claudeService = new ClaudeCodeService(context);
+  const taskProvider = new TaskProvider(claudeService);
+  const historyProvider = new HistoryProvider(claudeService);
+  const autoEditService = new AutoEditService();
 
-    // Initialize YOLO mode if configured
-    const settings = getSettings();
-    if (settings.yoloMode) {
-        claudeService.enableYoloMode();
-    }
+  // Initialize YOLO mode if configured
+  const settings = getSettings();
+  if (settings.yoloMode) {
+    claudeService.enableYoloMode();
+  }
 
-    return {
-        claudeService,
-        taskProvider,
-        historyProvider,
-        autoEditService
-    };
+  return {
+    claudeService,
+    taskProvider,
+    historyProvider,
+    autoEditService,
+  };
 }
 
 /**
@@ -76,15 +76,12 @@ function initializeServices(context: vscode.ExtensionContext) {
  * @param {Object} services - Services object
  */
 function registerProviders(services: any) {
-    vscode.window.registerTreeDataProvider('claude.tasksView', services.taskProvider);
-    vscode.window.registerTreeDataProvider('claude.historyView', services.historyProvider);
-
-
-
+  vscode.window.registerTreeDataProvider('claude.tasksView', services.taskProvider);
+  vscode.window.registerTreeDataProvider('claude.historyView', services.historyProvider);
 }
 
 function getWebviewContent(explanation: string): string {
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -120,20 +117,20 @@ function getWebviewContent(explanation: string): string {
  * @returns {vscode.Disposable} Disposable for cleanup
  */
 function startContextMonitoring(claudeService: ClaudeCodeService): vscode.Disposable {
-    const interval = setInterval(async () => {
-        const usage = await claudeService.getContextUsage();
-        const settings = getSettings();
-        const threshold = settings.contextAutoCompactThreshold || 0.9;
-        
-        if (usage > threshold) {
-            vscode.window.showWarningMessage(
-                `Context usage at ${(usage * 100).toFixed(0)}%. Auto-compacting...`
-            );
-            await claudeService.compactContext('dot_points');
-        }
-    }, 60000); // Check every minute
-    
-    return { dispose: () => clearInterval(interval) };
+  const interval = setInterval(async () => {
+    const usage = await claudeService.getContextUsage();
+    const settings = getSettings();
+    const threshold = settings.contextAutoCompactThreshold || 0.9;
+
+    if (usage > threshold) {
+      vscode.window.showWarningMessage(
+        `Context usage at ${(usage * 100).toFixed(0)}%. Auto-compacting...`
+      );
+      await claudeService.compactContext('dot_points');
+    }
+  }, 60000); // Check every minute
+
+  return { dispose: () => clearInterval(interval) };
 }
 
 /**
@@ -142,27 +139,28 @@ function startContextMonitoring(claudeService: ClaudeCodeService): vscode.Dispos
  * @returns {vscode.Disposable} Disposable for cleanup
  */
 function registerSaveHandler(claudeService: ClaudeCodeService): vscode.Disposable {
-    return vscode.workspace.onDidSaveTextDocument(async (document) => {
-        const settings = getSettings();
-        
-        if (settings.autoCommit) {
-            // In YOLO mode, skip confirmation
-            if (settings.yoloMode) {
-                await vscode.commands.executeCommand('claude.autoCommit');
-            } else {
-                const shouldCommit = await vscode.window.showInformationMessage(
-                    'Would you like to commit these changes?',
-                    'Yes', 'No'
-                );
-                
-                if (shouldCommit === 'Yes') {
-                    await vscode.commands.executeCommand('claude.autoCommit');
-                }
-            }
+  return vscode.workspace.onDidSaveTextDocument(async (document) => {
+    const settings = getSettings();
+
+    if (settings.autoCommit) {
+      // In YOLO mode, skip confirmation
+      if (settings.yoloMode) {
+        await vscode.commands.executeCommand('claude.autoCommit');
+      } else {
+        const shouldCommit = await vscode.window.showInformationMessage(
+          'Would you like to commit these changes?',
+          'Yes',
+          'No'
+        );
+
+        if (shouldCommit === 'Yes') {
+          await vscode.commands.executeCommand('claude.autoCommit');
         }
-    });
+      }
+    }
+  });
 }
 
 export function deactivate() {
-    console.log('Claude Code Integration deactivated');
+  console.log('Claude Code Integration deactivated');
 }

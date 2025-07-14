@@ -15,7 +15,14 @@
       "Bash(bash -c \"npm run lint:fix\")",
       "Bash(bash -c \"npm run build\")",
       "Bash(git add:*)",
-      "Bash(bash -c \"git add -A\")"
+      "Bash(bash -c \"git add -A\")",
+      "Bash(bash -c \"git status --short\")",
+      "Bash(git commit:*)",
+      "Bash(/usr/bin/git commit -m \"fix: Claude Code設定ファイルの修正と整理\")",
+      "Bash(/usr/bin/git push origin master)",
+      "Bash(npm run format:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run compile:*)"
     ],
     "deny": []
   }

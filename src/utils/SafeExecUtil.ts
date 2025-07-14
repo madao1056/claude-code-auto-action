@@ -35,15 +35,12 @@ export class SafeExecUtil {
   /**
    * Execute a command and return raw result
    */
-  static async execSafe(
-    command: string,
-    options?: ExecOptions
-  ): Promise<ExecResult | null> {
+  static async execSafe(command: string, options?: ExecOptions): Promise<ExecResult | null> {
     try {
       const result = await execAsync(command, options);
       return {
         stdout: result.stdout.toString(),
-        stderr: result.stderr.toString()
+        stderr: result.stderr.toString(),
       };
     } catch (error) {
       console.error(`Command execution failed: ${command}`, error);
@@ -61,22 +58,22 @@ export class SafeExecUtil {
     retryDelay: number = 1000
   ): Promise<ExecResult> {
     let lastError: Error | null = null;
-    
+
     for (let i = 0; i < maxRetries; i++) {
       try {
         const result = await execAsync(command, options);
         return {
           stdout: result.stdout.toString(),
-          stderr: result.stderr.toString()
+          stderr: result.stderr.toString(),
         };
       } catch (error) {
         lastError = error as Error;
         if (i < maxRetries - 1) {
-          await new Promise(resolve => setTimeout(resolve, retryDelay));
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
         }
       }
     }
-    
+
     throw lastError || new Error(`Command failed after ${maxRetries} retries: ${command}`);
   }
 }

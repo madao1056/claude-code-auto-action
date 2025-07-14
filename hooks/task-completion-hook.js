@@ -42,33 +42,33 @@ class TaskCompletionHook {
           status: 'completed',
           name: event.taskName || 'タスク',
           count: event.taskCount || 1,
-          type: event.taskType || 'general'
+          type: event.taskType || 'general',
         });
         break;
-        
+
       case 'task_failed':
         await this.notify({
           status: 'failed',
           name: event.taskName || 'タスク',
-          type: event.taskType || 'general'
+          type: event.taskType || 'general',
         });
         break;
-        
+
       case 'task_warning':
         await this.notify({
           status: 'warning',
           name: event.message || '警告',
-          type: event.taskType || 'general'
+          type: event.taskType || 'general',
         });
         break;
-        
+
       case 'batch_completed':
         // 複数タスクの完了
         await this.notify({
           status: 'completed',
           name: 'バッチ処理',
           count: event.completedCount || event.tasks?.length || 1,
-          type: 'batch'
+          type: 'batch',
         });
         break;
     }
@@ -78,14 +78,14 @@ class TaskCompletionHook {
 // メイン処理
 async function main() {
   const hook = new TaskCompletionHook();
-  
+
   // 標準入力からイベントを受け取る
   let inputData = '';
-  
+
   process.stdin.on('data', (chunk) => {
     inputData += chunk;
   });
-  
+
   process.stdin.on('end', async () => {
     try {
       const event = JSON.parse(inputData);
@@ -95,7 +95,7 @@ async function main() {
       process.exit(1);
     }
   });
-  
+
   // タイムアウト設定（5秒）
   setTimeout(() => {
     console.error('Timeout waiting for input');

@@ -5,22 +5,26 @@ This directory contains shared utility modules used across the Claude Code Auto 
 ## Modules
 
 ### settingsLoader
+
 - `loadSettings(basePath)` - Load and merge default and local settings
 - `loadUserSettings()` - Load settings from user's home directory
 - `deepMerge(target, source)` - Deep merge two objects
 
 ### notification
+
 - `playSound(soundName)` - Play system sounds
 - `showNotification(options)` - Show desktop notifications
 - `notifyTaskCompletion(taskInfo, settings)` - Notify when tasks complete
 - `notifyConfirmationPrompt(settings)` - Notify for confirmation prompts
 
 ### commandBuilder
+
 - `buildCommand(baseCommand, options)` - Build Claude CLI commands with flags
 - `escapeShellArg(str)` - Escape strings for shell commands
 - `buildEnvironment(options)` - Build environment variables for Claude execution
 
 ### processManager
+
 - `spawnProcess(command, args, options)` - Spawn child processes with error handling
 - `waitForProcessReady(process, pattern, timeout)` - Wait for process initialization
 - `gracefulShutdown(process, options)` - Gracefully shutdown processes
@@ -29,11 +33,13 @@ This directory contains shared utility modules used across the Claude Code Auto 
 ## Usage
 
 ### CommonJS
+
 ```javascript
 const { loadSettings, playSound, buildCommand } = require('../utils');
 ```
 
 ### Individual modules
+
 ```javascript
 const { loadSettings } = require('../utils/settingsLoader');
 const { notifyTaskCompletion } = require('../utils/notification');

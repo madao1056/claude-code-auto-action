@@ -41,32 +41,32 @@ export class AutoDependencyManager {
 
   async analyze(): Promise<DependencyAnalysis> {
     await this.loadPackageJson();
-    
+
     const [missing, unused, outdated, vulnerabilities] = await Promise.all([
       this.findMissingDependencies(),
       this.findUnusedDependencies(),
       this.checkOutdatedDependencies(),
-      this.checkVulnerabilities()
+      this.checkVulnerabilities(),
     ]);
 
     return {
       missing,
       unused,
       outdated,
-      vulnerabilities
+      vulnerabilities,
     };
   }
 
   async autoInstallMissing(): Promise<void> {
     const analysis = await this.analyze();
-    
+
     if (analysis.missing.length === 0) {
       console.log('✅ 依存関係はすべて揃っています');
       return;
     }
 
     console.log(`📦 ${analysis.missing.length}個の不足パッケージをインストール中...`);
-    
+
     for (const pkg of analysis.missing) {
       await this.installPackage(pkg);
     }
@@ -76,37 +76,37 @@ export class AutoDependencyManager {
 
   async cleanUnused(): Promise<void> {
     const analysis = await this.analyze();
-    
+
     if (analysis.unused.length === 0) {
       console.log('✅ 未使用の依存関係はありません');
       return;
     }
 
     console.log(`🧹 ${analysis.unused.length}個の未使用パッケージを削除中...`);
-    
+
     const cmd = `npm uninstall ${analysis.unused.join(' ')}`;
     await execAsync(cmd);
-    
+
     console.log('✅ 未使用パッケージの削除が完了しました');
   }
 
   async autoFixVulnerabilities(): Promise<void> {
     const analysis = await this.analyze();
-    const fixableVulns = analysis.vulnerabilities.filter(v => v.fixAvailable);
-    
+    const fixableVulns = analysis.vulnerabilities.filter((v) => v.fixAvailable);
+
     if (fixableVulns.length === 0) {
       console.log('✅ 修正可能な脆弱性はありません');
       return;
     }
 
     console.log(`🔒 ${fixableVulns.length}個の脆弱性を修正中...`);
-    
+
     try {
       await execAsync('npm audit fix');
-      
+
       // 強制的な修正が必要な場合
       const remainingVulns = await this.checkVulnerabilities();
-      if (remainingVulns.some(v => v.severity === 'critical' || v.severity === 'high')) {
+      if (remainingVulns.some((v) => v.severity === 'critical' || v.severity === 'high')) {
         console.log('⚠️ 重大な脆弱性が残っています。強制修正を試みます...');
         await execAsync('npm audit fix --force');
       }
@@ -125,15 +125,25 @@ export class AutoDependencyManager {
     const allImports = await this.collectAllImports();
     const installedPackages = new Set([
       ...Object.keys(this.packageJson.dependencies || {}),
-      ...Object.keys(this.packageJson.devDependencies || {})
+      ...Object.keys(this.packageJson.devDependencies || {}),
     ]);
 
     const missing: PackageInfo[] = [];
-    const builtinModules = new Set(['fs', 'path', 'http', 'https', 'crypto', 'stream', 'util', 'os', 'child_process']);
+    const builtinModules = new Set([
+      'fs',
+      'path',
+      'http',
+      'https',
+      'crypto',
+      'stream',
+      'util',
+      'os',
+      'child_process',
+    ]);
 
     for (const importPath of allImports) {
       const packageName = this.extractPackageName(importPath);
-      
+
       if (builtinModules.has(packageName) || packageName.startsWith('.')) {
         continue;
       }
@@ -141,11 +151,11 @@ export class AutoDependencyManager {
       if (!installedPackages.has(packageName)) {
         const isTypeDef = packageName.startsWith('@types/');
         const isDev = await this.isDevDependency(importPath);
-        
+
         missing.push({
           name: packageName,
           isDev,
-          isType: isTypeDef
+          isType: isTypeDef,
         });
 
         // TypeScript型定義も確認
@@ -155,33 +165,36 @@ export class AutoDependencyManager {
             missing.push({
               name: `@types/${packageName}`,
               isDev: true,
-              isType: true
+              isType: true,
             });
           }
         }
       }
     }
 
-    return [...new Map(missing.map(item => [item.name, item])).values()];
+    return [...new Map(missing.map((item) => [item.name, item])).values()];
   }
 
   private async findUnusedDependencies(): Promise<string[]> {
     const allImports = await this.collectAllImports();
-    const usedPackages = new Set(
-      Array.from(allImports).map(imp => this.extractPackageName(imp))
-    );
+    const usedPackages = new Set(Array.from(allImports).map((imp) => this.extractPackageName(imp)));
 
     const allDependencies = [
       ...Object.keys(this.packageJson.dependencies || {}),
-      ...Object.keys(this.packageJson.devDependencies || {})
+      ...Object.keys(this.packageJson.devDependencies || {}),
     ];
 
-    const unused = allDependencies.filter(dep => {
+    const unused = allDependencies.filter((dep) => {
       // 一部の特殊なパッケージは除外
-      if (dep.startsWith('@types/') || dep === 'typescript' || dep === 'eslint' || dep === 'prettier') {
+      if (
+        dep.startsWith('@types/') ||
+        dep === 'typescript' ||
+        dep === 'eslint' ||
+        dep === 'prettier'
+      ) {
         return false;
       }
-      
+
       return !usedPackages.has(dep) && !this.isIndirectlyUsed(dep);
     });
 
@@ -190,7 +203,7 @@ export class AutoDependencyManager {
 
   private async collectAllImports(): Promise<Set<string>> {
     if (this.importCache.size > 0) {
-      return new Set(Array.from(this.importCache.values()).flatMap(s => Array.from(s)));
+      return new Set(Array.from(this.importCache.values()).flatMap((s) => Array.from(s)));
     }
 
     const files = await this.getAllSourceFiles();
@@ -199,7 +212,7 @@ export class AutoDependencyManager {
     for (const file of files) {
       const imports = await this.extractImportsFromFile(file);
       this.importCache.set(file, imports);
-      imports.forEach(imp => allImports.add(imp));
+      imports.forEach((imp) => allImports.add(imp));
     }
 
     return allImports;
@@ -208,18 +221,18 @@ export class AutoDependencyManager {
   private async getAllSourceFiles(): Promise<string[]> {
     const files: string[] = [];
     const extensions = ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs'];
-    
+
     async function walkDir(dir: string): Promise<void> {
       const entries = await readdir(dir, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = join(dir, entry.name);
-        
+
         if (entry.isDirectory()) {
           if (!['node_modules', '.git', 'dist', 'build', 'coverage'].includes(entry.name)) {
             await walkDir(fullPath);
           }
-        } else if (extensions.some(ext => entry.name.endsWith(ext))) {
+        } else if (extensions.some((ext) => entry.name.endsWith(ext))) {
           files.push(fullPath);
         }
       }
@@ -231,14 +244,14 @@ export class AutoDependencyManager {
 
   private async extractImportsFromFile(filePath: string): Promise<Set<string>> {
     const imports = new Set<string>();
-    
+
     try {
       const content = await readFile(filePath, 'utf-8');
-      
+
       // Babel parserを使用してAST解析
       const ast = parse(content, {
         sourceType: 'module',
-        plugins: ['typescript', 'jsx', 'decorators-legacy']
+        plugins: ['typescript', 'jsx', 'decorators-legacy'],
       });
 
       traverse(ast, {
@@ -252,7 +265,7 @@ export class AutoDependencyManager {
               imports.add(arg.value);
             }
           }
-        }
+        },
       });
     } catch (error) {
       // パースエラーは無視
@@ -272,9 +285,9 @@ export class AutoDependencyManager {
   private async installPackage(pkg: PackageInfo): Promise<void> {
     const saveFlag = pkg.isDev ? '--save-dev' : '--save';
     const packageName = pkg.version ? `${pkg.name}@${pkg.version}` : pkg.name;
-    
+
     console.log(`📦 インストール中: ${packageName} ${saveFlag}`);
-    
+
     try {
       await execAsync(`npm install ${saveFlag} ${packageName}`);
     } catch (error) {
@@ -286,12 +299,12 @@ export class AutoDependencyManager {
     try {
       const { stdout } = await execAsync('npm outdated --json');
       const outdated = JSON.parse(stdout || '{}');
-      
+
       return Object.entries(outdated).map(([name, info]: [string, any]) => ({
         name,
         current: info.current,
         wanted: info.wanted,
-        latest: info.latest
+        latest: info.latest,
       }));
     } catch {
       return [];
@@ -302,13 +315,13 @@ export class AutoDependencyManager {
     try {
       const { stdout } = await execAsync('npm audit --json');
       const audit = JSON.parse(stdout);
-      
+
       if (!audit.vulnerabilities) return [];
-      
+
       return Object.entries(audit.vulnerabilities).map(([name, vuln]: [string, any]) => ({
         name,
         severity: vuln.severity,
-        fixAvailable: vuln.fixAvailable
+        fixAvailable: vuln.fixAvailable,
       }));
     } catch {
       return [];
@@ -335,16 +348,14 @@ export class AutoDependencyManager {
       /vite/,
       /jest/,
       /eslint/,
-      /prettier/
+      /prettier/,
     ];
-    
+
     const importingFiles = Array.from(this.importCache.entries())
       .filter(([_, imports]) => imports.has(importPath))
       .map(([file]) => file);
-    
-    return importingFiles.some(file => 
-      devPatterns.some(pattern => pattern.test(file))
-    );
+
+    return importingFiles.some((file) => devPatterns.some((pattern) => pattern.test(file)));
   }
 
   private isIndirectlyUsed(packageName: string): boolean {
@@ -355,9 +366,9 @@ export class AutoDependencyManager {
       'prettier-plugin-',
       '@babel/',
       'postcss-',
-      'tailwindcss'
+      'tailwindcss',
     ];
-    
-    return indirectPackages.some(prefix => packageName.startsWith(prefix));
+
+    return indirectPackages.some((prefix) => packageName.startsWith(prefix));
   }
 }

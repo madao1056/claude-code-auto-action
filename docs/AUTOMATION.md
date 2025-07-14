@@ -9,20 +9,23 @@ Claude Code Auto Actionの高度な自動化機能について詳しく説明し
 ### 1. 自動エラー修正システム
 
 #### 概要
+
 ビルドエラー、型エラー、リントエラーを自動的に検出して修正します。
 
 #### 対応エラータイプ
+
 - **TypeScript型エラー**: 型の不一致、未定義プロパティ、型推論エラー
 - **ESLintエラー**: コードスタイル、未使用変数、import順序
 - **ビルドエラー**: 構文エラー、モジュール解決エラー
 - **テストエラー**: アサーションエラー、スナップショット不一致
 
 #### 自動エスカレーション
+
 ```json
 {
   "autoFix": {
     "maxRetries": 3,
-    "escalateToUltrathink": true  // 2回失敗でultrathink mode
+    "escalateToUltrathink": true // 2回失敗でultrathink mode
   }
 }
 ```
@@ -30,6 +33,7 @@ Claude Code Auto Actionの高度な自動化機能について詳しく説明し
 ### 2. 依存関係の自動管理
 
 #### コマンド
+
 ```bash
 # 分析
 claude-code auto-deps analyze
@@ -42,6 +46,7 @@ claude-code auto-deps auto      # すべてを自動実行
 ```
 
 #### 検出項目
+
 - import文からの不足パッケージ検出
 - package.jsonとnode_modulesの不整合
 - 未使用の依存関係
@@ -51,6 +56,7 @@ claude-code auto-deps auto      # すべてを自動実行
 ### 3. 自動リファクタリング
 
 #### 検出パターン
+
 1. **重複コード**
    - 30行以上の重複を検出
    - 共通関数への抽出を提案
@@ -70,6 +76,7 @@ claude-code auto-deps auto      # すべてを自動実行
 ### 4. 自動ドキュメント生成
 
 #### 生成されるドキュメント
+
 ```
 docs/
 ├── API.md          # API仕様書
@@ -79,6 +86,7 @@ docs/
 ```
 
 #### 機能
+
 - JSDocコメントの自動生成
 - TypeScript型情報の抽出
 - サンプルコードの生成
@@ -87,23 +95,25 @@ docs/
 ### 5. テストカバレッジ自動改善
 
 #### 機能
+
 - カバレッジ80%未満の箇所を検出
 - テストケースの自動生成
 - エッジケースの考慮
 - モックの自動生成
 
 #### テストパターン
+
 ```typescript
 // 自動生成されるテストの例
 describe('functionName', () => {
   it('should work with valid input', () => {
     // 正常系
   });
-  
+
   it('should handle edge cases', () => {
     // エッジケース
   });
-  
+
   it('should handle errors', () => {
     // エラーケース
   });
@@ -113,17 +123,20 @@ describe('functionName', () => {
 ### 6. PR/コードレビュー自動化
 
 #### PR作成
+
 ```bash
 claude-code create-pr --auto-review
 ```
 
 自動的に以下を生成：
+
 - PR タイトル（Conventional Commits準拠）
 - PR 説明文（変更内容のサマリー）
 - ラベル（変更タイプ、サイズ）
 - レビュアーの選定
 
 #### 自動レビュー項目
+
 - コードスタイルチェック
 - セキュリティパターン検出
 - パフォーマンス問題
@@ -132,6 +145,7 @@ claude-code create-pr --auto-review
 ### 7. 環境構築の完全自動化
 
 #### 自動検出項目
+
 - プログラミング言語
 - フレームワーク
 - パッケージマネージャー
@@ -139,6 +153,7 @@ claude-code create-pr --auto-review
 - 必要なサービス
 
 #### 生成ファイル
+
 ```
 project/
 ├── Dockerfile
@@ -153,12 +168,14 @@ project/
 ### 8. 学習型コード補完
 
 #### 学習内容
+
 - 関数定義パターン
 - インポート傾向
 - コーディングスタイル
 - よく使う変数名
 
 #### データ保存場所
+
 ```
 .claude/learning/completion/
 ├── patterns.json      # コードパターン
@@ -169,11 +186,13 @@ project/
 ### 9. 自動バージョン管理
 
 #### Conventional Commitsに基づく判定
+
 - `feat:` → minor バージョンアップ
 - `fix:` → patch バージョンアップ
 - `BREAKING CHANGE:` → major バージョンアップ
 
 #### 自動生成物
+
 - バージョン番号
 - CHANGELOG.md
 - Git タグ
@@ -182,18 +201,20 @@ project/
 ### 10. 監視・アラート統合
 
 #### 監視項目
+
 - **システムリソース**: CPU、メモリ、ディスク
 - **アプリケーション**: レスポンスタイム、エラー率
 - **ビルド**: ビルド時間、バンドルサイズ
 - **セキュリティ**: 脆弱性、依存関係
 
 #### アラート条件
+
 ```json
 {
   "monitoring": {
     "thresholds": {
       "cpuUsage": 80,
-      "memoryUsage": 512,  // MB
+      "memoryUsage": 512, // MB
       "bundleSizeIncrease": "10%",
       "performanceRegression": "20%"
     }
@@ -204,6 +225,7 @@ project/
 ## ベストプラクティス
 
 ### 1. 段階的導入
+
 最初は一部の機能から始めて、徐々に自動化を拡大することを推奨します。
 
 ```json
@@ -219,6 +241,7 @@ project/
 ```
 
 ### 2. チーム設定の共有
+
 チーム全体で設定を統一するため、設定ファイルをGit管理します。
 
 ```bash
@@ -230,6 +253,7 @@ claude-code import-settings team-settings.json
 ```
 
 ### 3. 定期メンテナンス
+
 週次または月次で以下のメンテナンスを実施：
 
 ```bash
@@ -248,6 +272,7 @@ claude-code validate-config
 ### よくある問題と解決方法
 
 #### 1. 自動修正が無限ループする
+
 ```bash
 # 修正履歴をクリア
 rm -rf .claude/fix-history.json
@@ -257,6 +282,7 @@ claude-code config set autoFix.maxRetries 1
 ```
 
 #### 2. 学習データが大きくなりすぎる
+
 ```bash
 # 古いデータを削除
 claude-code learning cleanup --older-than 90d
@@ -266,11 +292,12 @@ claude-code learning compact
 ```
 
 #### 3. 監視がCPUを使いすぎる
+
 ```json
 {
   "monitoring": {
-    "interval": 300000,  // 5分に延長
-    "lightweight": true   // 軽量モード
+    "interval": 300000, // 5分に延長
+    "lightweight": true // 軽量モード
   }
 }
 ```

@@ -229,11 +229,13 @@ export CLAUDE_SKIP_NETWORK_PROMPTS=true
 ### Still Getting Prompts?
 
 1. Ensure all environment variables are set:
+
    ```bash
    claude-status
    ```
 
 2. Source the automation environment:
+
    ```bash
    source ~/.claude-auto-env
    ```
@@ -246,6 +248,7 @@ export CLAUDE_SKIP_NETWORK_PROMPTS=true
 ### Permission Denied Errors
 
 Make sure scripts are executable:
+
 ```bash
 chmod +x scripts/*.sh
 ```
@@ -253,6 +256,7 @@ chmod +x scripts/*.sh
 ### Environment Not Loading
 
 Add to your shell RC file:
+
 ```bash
 echo "source ~/.claude-auto-env" >> ~/.bashrc
 ```

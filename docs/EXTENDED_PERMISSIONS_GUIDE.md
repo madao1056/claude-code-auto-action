@@ -182,6 +182,7 @@ cc-create -r "ECサイトを作りたい。Next.js、Stripe決済、PostgreSQL�
 ```
 
 自動実行される操作:
+
 - `npx create-next-app` でプロジェクト作成
 - `npm install stripe @stripe/stripe-js` で決済ライブラリインストール
 - `docker-compose up -d postgres` でデータベース起動
@@ -195,6 +196,7 @@ cc-create -r "マイクロサービスAPIを作りたい。Go言語、gRPC、Kub
 ```
 
 自動実行される操作:
+
 - `go mod init` でGoプロジェクト初期化
 - `go get google.golang.org/grpc` でgRPCインストール
 - `protoc` でProtobufコンパイル
@@ -208,6 +210,7 @@ cc-create -r "機械学習APIを作りたい。Python、FastAPI、TensorFlow"
 ```
 
 自動実行される操作:
+
 - `python -m venv venv` で仮想環境作成
 - `pip install fastapi tensorflow uvicorn` で依存関係インストール
 - `docker-compose` でJupyter環境セットアップ
@@ -220,6 +223,7 @@ cc-create -r "機械学習APIを作りたい。Python、FastAPI、TensorFlow"
    - プロジェクトの要件に応じて追加
 
 2. **監査ログの確認**
+
    ```bash
    tail -f ~/.claude/logs/permissions.log
    ```
@@ -237,6 +241,7 @@ cc-create -r "機械学習APIを作りたい。Python、FastAPI、TensorFlow"
 ### 権限エラーが出る場合
 
 1. 権限設定を確認
+
    ```bash
    cat ~/.claude/permissions.json | jq '.permissions.allow'
    ```
@@ -245,9 +250,7 @@ cc-create -r "機械学習APIを作りたい。Python、FastAPI、TensorFlow"
    ```json
    {
      "permissions": {
-       "allow": [
-         "Bash(your-command *)"
-       ]
+       "allow": ["Bash(your-command *)"]
      }
    }
    ```
@@ -258,7 +261,7 @@ cc-create -r "機械学習APIを作りたい。Python、FastAPI、TensorFlow"
   ```json
   {
     "confirmThreshold": {
-      "batchOperations": 100  // 増やす
+      "batchOperations": 100 // 増やす
     }
   }
   ```

@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+out/
+*.min.js
+*.bundle.js
+coverage/
+.nyc_output/
+cursor-extension/out/
+cursor-extension/dist/
+*.d.ts
+email-receipt-collector/
+utils/
+# Ignore compiled JS files
+*.js
+!.eslintrc.js
+!jest.config.js
+!cursor-extension/src/**/*.js

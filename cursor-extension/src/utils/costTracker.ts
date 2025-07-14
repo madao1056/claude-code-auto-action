@@ -19,13 +19,11 @@ export interface CostData {
  * @param {vscode.ExtensionContext} context - Extension context
  * @returns {Promise<CostData>} Current cost data
  */
-export async function loadCostData(
-  context: vscode.ExtensionContext
-): Promise<CostData> {
+export async function loadCostData(context: vscode.ExtensionContext): Promise<CostData> {
   const dailyCost = context.workspaceState.get('dailyCost', 0);
   const contextUsage = context.workspaceState.get('contextUsage', 0);
   const lastReset = context.workspaceState.get('lastCostReset', '');
-  
+
   // Reset if new day
   const today = new Date().toDateString();
   if (today !== lastReset) {
@@ -34,10 +32,10 @@ export async function loadCostData(
     return {
       dailyCost: 0,
       contextUsage,
-      lastReset: today
+      lastReset: today,
     };
   }
-  
+
   return { dailyCost, contextUsage, lastReset };
 }
 
@@ -54,22 +52,22 @@ export async function trackCost(
   costLimit?: number
 ): Promise<number> {
   const costData = await loadCostData(context);
-  
+
   // Estimate cost
   const estimatedTokens = outputLength / CHARS_PER_TOKEN;
   const estimatedCost = estimatedTokens * COST_PER_TOKEN;
   const newDailyCost = costData.dailyCost + estimatedCost;
-  
+
   // Update storage
   await context.workspaceState.update('dailyCost', newDailyCost);
-  
+
   // Check limit if provided
   if (costLimit && newDailyCost > costLimit) {
     vscode.window.showErrorMessage(
       `Daily cost limit ($${costLimit}) exceeded! Current: $${newDailyCost.toFixed(2)}`
     );
   }
-  
+
   return newDailyCost;
 }
 

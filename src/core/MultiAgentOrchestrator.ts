@@ -70,16 +70,16 @@ export class MultiAgentOrchestrator extends EventEmitter {
         'architecture-first',
         'step-by-step reasoning',
         'evaluate trade-offs',
-        'You are an expert software architect responsible for high-level project analysis and task decomposition.'
+        'You are an expert software architect responsible for high-level project analysis and task decomposition.',
       ],
       capabilities: [
         'project_analysis',
         'task_decomposition',
         'architecture_design',
         'technology_selection',
-        'risk_assessment'
+        'risk_assessment',
       ],
-      parallel_limit: 1
+      parallel_limit: 1,
     });
 
     // Manager Agents - Task coordination and oversight
@@ -95,16 +95,16 @@ export class MultiAgentOrchestrator extends EventEmitter {
           'step-by-step',
           'context-aware',
           'consider edge cases',
-          'You are a technical manager responsible for coordinating implementation tasks and ensuring quality.'
+          'You are a technical manager responsible for coordinating implementation tasks and ensuring quality.',
         ],
         capabilities: [
           'task_coordination',
           'quality_assurance',
           'progress_monitoring',
           'resource_allocation',
-          'issue_resolution'
+          'issue_resolution',
         ],
-        parallel_limit: 2
+        parallel_limit: 2,
       });
     }
 
@@ -121,16 +121,16 @@ export class MultiAgentOrchestrator extends EventEmitter {
           'implementation-focused',
           'clean-code',
           'performance-critical',
-          'You are a skilled developer responsible for implementing specific features and fixes.'
+          'You are a skilled developer responsible for implementing specific features and fixes.',
         ],
         capabilities: [
           'code_implementation',
           'bug_fixing',
           'testing',
           'documentation',
-          'optimization'
+          'optimization',
         ],
-        parallel_limit: 3
+        parallel_limit: 3,
       });
     }
   }
@@ -141,7 +141,7 @@ export class MultiAgentOrchestrator extends EventEmitter {
       description: `Analyze project at ${projectPath} with requirements: ${requirements}`,
       type: 'analysis',
       priority: 'high',
-      dependencies: []
+      dependencies: [],
     });
 
     const architectAgent = this.agents.get('architect')!;
@@ -165,7 +165,7 @@ export class MultiAgentOrchestrator extends EventEmitter {
       description: `Decompose project into executable tasks based on analysis`,
       type: 'analysis',
       priority: 'high',
-      dependencies: []
+      dependencies: [],
     });
 
     const architectAgent = this.agents.get('architect')!;
@@ -195,13 +195,13 @@ export class MultiAgentOrchestrator extends EventEmitter {
       created_at: new Date(),
       child_tasks: [],
       parent_task: taskData.parent_task,
-      ...taskData
+      ...taskData,
     };
 
     this.tasks.set(taskId, task);
     this.taskQueue.push(taskId);
     this.emit('task_created', task);
-    
+
     return taskId;
   }
 
@@ -231,17 +231,17 @@ export class MultiAgentOrchestrator extends EventEmitter {
   private async executeTask(task: Task, agent: AgentConfig): Promise<any> {
     // Simulate Claude Code execution
     const prompt = this.buildPrompt(task, agent);
-    
+
     // This would be replaced with actual Claude Code API calls
     const mockResult = await this.simulateClaudeExecution(prompt, agent);
-    
+
     return mockResult;
   }
 
   private buildPrompt(task: Task, agent: AgentConfig): string {
     const systemPrompts = agent.system_prompts.join('\n');
     const context = this.getTaskContext(task);
-    
+
     return `
 ${systemPrompts}
 
@@ -269,9 +269,9 @@ Please execute this task and provide a detailed response including:
 
   private getTaskContext(task: Task): string {
     const dependencies = task.dependencies
-      .map(depId => this.tasks.get(depId))
-      .filter(dep => dep && dep.status === 'completed')
-      .map(dep => `- ${dep!.title}: ${dep!.result}`)
+      .map((depId) => this.tasks.get(depId))
+      .filter((dep) => dep && dep.status === 'completed')
+      .map((dep) => `- ${dep!.title}: ${dep!.result}`)
       .join('\n');
 
     return `
@@ -279,23 +279,25 @@ Task Dependencies (completed):
 ${dependencies}
 
 Related Tasks:
-${task.child_tasks.map(childId => {
-  const child = this.tasks.get(childId);
-  return child ? `- ${child.title} (${child.status})` : '';
-}).join('\n')}
+${task.child_tasks
+  .map((childId) => {
+    const child = this.tasks.get(childId);
+    return child ? `- ${child.title} (${child.status})` : '';
+  })
+  .join('\n')}
 `;
   }
 
   private async simulateClaudeExecution(prompt: string, agent: AgentConfig): Promise<any> {
     // This would be replaced with actual Claude Code API integration
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 2000));
+
     return {
       status: 'completed',
       files_modified: ['src/example.ts', 'tests/example.test.ts'],
       implementation_details: 'Mock implementation completed successfully',
       next_steps: ['Run tests', 'Update documentation'],
-      agent_used: agent.id
+      agent_used: agent.id,
     };
   }
 
@@ -334,12 +336,12 @@ ${task.child_tasks.map(childId => {
 
   private processTaskQueue(): void {
     // Find tasks that are ready to be executed (dependencies satisfied)
-    const readyTasks = this.taskQueue.filter(taskId => {
+    const readyTasks = this.taskQueue.filter((taskId) => {
       const task = this.tasks.get(taskId);
       if (!task || task.status !== 'pending') return false;
 
       // Check if all dependencies are completed
-      return task.dependencies.every(depId => {
+      return task.dependencies.every((depId) => {
         const dep = this.tasks.get(depId);
         return dep && dep.status === 'completed';
       });
@@ -350,16 +352,17 @@ ${task.child_tasks.map(childId => {
       const availableAgent = this.findAvailableAgent();
       if (availableAgent) {
         this.assignTaskToAgent(taskId, availableAgent.id);
-        this.taskQueue = this.taskQueue.filter(id => id !== taskId);
+        this.taskQueue = this.taskQueue.filter((id) => id !== taskId);
       }
     }
   }
 
   private findAvailableAgent(): AgentConfig | null {
     for (const agent of this.agents.values()) {
-      const activeTasksForAgent = Array.from(this.activeTasks.values())
-        .filter(agentId => agentId === agent.id);
-      
+      const activeTasksForAgent = Array.from(this.activeTasks.values()).filter(
+        (agentId) => agentId === agent.id
+      );
+
       if (activeTasksForAgent.length < agent.parallel_limit) {
         return agent;
       }
@@ -372,15 +375,15 @@ ${task.child_tasks.map(childId => {
       // Step 1: Analyze project
       console.log('🔍 Analyzing project...');
       const analysis = await this.analyzeProject(projectPath, requirements);
-      
+
       // Step 2: Decompose into tasks
       console.log('📋 Decomposing into tasks...');
       const taskIds = await this.decomposeIntoTasks(analysis);
-      
+
       // Step 3: Execute tasks in parallel
       console.log('🚀 Executing tasks in parallel...');
       await this.waitForAllTasks();
-      
+
       console.log('✅ Project execution completed!');
     } catch (error) {
       console.error('❌ Project execution failed:', error);
@@ -391,16 +394,17 @@ ${task.child_tasks.map(childId => {
   private async waitForAllTasks(): Promise<void> {
     return new Promise((resolve) => {
       const checkCompletion = () => {
-        const pendingTasks = Array.from(this.tasks.values())
-          .filter(task => task.status === 'pending' || task.status === 'in_progress');
-        
+        const pendingTasks = Array.from(this.tasks.values()).filter(
+          (task) => task.status === 'pending' || task.status === 'in_progress'
+        );
+
         if (pendingTasks.length === 0) {
           resolve();
         } else {
           setTimeout(checkCompletion, 1000);
         }
       };
-      
+
       checkCompletion();
     });
   }
@@ -410,7 +414,7 @@ ${task.child_tasks.map(childId => {
       pending: 0,
       in_progress: 0,
       completed: 0,
-      failed: 0
+      failed: 0,
     };
 
     for (const task of this.tasks.values()) {
@@ -422,7 +426,7 @@ ${task.child_tasks.map(childId => {
       total_agents: this.agents.size,
       active_agents: this.activeTasks.size,
       tasks: tasksByStatus,
-      project_analysis: this.projectAnalysis
+      project_analysis: this.projectAnalysis,
     };
   }
 }

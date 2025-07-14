@@ -96,6 +96,7 @@ cc-architect upgrade -r "React 16から18にアップグレードし、TypeScrip
 ```
 
 実行される処理:
+
 - 依存関係の更新
 - TypeScript設定の追加
 - 既存コードの型定義追加
@@ -109,6 +110,7 @@ cc-architect upgrade -r "ページ読み込み速度を50%改善" -t optimize
 ```
 
 実行される最適化:
+
 - バンドルサイズの削減
 - 画像の遅延読み込み実装
 - コード分割の実装
@@ -122,6 +124,7 @@ cc-architect upgrade -r "OWASP Top 10の脆弱性対策" -t security
 ```
 
 実行される対策:
+
 - 依存関係の脆弱性修正
 - SQL Injection対策
 - XSS対策の実装
@@ -135,6 +138,7 @@ cc-architect upgrade -r "モノリスからマイクロサービスへ移行" -t
 ```
 
 実行される変更:
+
 - サービス境界の定義
 - APIゲートウェイの実装
 - サービス間通信の設定
@@ -180,6 +184,7 @@ cc-architect upgrade -r "分析で見つかったすべての問題を修正" --
 ## ベストプラクティス
 
 1. **バックアップを取る**
+
    ```bash
    git add -A && git commit -m "Backup before upgrade"
    ```
@@ -190,6 +195,7 @@ cc-architect upgrade -r "分析で見つかったすべての問題を修正" --
    - 各段階でテストを実行
 
 3. **ブランチで作業**
+
    ```bash
    git checkout -b feature/claude-upgrade
    cc-architect upgrade -r "..."
@@ -235,7 +241,7 @@ cc-architect upgrade -r "..." --update-tests
 name: Weekly Code Analysis
 on:
   schedule:
-    - cron: '0 0 * * 0'  # 毎週日曜日
+    - cron: '0 0 * * 0' # 毎週日曜日
 jobs:
   analyze:
     runs-on: ubuntu-latest

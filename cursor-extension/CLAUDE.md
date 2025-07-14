@@ -1,15 +1,18 @@
 # PROJECT INFORMATION
 
 ## Project Name
+
 Claude Code Auto Action
 
 ## Technical Stack
+
 - TypeScript/JavaScript
 - VSCode Extension API
 - Shell scripting
 - GitHub Actions
 
 ## Key Features
+
 - YOLO Mode (automatic permission bypass)
 - Token/context optimization
 - Cost monitoring
@@ -19,11 +22,13 @@ Claude Code Auto Action
 # DEVELOPMENT GUIDELINES
 
 ## Code Style
+
 - Use TypeScript for all extension code
 - Follow ESLint rules
 - Prettier formatting on save
 
 ## Testing
+
 - Minimum 90% coverage
 - Unit tests for all services
 - Integration tests for commands

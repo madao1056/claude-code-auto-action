@@ -2,7 +2,11 @@ import { EventEmitter } from 'events';
 import { MultiAgentOrchestrator } from '../core/MultiAgentOrchestrator';
 import { TaskDistributor, DistributionStrategy } from '../core/TaskDistributor';
 import { AgentCommunicationHub } from '../communication/AgentCommunicationHub';
-import { TopDownCommandSystem, CommandType, CommandContext } from '../hierarchy/TopDownCommandSystem';
+import {
+  TopDownCommandSystem,
+  CommandType,
+  CommandContext,
+} from '../hierarchy/TopDownCommandSystem';
 import { BottomUpReportingSystem } from '../reporting/BottomUpReportingSystem';
 import { ParallelProcessController, ResourceLimits } from '../control/ParallelProcessController';
 
@@ -78,18 +82,21 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
   private processController: ParallelProcessController;
   private systemStatus: SystemStatus;
   private startTime: Date;
-  private activeRequests: Map<string, {
-    request: ProjectRequest;
-    commandId: string;
-    startTime: Date;
-  }> = new Map();
+  private activeRequests: Map<
+    string,
+    {
+      request: ProjectRequest;
+      commandId: string;
+      startTime: Date;
+    }
+  > = new Map();
 
   constructor(config: Partial<SystemConfig> = {}) {
     super();
     this.config = this.mergeDefaultConfig(config);
     this.startTime = new Date();
     this.systemStatus = this.initializeStatus();
-    
+
     console.log('🚀 Initializing Claude Code Auto System...');
     this.initializeComponents();
     this.setupEventHandlers();
@@ -100,12 +107,12 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
       communication: {
         hub_port: 8765,
         heartbeat_interval: 30000,
-        message_timeout: 30000
+        message_timeout: 30000,
       },
       orchestrator: {
         max_parallel_tasks: 50,
         task_timeout: 3600000, // 1 hour
-        retry_attempts: 3
+        retry_attempts: 3,
       },
       distribution: {
         strategy: {
@@ -114,36 +121,36 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
           parameters: {
             load_weight: 0.3,
             capability_weight: 0.4,
-            performance_weight: 0.3
-          }
+            performance_weight: 0.3,
+          },
         },
-        load_balancing_algorithm: 'performance_based'
+        load_balancing_algorithm: 'performance_based',
       },
       resources: {
         max_concurrent_tasks: 50,
         max_memory_per_process: 2048,
         max_cpu_percentage: 80,
         max_execution_time: 3600,
-        max_processes_per_pool: 10
+        max_processes_per_pool: 10,
       },
       reporting: {
         real_time_updates: true,
         report_retention_hours: 24,
-        dashboard_refresh_interval: 5000
+        dashboard_refresh_interval: 5000,
       },
       auto_scaling: {
         enabled: true,
         min_agents_per_type: {
           architect: 1,
           manager: 2,
-          worker: 3
+          worker: 3,
         },
         max_agents_per_type: {
           architect: 3,
           manager: 5,
-          worker: 10
-        }
-      }
+          worker: 10,
+        },
+      },
     };
 
     return this.deepMerge(defaultConfig, userConfig);
@@ -175,7 +182,7 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
       memory_usage: 0,
       error_rate: 0,
       throughput: 0,
-      recent_activities: []
+      recent_activities: [],
     };
   }
 
@@ -293,9 +300,9 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
 
   async processProject(request: ProjectRequest): Promise<string> {
     console.log(`🎯 Processing project request: ${request.requirements}`);
-    
+
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     try {
       // Validate request
       this.validateProjectRequest(request);
@@ -310,14 +317,14 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
           time_limit: request.constraints?.time_limit,
           budget_limit: request.constraints?.budget_limit,
           resource_constraints: request.constraints?.resource_constraints || [],
-          technology_constraints: []
+          technology_constraints: [],
         },
         quality_requirements: {
           test_coverage_min: request.quality_requirements?.test_coverage_min || 80,
           performance_requirements: request.quality_requirements?.performance_requirements || [],
           security_requirements: request.quality_requirements?.security_requirements || [],
-          documentation_level: request.quality_requirements?.documentation_level || 'standard'
-        }
+          documentation_level: request.quality_requirements?.documentation_level || 'standard',
+        },
       };
 
       // Execute command
@@ -325,20 +332,20 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
         type: request.command_type,
         title: `${request.command_type}: ${request.requirements}`,
         description: `Processing project at ${request.project_path}`,
-        context: commandContext
+        context: commandContext,
       });
 
       // Track request
       this.activeRequests.set(requestId, {
         request,
         commandId,
-        startTime: new Date()
+        startTime: new Date(),
       });
 
       this.emit('project_started', {
         requestId,
         commandId,
-        request
+        request,
       });
 
       console.log(`✅ Project request initiated: ${requestId}`);
@@ -348,7 +355,7 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
       this.emit('project_failed', {
         requestId,
         request,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -371,13 +378,14 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
     if (request) {
       const duration = Date.now() - request.startTime.getTime();
       console.log(`🎉 Project completed in ${duration}ms: ${request.request.requirements}`);
-      
+
       this.emit('project_completed', {
-        requestId: Array.from(this.activeRequests.keys())
-          .find(key => this.activeRequests.get(key)?.commandId === commandId),
+        requestId: Array.from(this.activeRequests.keys()).find(
+          (key) => this.activeRequests.get(key)?.commandId === commandId
+        ),
         commandId,
         duration,
-        request: request.request
+        request: request.request,
       });
     }
   }
@@ -386,13 +394,14 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
     const request = this.findRequestByCommandId(commandId);
     if (request) {
       console.error(`❌ Project failed: ${request.request.requirements} - ${error}`);
-      
+
       this.emit('project_failed', {
-        requestId: Array.from(this.activeRequests.keys())
-          .find(key => this.activeRequests.get(key)?.commandId === commandId),
+        requestId: Array.from(this.activeRequests.keys()).find(
+          (key) => this.activeRequests.get(key)?.commandId === commandId
+        ),
         commandId,
         error,
-        request: request.request
+        request: request.request,
       });
     }
   }
@@ -403,8 +412,7 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
   }
 
   private findRequestByCommandId(commandId: string) {
-    return Array.from(this.activeRequests.values())
-      .find(req => req.commandId === commandId);
+    return Array.from(this.activeRequests.values()).find((req) => req.commandId === commandId);
   }
 
   private updateSystemMetrics(): void {
@@ -413,7 +421,7 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
     this.systemStatus.memory_usage = this.calculateMemoryUsage();
     this.systemStatus.error_rate = this.calculateErrorRate();
     this.systemStatus.throughput = this.calculateThroughput();
-    
+
     this.emit('system_metrics_updated', this.systemStatus);
   }
 
@@ -468,7 +476,7 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
       commandId: data.commandId,
       request: data.request,
       startTime: data.startTime,
-      duration: Date.now() - data.startTime.getTime()
+      duration: Date.now() - data.startTime.getTime(),
     }));
   }
 
@@ -484,7 +492,7 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
       request: request.request,
       command: commandStatus,
       startTime: request.startTime,
-      duration: Date.now() - request.startTime.getTime()
+      duration: Date.now() - request.startTime.getTime(),
     };
   }
 
@@ -496,7 +504,7 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
 
     await this.commandSystem.cancelCommand(request.commandId);
     this.activeRequests.delete(requestId);
-    
+
     this.emit('project_cancelled', { requestId, request: request.request });
   }
 
@@ -506,7 +514,7 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
         version: '1.0.0',
         start_time: this.startTime,
         uptime: this.systemStatus.uptime,
-        configuration: this.config
+        configuration: this.config,
       },
       status: this.getSystemStatus(),
       dashboard: this.getDashboardData(),
@@ -514,25 +522,26 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
       process_status: this.processController.getSystemStatus(),
       communication_stats: this.communicationHub.getHubStats(),
       distribution_stats: this.taskDistributor.getDistributionStats(),
-      session_summary: this.reportingSystem.generateSessionSummary()
+      session_summary: this.reportingSystem.generateSessionSummary(),
     };
   }
 
   async shutdown(): Promise<void> {
     console.log('🛑 Shutting down Claude Code Auto System...');
-    
+
     this.systemStatus.status = 'shutdown';
-    
+
     try {
       // Cancel all active projects
-      const cancelPromises = Array.from(this.activeRequests.keys())
-        .map(requestId => this.cancelProject(requestId));
+      const cancelPromises = Array.from(this.activeRequests.keys()).map((requestId) =>
+        this.cancelProject(requestId)
+      );
       await Promise.all(cancelPromises);
 
       // Shutdown components
       await this.processController.shutdown();
       this.communicationHub.shutdown();
-      
+
       console.log('✅ System shutdown complete');
       this.emit('system_shutdown');
     } catch (error) {
@@ -544,7 +553,7 @@ export class ClaudeCodeAutoSystem extends EventEmitter {
   // Static factory method
   static async create(config: Partial<SystemConfig> = {}): Promise<ClaudeCodeAutoSystem> {
     const system = new ClaudeCodeAutoSystem(config);
-    
+
     // Wait for system to be ready
     return new Promise((resolve, reject) => {
       if (system.systemStatus.status === 'ready') {

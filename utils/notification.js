@@ -38,7 +38,7 @@ async function showNotification({ title, message, sound }) {
       command += ` sound name "${sound}"`;
     }
     command += `' 2>/dev/null &`;
-    
+
     await execAsync(command);
   } catch (error) {
     console.debug('Desktop notification failed:', error.message);
@@ -59,17 +59,17 @@ async function notifyTaskCompletion(taskInfo, settings = {}) {
   if (settings.notifications?.enabled === false) {
     return;
   }
-  
+
   const { status, name, count } = taskInfo;
   const sounds = settings.notifications?.sounds || {
     success: 'Glass',
     error: 'Basso',
     warning: 'Pop',
-    info: 'Pop'
+    info: 'Pop',
   };
-  
+
   let sound, title, message;
-  
+
   switch (status) {
     case 'completed':
       sound = sounds.success;
@@ -91,10 +91,10 @@ async function notifyTaskCompletion(taskInfo, settings = {}) {
       title = 'Task Update';
       message = name;
   }
-  
+
   // Play sound
   await playSound(sound);
-  
+
   // Show desktop notification if enabled
   if (settings.notifications?.desktop !== false) {
     await showNotification({ title, message, sound });
@@ -110,15 +110,15 @@ async function notifyConfirmationPrompt(settings = {}) {
   if (settings.notifications?.enabled === false) {
     return;
   }
-  
+
   const sound = settings.notifications?.sounds?.info || 'Pop';
   await playSound(sound);
-  
+
   if (settings.notifications?.desktop) {
     await showNotification({
       title: 'Claude Code',
       message: 'Confirmation required',
-      sound
+      sound,
     });
   }
 }
@@ -127,5 +127,5 @@ module.exports = {
   playSound,
   showNotification,
   notifyTaskCompletion,
-  notifyConfirmationPrompt
+  notifyConfirmationPrompt,
 };

@@ -38,10 +38,13 @@ class GitAutoHook {
     }
 
     const interval = (this.gitConfig.commitInterval || 300) * 1000; // 秒をミリ秒に変換
-    
-    this.commitTimer = setTimeout(() => {
-      this.autoCommitAndPush();
-    }, Math.min(interval, 30000)); // 最大30秒
+
+    this.commitTimer = setTimeout(
+      () => {
+        this.autoCommitAndPush();
+      },
+      Math.min(interval, 30000)
+    ); // 最大30秒
   }
 
   /**
@@ -58,10 +61,10 @@ class GitAutoHook {
       /\.cache/,
       /dist\//,
       /build\//,
-      /out\//
+      /out\//,
     ];
 
-    return ignorePatterns.some(pattern => pattern.test(filename));
+    return ignorePatterns.some((pattern) => pattern.test(filename));
   }
 
   /**
@@ -75,20 +78,20 @@ class GitAutoHook {
     try {
       // Git自動化スクリプトを実行
       const scriptPath = path.join(__dirname, '../scripts/git-auto-manager.sh');
-      
+
       console.log('🔄 自動Git操作を開始...');
-      
+
       exec(`${scriptPath} auto`, (error, stdout, stderr) => {
         if (error) {
           console.error('❌ Git自動化エラー:', error.message);
           return;
         }
-        
+
         console.log(stdout);
         if (stderr) {
           console.error(stderr);
         }
-        
+
         this.pendingChanges = false;
         this.lastCommitTime = Date.now();
       });
@@ -110,13 +113,13 @@ class GitAutoHook {
 
         // コンフリクトマーカーをチェック
         const hasConflicts = stdout.includes('UU ') || stdout.includes('AA ');
-        
+
         if (hasConflicts) {
           console.log('⚠️ コンフリクト検出 - 自動解決を試みます');
-          
+
           const resolverPath = path.join(__dirname, 'git-conflict-resolver.js');
           const strategy = this.gitConfig.conflictStrategy || 'local';
-          
+
           exec(`node ${resolverPath} resolve-${strategy}`, (resolveError, resolveStdout) => {
             if (resolveError) {
               reject(resolveError);
@@ -169,7 +172,7 @@ if (require.main === module) {
       const chokidar = require('chokidar');
       const watcher = chokidar.watch('.', {
         ignored: /(^|[\/\\])\../,
-        persistent: true
+        persistent: true,
       });
 
       watcher.on('change', (path) => hook.onFileChange('change', path));

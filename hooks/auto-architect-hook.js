@@ -2,7 +2,7 @@
 
 /**
  * Claude Code Auto-Architect Hook
- * 
+ *
  * このフックはClaude Code起動時に自動実行され、
  * 複雑なタスクを検出してマルチエージェントシステムに転送します。
  */
@@ -38,17 +38,23 @@ class AutoArchitectHook {
 
     try {
       // マルチエージェントシステムを別プロセスで起動
-      this.multiAgentSystem = processManager.spawn('node', [
-        path.join(__dirname, '../dist/src/main/ClaudeCodeAutoSystem.js'),
-        '--mode', 'service',
-        '--config', JSON.stringify(this.settings)
-      ], {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        env: {
-          ...process.env,
-          CLAUDE_AUTO_ARCHITECT: 'true'
+      this.multiAgentSystem = processManager.spawn(
+        'node',
+        [
+          path.join(__dirname, '../dist/src/main/ClaudeCodeAutoSystem.js'),
+          '--mode',
+          'service',
+          '--config',
+          JSON.stringify(this.settings),
+        ],
+        {
+          stdio: ['pipe', 'pipe', 'pipe'],
+          env: {
+            ...process.env,
+            CLAUDE_AUTO_ARCHITECT: 'true',
+          },
         }
-      });
+      );
 
       this.multiAgentSystem.stdout.on('data', (data) => {
         const message = data.toString().trim();
@@ -74,18 +80,16 @@ class AutoArchitectHook {
         /ready/i,
         TIMING.PROCESS_READY_TIMEOUT
       );
-      
+
       if (!isReady) {
         throw new Error('Multi-agent system failed to start');
       }
       this.isEnabled = true;
       console.log('✅ Auto-Architect System ready');
-
     } catch (error) {
       console.error('Failed to initialize Auto-Architect:', error);
     }
   }
-
 
   /**
    * Intercept and route complex tasks to the Auto-Architect system
@@ -109,15 +113,14 @@ class AutoArchitectHook {
           command_type: this.determineCommandType(taskData),
           priority: taskData.priority || 'medium',
           constraints: taskData.constraints || {},
-          quality_requirements: taskData.qualityRequirements || {}
-        }
+          quality_requirements: taskData.qualityRequirements || {},
+        },
       };
 
       this.multiAgentSystem.stdin.write(JSON.stringify(request) + '\n');
 
       // 結果を待機
       return await this.waitForResult(request.data);
-
     } catch (error) {
       console.error('Auto-Architect processing failed:', error);
       return null; // フォールバック
@@ -132,24 +135,26 @@ class AutoArchitectHook {
   shouldUseAutoArchitect(taskData) {
     const prompt = taskData.prompt || taskData.description || '';
     const fileCount = taskData.fileCount || 0;
-    
+
     // 複雑さの判定
     const complexityFactors = [
-      prompt.length > 300,                          // 長い説明
+      prompt.length > 300, // 長い説明
       /\b(architecture|refactor|redesign)\b/i.test(prompt), // アーキテクチャ関連
-      /\b(multiple|several|many)\b/i.test(prompt),  // 複数要素
+      /\b(multiple|several|many)\b/i.test(prompt), // 複数要素
       /\b(system|framework|platform)\b/i.test(prompt), // システム全体
-      fileCount > 20,                               // 大きなプロジェクト
-      taskData.estimatedDuration > 1800,           // 30分以上の予想時間
-      /\b(analyze|review|audit)\b/i.test(prompt),   // 分析タスク
-      prompt.split(/[.!?]/).length > 5              // 複数の文
+      fileCount > 20, // 大きなプロジェクト
+      taskData.estimatedDuration > 1800, // 30分以上の予想時間
+      /\b(analyze|review|audit)\b/i.test(prompt), // 分析タスク
+      prompt.split(/[.!?]/).length > 5, // 複数の文
     ];
 
     const complexityScore = complexityFactors.filter(Boolean).length;
     const threshold = this.settings.complexity_threshold || 3;
 
-    console.log(`Task complexity score: ${complexityScore}/${complexityFactors.length} (threshold: ${threshold})`);
-    
+    console.log(
+      `Task complexity score: ${complexityScore}/${complexityFactors.length} (threshold: ${threshold})`
+    );
+
     return complexityScore >= threshold;
   }
 
@@ -160,7 +165,7 @@ class AutoArchitectHook {
    */
   determineCommandType(taskData) {
     const prompt = (taskData.prompt || taskData.description || '').toLowerCase();
-    
+
     if (/\b(analyze|review|audit|assess)\b/.test(prompt)) {
       return 'ANALYZE_PROJECT';
     }
@@ -185,7 +190,7 @@ class AutoArchitectHook {
     if (/\b(document|documentation|readme)\b/.test(prompt)) {
       return 'CREATE_DOCUMENTATION';
     }
-    
+
     return 'IMPLEMENT_FEATURE'; // デフォルト
   }
 
@@ -207,7 +212,7 @@ class AutoArchitectHook {
           if (response.type === 'project_completed' || response.type === 'project_failed') {
             clearTimeout(timeoutId);
             this.multiAgentSystem.stdout.off('data', resultHandler);
-            
+
             if (response.type === 'project_completed') {
               resolve(response.result);
             } else {
@@ -229,11 +234,11 @@ class AutoArchitectHook {
    */
   async shutdown() {
     console.log('🛑 Shutting down Auto-Architect Hook...');
-    
+
     if (this.multiAgentSystem) {
       // Send shutdown message
       this.multiAgentSystem.stdin.write(JSON.stringify({ type: 'shutdown' }) + '\n');
-      
+
       // Wait for graceful termination
       await processManager.terminate(this.multiAgentSystem, 5000);
     }
@@ -250,12 +255,12 @@ process.on('SIGTERM', () => autoArchitect.shutdown());
 // Claude Code から呼び出されるメイン関数
 async function main(args) {
   const command = args[0];
-  
+
   switch (command) {
     case 'init':
       await autoArchitect.initialize();
       break;
-      
+
     case 'intercept':
       let taskData = {};
       try {
@@ -269,11 +274,11 @@ async function main(args) {
         console.log(JSON.stringify({ type: 'auto_architect_result', result }));
       }
       break;
-      
+
     case 'shutdown':
       await autoArchitect.shutdown();
       break;
-      
+
     default:
       console.log('Auto-Architect Hook - Usage: init|intercept|shutdown');
   }

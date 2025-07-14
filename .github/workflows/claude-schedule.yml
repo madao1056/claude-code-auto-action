@@ -19,20 +19,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Check for outdated dependencies
         run: |
           npm outdated --json > outdated.json || true
-          
+
           if [ -s outdated.json ] && [ $(jq '. | length' outdated.json) -gt 0 ]; then
             echo "Found outdated dependencies:"
             cat outdated.json | jq '.'
@@ -79,22 +79,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Generate Code Quality Report
         run: |
           # Run various code quality tools
           echo "# Code Quality Report - $(date +%Y-%m-%d)" > quality-report.md
           echo "" >> quality-report.md
-          
+
           # Run linting
           echo "## Linting Results" >> quality-report.md
           echo "" >> quality-report.md
@@ -107,7 +107,7 @@ jobs:
             echo "\`\`\`" >> quality-report.md
           fi
           echo "" >> quality-report.md
-          
+
           # Run tests
           echo "## Test Results" >> quality-report.md
           echo "" >> quality-report.md
@@ -120,7 +120,7 @@ jobs:
             echo "\`\`\`" >> quality-report.md
           fi
           echo "" >> quality-report.md
-          
+
           # Check if cursor extension exists and test it
           if [ -d "cursor-extension" ]; then
             echo "## Extension Quality" >> quality-report.md
@@ -140,11 +140,11 @@ jobs:
             fi
             cd ..
           fi
-          
+
           echo "" >> quality-report.md
           echo "---" >> quality-report.md
           echo "Generated on: $(date)" >> quality-report.md
-          
+
           # Only create issue if there are problems
           if grep -q "❌" quality-report.md; then
             gh issue create \
@@ -161,21 +161,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run Security Scan
         run: |
           # Run npm audit
           npm audit --json > audit.json || true
-          
+
           # Check if there are vulnerabilities
           if [ -s audit.json ]; then
             VULNS=$(jq '.metadata.vulnerabilities' audit.json 2>/dev/null || echo '{}')
@@ -219,23 +219,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci || echo "No package-lock.json found, skipping npm ci"
-      
+
       - name: Check Documentation Coverage
         run: |
           echo "# Documentation Coverage Report" > doc-report.md
           echo "" >> doc-report.md
           echo "Generated on: $(date)" >> doc-report.md
           echo "" >> doc-report.md
-          
+
           # Check if README exists
           echo "## README Status" >> doc-report.md
           if [ -f "README.md" ]; then
@@ -249,7 +249,7 @@ jobs:
             echo "❌ README.md is missing" >> doc-report.md
           fi
           echo "" >> doc-report.md
-          
+
           # Check if CLAUDE.md exists
           echo "## CLAUDE.md Status" >> doc-report.md
           if [ -f "CLAUDE.md" ]; then
@@ -258,25 +258,25 @@ jobs:
             echo "❌ CLAUDE.md is missing" >> doc-report.md
           fi
           echo "" >> doc-report.md
-          
+
           # Find all source files
           echo "## Source Files Documentation" >> doc-report.md
           echo "" >> doc-report.md
-          
+
           # Count files
           JS_COUNT=$(find . -type f -name "*.js" -not -path "./node_modules/*" -not -path "./dist/*" | wc -l)
           TS_COUNT=$(find . -type f -name "*.ts" -not -path "./node_modules/*" -not -path "./dist/*" | wc -l)
-          
+
           echo "- JavaScript files: $JS_COUNT" >> doc-report.md
           echo "- TypeScript files: $TS_COUNT" >> doc-report.md
           echo "" >> doc-report.md
-          
+
           # Check for JSDoc comments in a sample of files
           echo "## JSDoc Coverage (sample)" >> doc-report.md
           echo "" >> doc-report.md
-          
+
           SAMPLE_FILES=$(find . -type f \( -name "*.js" -o -name "*.ts" \) -not -path "./node_modules/*" -not -path "./dist/*" | head -10)
-          
+
           for file in $SAMPLE_FILES; do
             if grep -q "/\*\*" "$file"; then
               echo "✅ $file - has JSDoc comments" >> doc-report.md
@@ -284,11 +284,11 @@ jobs:
               echo "❌ $file - missing JSDoc comments" >> doc-report.md
             fi
           done
-          
+
           echo "" >> doc-report.md
           echo "---" >> doc-report.md
           echo "Note: This is an automated check. Manual review recommended for comprehensive documentation assessment." >> doc-report.md
-          
+
           # Only create issue if there are documentation issues
           if grep -q "❌" doc-report.md; then
             gh issue create \

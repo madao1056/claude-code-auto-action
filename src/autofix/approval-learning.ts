@@ -47,7 +47,7 @@ export class ApprovalLearningSystem {
     this.historyFile = path.join(this.dataDir, 'approval-history.json');
     this.patternsFile = path.join(this.dataDir, 'approval-patterns.json');
     this.configFile = path.join(this.dataDir, 'learning-config.json');
-    
+
     this.ensureDataDirectory();
   }
 
@@ -100,7 +100,7 @@ export class ApprovalLearningSystem {
     } catch (error) {
       console.error('Error loading learning config:', error);
     }
-    
+
     return {
       updateInterval: 3600,
       minConfidenceThreshold: 0.8,
@@ -117,9 +117,9 @@ export class ApprovalLearningSystem {
         'password',
         'secret',
         'key',
-        'token'
+        'token',
       ],
-      lastUpdateCheck: Date.now()
+      lastUpdateCheck: Date.now(),
     };
   }
 
@@ -132,12 +132,12 @@ export class ApprovalLearningSystem {
     const newRecord: ApprovalRecord = {
       ...record,
       id: this.generateId(record),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
-    
+
     history.push(newRecord);
     this.saveHistory(history);
-    
+
     // Update patterns if approved and not dangerous
     if (record.approved && !record.context.isDangerous) {
       this.updatePatterns(newRecord);
@@ -152,19 +152,21 @@ export class ApprovalLearningSystem {
   private updatePatterns(record: ApprovalRecord): void {
     const patterns = this.loadPatterns();
     const patternKey = this.extractPatternKey(record);
-    
+
     if (!patternKey) return;
-    
+
     const existing = patterns.get(patternKey);
     if (existing) {
       existing.usageCount++;
       existing.lastUsed = Date.now();
       existing.confidence = Math.min(1, existing.confidence + 0.1);
-      
+
       // Auto-approve if usage count meets threshold
       const config = this.loadConfig();
-      if (existing.usageCount >= config.minUsageCountForAutoApproval &&
-          existing.confidence >= config.minConfidenceThreshold) {
+      if (
+        existing.usageCount >= config.minUsageCountForAutoApproval &&
+        existing.confidence >= config.minConfidenceThreshold
+      ) {
         existing.autoApprove = true;
       }
     } else {
@@ -175,10 +177,10 @@ export class ApprovalLearningSystem {
         confidence: 0.5,
         usageCount: 1,
         lastUsed: Date.now(),
-        createdAt: Date.now()
+        createdAt: Date.now(),
       });
     }
-    
+
     this.savePatterns(patterns);
   }
 
@@ -205,7 +207,7 @@ export class ApprovalLearningSystem {
 
   shouldAutoApprove(operation: string, command?: string, filePath?: string): boolean {
     const config = this.loadConfig();
-    
+
     // Check if it contains dangerous patterns
     const checkString = `${operation} ${command || ''} ${filePath || ''}`.toLowerCase();
     for (const dangerous of config.dangerousPatterns) {
@@ -213,41 +215,41 @@ export class ApprovalLearningSystem {
         return false;
       }
     }
-    
+
     // Check learned patterns
     const patterns = this.loadPatterns();
     const testRecord = { operation, command, filePath, context: {} } as ApprovalRecord;
     const patternKey = this.extractPatternKey(testRecord);
-    
+
     if (patternKey) {
       const pattern = patterns.get(patternKey);
       if (pattern && pattern.autoApprove) {
         return true;
       }
     }
-    
+
     return false;
   }
 
   async checkForUpdates(): Promise<boolean> {
     const config = this.loadConfig();
     const now = Date.now();
-    
+
     if (now - config.lastUpdateCheck < this.updateCheckInterval * 1000) {
       return false;
     }
-    
+
     console.log('\n🔄 学習システムの更新をチェックしています...');
-    
+
     // Analyze recent history and update patterns
     const history = this.loadHistory();
-    const recentHistory = history.filter(r => 
-      now - r.timestamp < 7 * 24 * 60 * 60 * 1000 // Last 7 days
+    const recentHistory = history.filter(
+      (r) => now - r.timestamp < 7 * 24 * 60 * 60 * 1000 // Last 7 days
     );
-    
+
     const patterns = this.loadPatterns();
     let updated = false;
-    
+
     // Count pattern usage in recent history
     const usageCounts = new Map<string, number>();
     for (const record of recentHistory) {
@@ -258,7 +260,7 @@ export class ApprovalLearningSystem {
         }
       }
     }
-    
+
     // Update patterns based on recent usage
     for (const [key, count] of usageCounts.entries()) {
       const pattern = patterns.get(key);
@@ -271,14 +273,14 @@ export class ApprovalLearningSystem {
         }
       }
     }
-    
+
     if (updated) {
       this.savePatterns(patterns);
     }
-    
+
     config.lastUpdateCheck = now;
     this.saveConfig(config);
-    
+
     return updated;
   }
 
@@ -291,24 +293,23 @@ export class ApprovalLearningSystem {
     const history = this.loadHistory();
     const patterns = this.loadPatterns();
     const now = Date.now();
-    
-    const recentApprovals = history.filter(r => 
-      now - r.timestamp < 24 * 60 * 60 * 1000 && r.approved
+
+    const recentApprovals = history.filter(
+      (r) => now - r.timestamp < 24 * 60 * 60 * 1000 && r.approved
     ).length;
-    
-    const autoApprovePatterns = Array.from(patterns.values())
-      .filter(p => p.autoApprove).length;
-    
+
+    const autoApprovePatterns = Array.from(patterns.values()).filter((p) => p.autoApprove).length;
+
     const mostUsedPatterns = Array.from(patterns.values())
       .sort((a, b) => b.usageCount - a.usageCount)
       .slice(0, 5)
-      .map(p => ({ pattern: p.pattern, count: p.usageCount }));
-    
+      .map((p) => ({ pattern: p.pattern, count: p.usageCount }));
+
     return {
       totalRecords: history.length,
       autoApprovePatterns,
       recentApprovals,
-      mostUsedPatterns
+      mostUsedPatterns,
     };
   }
 
@@ -316,20 +317,24 @@ export class ApprovalLearningSystem {
     const history = this.loadHistory();
     const patterns = this.loadPatterns();
     const config = this.loadConfig();
-    
-    return JSON.stringify({
-      exportDate: new Date().toISOString(),
-      history: history.slice(-1000), // Last 1000 records
-      patterns: Object.fromEntries(patterns),
-      config,
-      statistics: this.getStatistics()
-    }, null, 2);
+
+    return JSON.stringify(
+      {
+        exportDate: new Date().toISOString(),
+        history: history.slice(-1000), // Last 1000 records
+        patterns: Object.fromEntries(patterns),
+        config,
+        statistics: this.getStatistics(),
+      },
+      null,
+      2
+    );
   }
 
   importLearningData(data: string): boolean {
     try {
       const imported = JSON.parse(data);
-      
+
       if (imported.patterns) {
         const patterns = new Map<string, ApprovalPattern>();
         Object.entries(imported.patterns).forEach(([key, value]) => {
@@ -337,11 +342,11 @@ export class ApprovalLearningSystem {
         });
         this.savePatterns(patterns);
       }
-      
+
       if (imported.config) {
         this.saveConfig(imported.config);
       }
-      
+
       console.log('✅ 学習データのインポートが完了しました');
       return true;
     } catch (error) {

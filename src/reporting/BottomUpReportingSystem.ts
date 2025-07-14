@@ -44,7 +44,7 @@ export enum ReportSource {
   AGENT = 'agent',
   TASK = 'task',
   COMMAND = 'command',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
 }
 
 export enum ReportType {
@@ -55,14 +55,14 @@ export enum ReportType {
   PERFORMANCE_REPORT = 'performance_report',
   QUALITY_REPORT = 'quality_report',
   RESOURCE_REPORT = 'resource_report',
-  SUMMARY_REPORT = 'summary_report'
+  SUMMARY_REPORT = 'summary_report',
 }
 
 export enum ReportLevel {
   TASK = 'task',
   AGENT = 'agent',
   COMMAND = 'command',
-  SESSION = 'session'
+  SESSION = 'session',
 }
 
 export interface ReportTemplate {
@@ -107,7 +107,7 @@ export class BottomUpReportingSystem extends EventEmitter {
         active_agents: 0,
         overall_progress: 0,
         estimated_completion: null,
-        current_issues: []
+        current_issues: [],
       },
       agent_performance: new Map(),
       command_progress: new Map(),
@@ -116,17 +116,17 @@ export class BottomUpReportingSystem extends EventEmitter {
         memory_usage: 0,
         network_usage: 0,
         concurrent_tasks: 0,
-        agent_capacity_used: 0
+        agent_capacity_used: 0,
       },
       quality_metrics: {
         overall_quality_score: 0,
         test_coverage: 0,
         code_quality_score: 0,
         documentation_completeness: 0,
-        security_score: 0
+        security_score: 0,
       },
       recent_activities: [],
-      alerts: []
+      alerts: [],
     };
   }
 
@@ -139,8 +139,8 @@ export class BottomUpReportingSystem extends EventEmitter {
       format: 'summary',
       recipients: ['dashboard'],
       filters: {
-        min_severity: 'medium'
-      }
+        min_severity: 'medium',
+      },
     });
 
     // Periodic progress reports
@@ -151,8 +151,8 @@ export class BottomUpReportingSystem extends EventEmitter {
       format: 'detailed',
       recipients: ['dashboard', 'user'],
       filters: {
-        categories: ['performance', 'quality']
-      }
+        categories: ['performance', 'quality'],
+      },
     });
 
     // Error and issue reports
@@ -163,8 +163,8 @@ export class BottomUpReportingSystem extends EventEmitter {
       format: 'detailed',
       recipients: ['dashboard', 'user', 'logs'],
       filters: {
-        min_severity: 'high'
-      }
+        min_severity: 'high',
+      },
     });
 
     // Performance monitoring
@@ -173,7 +173,7 @@ export class BottomUpReportingSystem extends EventEmitter {
       level: ReportLevel.SESSION,
       frequency: 'periodic',
       format: 'metrics_only',
-      recipients: ['dashboard', 'analytics']
+      recipients: ['dashboard', 'analytics'],
     });
   }
 
@@ -182,40 +182,45 @@ export class BottomUpReportingSystem extends EventEmitter {
       metrics_calculation: 'weighted_average',
       issue_escalation: {
         threshold: 3,
-        severity_upgrade: true
+        severity_upgrade: true,
       },
-      rollup_frequency: 60000 // 1 minute
+      rollup_frequency: 60000, // 1 minute
     });
 
     this.aggregationRules.set(ReportLevel.AGENT, {
       metrics_calculation: 'weighted_average',
       issue_escalation: {
         threshold: 2,
-        severity_upgrade: true
+        severity_upgrade: true,
       },
-      rollup_frequency: 300000 // 5 minutes
+      rollup_frequency: 300000, // 5 minutes
     });
 
     this.aggregationRules.set(ReportLevel.COMMAND, {
       metrics_calculation: 'weighted_average',
       issue_escalation: {
         threshold: 1,
-        severity_upgrade: false
+        severity_upgrade: false,
       },
-      rollup_frequency: 600000 // 10 minutes
+      rollup_frequency: 600000, // 10 minutes
     });
 
     this.aggregationRules.set(ReportLevel.SESSION, {
       metrics_calculation: 'overall_average',
       issue_escalation: {
         threshold: 1,
-        severity_upgrade: false
+        severity_upgrade: false,
       },
-      rollup_frequency: 1800000 // 30 minutes
+      rollup_frequency: 1800000, // 30 minutes
     });
   }
 
-  reportTaskProgress(task: Task, agentId: string, progress: number, metrics?: Partial<ReportMetrics>): void {
+  reportTaskProgress(
+    task: Task,
+    agentId: string,
+    progress: number,
+    metrics?: Partial<ReportMetrics>
+  ): void {
     const report: ProgressReport = {
       id: `task_${task.id}_${Date.now()}`,
       timestamp: new Date(),
@@ -230,12 +235,12 @@ export class BottomUpReportingSystem extends EventEmitter {
           type: task.type,
           priority: task.priority,
           status: task.status,
-          progress: progress
+          progress: progress,
         },
         agent_id: agentId,
-        progress: progress
+        progress: progress,
       },
-      metrics: this.calculateTaskMetrics(task, progress, metrics)
+      metrics: this.calculateTaskMetrics(task, progress, metrics),
     };
 
     this.addReport(report);
@@ -256,15 +261,17 @@ export class BottomUpReportingSystem extends EventEmitter {
           title: task.title,
           type: task.type,
           priority: task.priority,
-          status: 'completed'
+          status: 'completed',
         },
         agent_id: agentId,
         result: result,
-        duration: task.completed_at && task.started_at ? 
-          task.completed_at.getTime() - task.started_at.getTime() : null
+        duration:
+          task.completed_at && task.started_at
+            ? task.completed_at.getTime() - task.started_at.getTime()
+            : null,
       },
       metrics: metrics || this.calculateTaskMetrics(task, 100),
-      recommendations: this.generateTaskRecommendations(task, result, metrics)
+      recommendations: this.generateTaskRecommendations(task, result, metrics),
     };
 
     this.addReport(report);
@@ -286,12 +293,12 @@ export class BottomUpReportingSystem extends EventEmitter {
           type: agent.type,
           status: agent.status,
           load: agent.load,
-          current_tasks: agent.current_tasks
-        }
+          current_tasks: agent.current_tasks,
+        },
       },
       metrics: metrics,
       issues: issues || [],
-      next_steps: this.generateAgentNextSteps(agent, metrics)
+      next_steps: this.generateAgentNextSteps(agent, metrics),
     };
 
     this.addReport(report);
@@ -312,13 +319,13 @@ export class BottomUpReportingSystem extends EventEmitter {
           title: command.title,
           type: command.type,
           status: command.status,
-          progress: command.progress
+          progress: command.progress,
         },
         total_tasks: command.generated_tasks.length,
-        assigned_agents: command.assigned_agents
+        assigned_agents: command.assigned_agents,
       },
       metrics: aggregatedMetrics,
-      recommendations: this.generateCommandRecommendations(command, aggregatedMetrics)
+      recommendations: this.generateCommandRecommendations(command, aggregatedMetrics),
     };
 
     this.addReport(report);
@@ -335,7 +342,7 @@ export class BottomUpReportingSystem extends EventEmitter {
       affected_components: [sourceId],
       suggested_actions: this.generateErrorActions(error, context),
       reported_by: sourceId,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const report: ProgressReport = {
@@ -349,11 +356,11 @@ export class BottomUpReportingSystem extends EventEmitter {
         error: {
           name: error.name,
           message: error.message,
-          stack: error.stack
+          stack: error.stack,
         },
-        context: context
+        context: context,
       },
-      issues: [issue]
+      issues: [issue],
     };
 
     this.addReport(report);
@@ -363,10 +370,10 @@ export class BottomUpReportingSystem extends EventEmitter {
   private addReport(report: ProgressReport): void {
     this.reports.set(report.id, report);
     this.reportQueue.push(report.id);
-    
+
     // Emit event for real-time listeners
     this.emit('report_generated', report);
-    
+
     // Process high-priority reports immediately
     if (this.isHighPriority(report)) {
       this.processReport(report);
@@ -374,8 +381,10 @@ export class BottomUpReportingSystem extends EventEmitter {
   }
 
   private isHighPriority(report: ProgressReport): boolean {
-    return report.report_type === ReportType.ERROR_REPORT ||
-           (report.issues && report.issues.some(issue => issue.severity === 'critical'));
+    return (
+      report.report_type === ReportType.ERROR_REPORT ||
+      (report.issues && report.issues.some((issue) => issue.severity === 'critical'))
+    );
   }
 
   private startReportProcessing(): void {
@@ -473,12 +482,14 @@ export class BottomUpReportingSystem extends EventEmitter {
       source: `${report.source}:${report.source_id}`,
       type: report.report_type,
       summary: this.generateSummary(report),
-      key_metrics: report.metrics ? {
-        completion: report.metrics.completion_percentage,
-        quality: report.metrics.quality_score,
-        efficiency: report.metrics.efficiency_score
-      } : null,
-      issues_count: report.issues?.length || 0
+      key_metrics: report.metrics
+        ? {
+            completion: report.metrics.completion_percentage,
+            quality: report.metrics.quality_score,
+            efficiency: report.metrics.efficiency_score,
+          }
+        : null,
+      issues_count: report.issues?.length || 0,
     };
   }
 
@@ -486,7 +497,7 @@ export class BottomUpReportingSystem extends EventEmitter {
     return {
       timestamp: report.timestamp,
       source: report.source_id,
-      metrics: report.metrics
+      metrics: report.metrics,
     };
   }
 
@@ -494,11 +505,15 @@ export class BottomUpReportingSystem extends EventEmitter {
     return report; // Full report
   }
 
-  private calculateTaskMetrics(task: Task, progress: number, provided?: Partial<ReportMetrics>): ReportMetrics {
+  private calculateTaskMetrics(
+    task: Task,
+    progress: number,
+    provided?: Partial<ReportMetrics>
+  ): ReportMetrics {
     const now = new Date().getTime();
     const startTime = task.started_at?.getTime() || now;
     const timeElapsed = now - startTime;
-    
+
     return {
       completion_percentage: progress,
       time_elapsed: timeElapsed,
@@ -507,8 +522,8 @@ export class BottomUpReportingSystem extends EventEmitter {
       quality_score: provided?.quality_score || 0.8, // Default quality score
       resource_utilization: 0.7, // Mock resource utilization
       error_rate: 0.05, // Mock error rate
-      throughput: progress > 0 ? (progress / (timeElapsed / 3600000)) : 0, // tasks per hour
-      ...provided
+      throughput: progress > 0 ? progress / (timeElapsed / 3600000) : 0, // tasks per hour
+      ...provided,
     };
   }
 
@@ -522,7 +537,7 @@ export class BottomUpReportingSystem extends EventEmitter {
     this.dashboardData.recent_activities.unshift({
       timestamp: formattedReport.timestamp,
       activity: formattedReport.summary || formattedReport.type,
-      source: formattedReport.source
+      source: formattedReport.source,
     });
 
     // Keep only recent activities (last 50)
@@ -539,25 +554,23 @@ export class BottomUpReportingSystem extends EventEmitter {
 
   getReportHistory(level?: ReportLevel, limit: number = 100): ProgressReport[] {
     let reports = Array.from(this.reports.values());
-    
+
     if (level) {
-      reports = reports.filter(r => r.level === level);
+      reports = reports.filter((r) => r.level === level);
     }
-    
-    return reports
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit);
+
+    return reports.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, limit);
   }
 
   getMetricsHistory(duration: number = 3600000): MetricsSnapshot[] {
     const cutoff = new Date(Date.now() - duration);
-    return this.metricsHistory.filter(snapshot => snapshot.timestamp >= cutoff);
+    return this.metricsHistory.filter((snapshot) => snapshot.timestamp >= cutoff);
   }
 
   generateSessionSummary(): any {
     const recentReports = this.getReportHistory(undefined, 1000);
     const metrics = this.calculateSessionMetrics(recentReports);
-    
+
     return {
       session_id: 'current',
       generated_at: new Date(),
@@ -568,13 +581,12 @@ export class BottomUpReportingSystem extends EventEmitter {
         tasks_completed: this.dashboardData.session_overview.completed_tasks,
         overall_efficiency: metrics.efficiency_score,
         quality_score: metrics.quality_score,
-        issues_resolved: recentReports.filter(r => 
-          r.report_type === ReportType.COMPLETION_REPORT
-        ).length
+        issues_resolved: recentReports.filter((r) => r.report_type === ReportType.COMPLETION_REPORT)
+          .length,
       },
       performance_highlights: this.extractPerformanceHighlights(recentReports),
       recommendations: this.generateSessionRecommendations(metrics),
-      next_session_improvements: this.suggestImprovements(recentReports)
+      next_session_improvements: this.suggestImprovements(recentReports),
     };
   }
 
@@ -620,10 +632,14 @@ export class BottomUpReportingSystem extends EventEmitter {
 
   private mapSourceToLevel(source: ReportSource): ReportLevel {
     switch (source) {
-      case ReportSource.TASK: return ReportLevel.TASK;
-      case ReportSource.AGENT: return ReportLevel.AGENT;
-      case ReportSource.COMMAND: return ReportLevel.COMMAND;
-      default: return ReportLevel.SESSION;
+      case ReportSource.TASK:
+        return ReportLevel.TASK;
+      case ReportSource.AGENT:
+        return ReportLevel.AGENT;
+      case ReportSource.COMMAND:
+        return ReportLevel.COMMAND;
+      default:
+        return ReportLevel.SESSION;
     }
   }
 
@@ -682,7 +698,7 @@ export class BottomUpReportingSystem extends EventEmitter {
       quality_score: 0.85,
       resource_utilization: 0.7,
       error_rate: 0.05,
-      throughput: 10
+      throughput: 10,
     };
   }
 

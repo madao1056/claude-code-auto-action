@@ -14,20 +14,17 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'email-receipt-collector' },
   transports: [
-    new winston.transports.File({ 
-      filename: path.join(logDir, 'error.log'), 
-      level: 'error' 
+    new winston.transports.File({
+      filename: path.join(logDir, 'error.log'),
+      level: 'error',
     }),
-    new winston.transports.File({ 
-      filename: path.join(logDir, 'combined.log') 
+    new winston.transports.File({
+      filename: path.join(logDir, 'combined.log'),
     }),
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+    }),
+  ],
 });
 
 module.exports = logger;

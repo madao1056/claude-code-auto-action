@@ -15,17 +15,17 @@ const { spawn } = require('child_process');
 function spawnProcess(command, args, options = {}) {
   const defaultOptions = {
     stdio: ['pipe', 'pipe', 'pipe'],
-    env: { ...process.env }
+    env: { ...process.env },
   };
-  
+
   const mergedOptions = { ...defaultOptions, ...options };
   const childProcess = spawn(command, args, mergedOptions);
-  
+
   // Add error handling
   childProcess.on('error', (error) => {
     console.error(`Failed to start process ${command}:`, error);
   });
-  
+
   return childProcess;
 }
 
@@ -44,13 +44,12 @@ async function waitForProcessReady(process, readyPattern, timeout = 30000) {
         reject(new Error('Process startup timeout'));
       }
     }, timeout);
-    
+
     const checkOutput = (data) => {
       const output = data.toString();
-      const pattern = typeof readyPattern === 'string' 
-        ? new RegExp(readyPattern, 'i')
-        : readyPattern;
-        
+      const pattern =
+        typeof readyPattern === 'string' ? new RegExp(readyPattern, 'i') : readyPattern;
+
       if (pattern.test(output)) {
         isReady = true;
         clearTimeout(timeoutId);
@@ -58,7 +57,7 @@ async function waitForProcessReady(process, readyPattern, timeout = 30000) {
         resolve();
       }
     };
-    
+
     process.stdout.on('data', checkOutput);
   });
 }
@@ -73,16 +72,12 @@ async function waitForProcessReady(process, readyPattern, timeout = 30000) {
  * @returns {Promise<void>}
  */
 async function gracefulShutdown(process, options = {}) {
-  const {
-    signal = 'SIGTERM',
-    timeout = 5000,
-    shutdownMessage = null
-  } = options;
-  
+  const { signal = 'SIGTERM', timeout = 5000, shutdownMessage = null } = options;
+
   if (!process || process.killed) {
     return;
   }
-  
+
   // Send shutdown message if provided
   if (shutdownMessage && process.stdin && !process.stdin.destroyed) {
     try {
@@ -91,10 +86,10 @@ async function gracefulShutdown(process, options = {}) {
       console.debug('Failed to send shutdown message:', error);
     }
   }
-  
+
   // Send signal
   process.kill(signal);
-  
+
   // Set timeout for force kill
   return new Promise((resolve) => {
     const forceKillTimeout = setTimeout(() => {
@@ -103,7 +98,7 @@ async function gracefulShutdown(process, options = {}) {
       }
       resolve();
     }, timeout);
-    
+
     process.once('exit', () => {
       clearTimeout(forceKillTimeout);
       resolve();
@@ -120,42 +115,41 @@ async function gracefulShutdown(process, options = {}) {
  * @returns {Object} Monitor control object
  */
 function createProcessMonitor(startProcess, options = {}) {
-  const {
-    maxRestarts = 3,
-    restartDelay = 1000
-  } = options;
-  
+  const { maxRestarts = 3, restartDelay = 1000 } = options;
+
   let process = null;
   let restartCount = 0;
   let isRunning = false;
   let shouldRestart = true;
-  
+
   const start = async () => {
     if (isRunning) return;
-    
+
     isRunning = true;
     process = await startProcess();
-    
+
     process.on('exit', async (code) => {
       isRunning = false;
-      
+
       if (shouldRestart && code !== 0 && restartCount < maxRestarts) {
         restartCount++;
-        console.log(`Process exited with code ${code}. Restarting (${restartCount}/${maxRestarts})...`);
-        
-        await new Promise(resolve => setTimeout(resolve, restartDelay));
+        console.log(
+          `Process exited with code ${code}. Restarting (${restartCount}/${maxRestarts})...`
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, restartDelay));
         start();
       }
     });
   };
-  
+
   const stop = async () => {
     shouldRestart = false;
     if (process) {
       await gracefulShutdown(process);
     }
   };
-  
+
   return { start, stop };
 }
 
@@ -163,5 +157,5 @@ module.exports = {
   spawnProcess,
   waitForProcessReady,
   gracefulShutdown,
-  createProcessMonitor
+  createProcessMonitor,
 };

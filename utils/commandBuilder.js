@@ -15,21 +15,21 @@
  */
 function buildCommand(baseCommand, options = {}) {
   const flags = [];
-  
+
   if (options.yoloMode || options.autoApprove) {
     flags.push('--dangerously-skip-permissions');
     flags.push('--auto-approve');
     flags.push('--non-interactive');
   }
-  
+
   if (options.nonInteractive) {
     flags.push('--non-interactive');
   }
-  
+
   if (options.model) {
     flags.push(`--model ${options.model}`);
   }
-  
+
   return flags.length > 0 ? `${baseCommand} ${flags.join(' ')}` : baseCommand;
 }
 
@@ -57,23 +57,23 @@ function escapeShellArg(str) {
  */
 function buildEnvironment(options = {}) {
   const env = { ...process.env };
-  
+
   if (options.yoloMode || options.autoApprove) {
     env.CLAUDE_AUTO_APPROVE = 'true';
     env.CLAUDE_SKIP_CONFIRMATION = 'true';
     env.CLAUDE_NON_INTERACTIVE = 'true';
     env.CLAUDE_PERMISSIONS_MODE = 'bypassPermissions';
   }
-  
+
   if (options.autoArchitect) {
     env.CLAUDE_AUTO_ARCHITECT = 'true';
   }
-  
+
   return env;
 }
 
 module.exports = {
   buildCommand,
   escapeShellArg,
-  buildEnvironment
+  buildEnvironment,
 };

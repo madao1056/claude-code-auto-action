@@ -22,7 +22,7 @@ class FileProcessor {
   async processAttachment(attachment) {
     const { filename, data, mimeType } = attachment;
     const fileExtension = path.extname(filename).toLowerCase().slice(1);
-    
+
     logger.info(`Processing attachment: ${filename} (${mimeType})`);
 
     try {
@@ -44,7 +44,7 @@ class FileProcessor {
     try {
       const buffer = Buffer.from(base64Data, 'base64');
       const data = await pdf(buffer);
-      
+
       return {
         type: 'pdf',
         filename: filename,
@@ -52,7 +52,7 @@ class FileProcessor {
         numPages: data.numpages,
         info: data.info,
         metadata: data.metadata,
-        processedAt: new Date().toISOString()
+        processedAt: new Date().toISOString(),
       };
     } catch (error) {
       logger.error(`Error processing PDF ${filename}:`, error);
@@ -62,7 +62,7 @@ class FileProcessor {
 
   async processImage(base64Data, filename) {
     const tempFilePath = path.join(this.tempDir, `temp_${Date.now()}_${filename}`);
-    
+
     try {
       // Save image temporarily
       const buffer = Buffer.from(base64Data, 'base64');
@@ -76,7 +76,7 @@ class FileProcessor {
         processedPath,
         process.env.OCR_LANGUAGES || 'eng+jpn',
         {
-          logger: m => logger.debug(m)
+          logger: (m) => logger.debug(m),
         }
       );
 
@@ -88,7 +88,7 @@ class FileProcessor {
         filename: filename,
         text: result.data.text,
         confidence: result.data.confidence,
-        processedAt: new Date().toISOString()
+        processedAt: new Date().toISOString(),
       };
     } catch (error) {
       logger.error(`Error processing image ${filename}:`, error);
@@ -99,7 +99,7 @@ class FileProcessor {
 
   async preprocessImage(imagePath) {
     const processedPath = imagePath.replace(/\.[^.]+$/, '_processed.png');
-    
+
     try {
       await sharp(imagePath)
         .greyscale()
@@ -107,10 +107,10 @@ class FileProcessor {
         .sharpen()
         .resize(2000, null, {
           withoutEnlargement: true,
-          fit: 'inside'
+          fit: 'inside',
         })
         .toFile(processedPath);
-      
+
       return processedPath;
     } catch (error) {
       logger.error('Error preprocessing image:', error);
@@ -135,20 +135,20 @@ class FileProcessor {
 
   async extractTextFromFiles(attachments) {
     const results = [];
-    
+
     for (const attachment of attachments) {
       const result = await this.processAttachment(attachment);
       if (result) {
         results.push(result);
       }
     }
-    
+
     return results;
   }
 
   combineExtractedText(processedFiles) {
     let combinedText = '';
-    
+
     for (const file of processedFiles) {
       if (file.text) {
         combinedText += `\n--- ${file.filename} ---\n`;
@@ -156,7 +156,7 @@ class FileProcessor {
         combinedText += '\n--- End ---\n';
       }
     }
-    
+
     return combinedText;
   }
 }

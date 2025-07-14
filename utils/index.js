@@ -20,21 +20,21 @@ module.exports = {
   loadSettings: settingsLoader.loadSettings,
   loadUserSettings: settingsLoader.loadUserSettings,
   deepMerge: settingsLoader.deepMerge,
-  
+
   // Notifications
   playSound: notification.playSound,
   showNotification: notification.showNotification,
   notifyTaskCompletion: notification.notifyTaskCompletion,
   notifyConfirmationPrompt: notification.notifyConfirmationPrompt,
-  
+
   // Command building
   buildCommand: commandBuilder.buildCommand,
   escapeShellArg: commandBuilder.escapeShellArg,
   buildEnvironment: commandBuilder.buildEnvironment,
-  
+
   // Process management
   spawnProcess: processManager.spawnProcess,
   waitForProcessReady: processManager.waitForProcessReady,
   gracefulShutdown: processManager.gracefulShutdown,
-  createProcessMonitor: processManager.createProcessMonitor
+  createProcessMonitor: processManager.createProcessMonitor,
 };

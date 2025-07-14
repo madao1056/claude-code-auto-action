@@ -25,21 +25,21 @@ export interface CommandOptions {
  */
 export function buildCommand(baseCommand: string, options: CommandOptions = {}): string {
   const flags: string[] = [];
-  
+
   if (options.yoloMode || options.autoApprove) {
     flags.push('--dangerously-skip-permissions');
     flags.push('--auto-approve');
     flags.push('--non-interactive');
   }
-  
+
   if (options.nonInteractive) {
     flags.push('--non-interactive');
   }
-  
+
   if (options.model) {
     flags.push(`--model ${options.model}`);
   }
-  
+
   return flags.length > 0 ? `${baseCommand} ${flags.join(' ')}` : baseCommand;
 }
 
@@ -55,7 +55,7 @@ export async function executeCommand(
 ): Promise<{ stdout: string; stderr: string }> {
   const fullCommand = buildCommand(command, options);
   const timeout = options.timeout || 120000; // 2 minutes default
-  
+
   // Ensure auto-system environment variables are set for VSCode execution
   const env = {
     ...process.env,
@@ -63,9 +63,9 @@ export async function executeCommand(
     CLAUDE_USE_AUTO_SYSTEM: 'true',
     CLAUDE_AUTO_APPROVE: 'true',
     CLAUDE_SKIP_CONFIRMATION: 'true',
-    CLAUDE_NON_INTERACTIVE: 'true'
+    CLAUDE_NON_INTERACTIVE: 'true',
   };
-  
+
   try {
     const result = await execAsync(fullCommand, { timeout, env });
     return result;
@@ -94,13 +94,10 @@ export function escapeString(str: string): string {
  * @param {ClaudeSettings} settings - Extension settings
  * @returns {string} Command with flags from settings
  */
-export function buildCommandFromSettings(
-  baseCommand: string,
-  settings: ClaudeSettings
-): string {
+export function buildCommandFromSettings(baseCommand: string, settings: ClaudeSettings): string {
   return buildCommand(baseCommand, {
     yoloMode: settings.yoloMode,
     model: settings.preferredModel,
-    autoApprove: settings.yoloMode
+    autoApprove: settings.yoloMode,
   });
 }

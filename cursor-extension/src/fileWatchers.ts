@@ -20,27 +20,27 @@ export interface Services {
  */
 export function registerFileWatchers(services: Services): vscode.Disposable[] {
   const disposables: vscode.Disposable[] = [];
-  
+
   // Create file watcher for all files
   const fileWatcher = vscode.workspace.createFileSystemWatcher('**/*');
-  
+
   // Handle file changes
   fileWatcher.onDidChange(async (uri) => {
     await handleFileChange(uri);
   });
-  
+
   // Handle file creation
   fileWatcher.onDidCreate(async (uri) => {
     await handleFileCreate(uri);
   });
-  
+
   // Handle file deletion
   fileWatcher.onDidDelete(async (uri) => {
     await handleFileDelete(uri);
   });
-  
+
   disposables.push(fileWatcher);
-  
+
   return disposables;
 }
 
@@ -50,16 +50,16 @@ export function registerFileWatchers(services: Services): vscode.Disposable[] {
  */
 async function handleFileChange(uri: vscode.Uri): Promise<void> {
   const settings = getSettings();
-  
+
   // Auto-format on change if enabled
   if (settings.autoFormat) {
     const document = await vscode.workspace.openTextDocument(uri);
     const editor = await vscode.window.showTextDocument(document, { preview: false });
-    
+
     await vscode.commands.executeCommand('editor.action.formatDocument');
     await document.save();
   }
-  
+
   // Auto-lint on change if enabled
   if (settings.autoLint) {
     // Check if file is JavaScript/TypeScript
@@ -76,7 +76,7 @@ async function handleFileChange(uri: vscode.Uri): Promise<void> {
 async function handleFileCreate(uri: vscode.Uri): Promise<void> {
   // Log file creation for debugging
   console.log(`File created: ${uri.fsPath}`);
-  
+
   // Refresh task and history providers
   vscode.commands.executeCommand('claude.tasksView.refresh');
   vscode.commands.executeCommand('claude.historyView.refresh');
@@ -89,7 +89,7 @@ async function handleFileCreate(uri: vscode.Uri): Promise<void> {
 async function handleFileDelete(uri: vscode.Uri): Promise<void> {
   // Log file deletion for debugging
   console.log(`File deleted: ${uri.fsPath}`);
-  
+
   // Refresh task and history providers
   vscode.commands.executeCommand('claude.tasksView.refresh');
   vscode.commands.executeCommand('claude.historyView.refresh');

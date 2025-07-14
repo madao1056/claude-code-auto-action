@@ -15,12 +15,5 @@
       "path": "${file_dir}/__tests__/${file_name}.test${file_ext}"
     }
   ],
-  "supported_languages": [
-    "javascript",
-    "typescript",
-    "python",
-    "java",
-    "go",
-    "rust"
-  ]
+  "supported_languages": ["javascript", "typescript", "python", "java", "go", "rust"]
 }

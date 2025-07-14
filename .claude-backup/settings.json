@@ -86,7 +86,12 @@
       "model": "opus",
       "temperature": 0.7,
       "max_tokens": 4000,
-      "system_prompts": ["deep-thinking", "architecture-first", "step-by-step reasoning", "evaluate trade-offs"]
+      "system_prompts": [
+        "deep-thinking",
+        "architecture-first",
+        "step-by-step reasoning",
+        "evaluate trade-offs"
+      ]
     },
     "managers": {
       "model": "opus",
@@ -277,10 +282,7 @@
     },
     "optimize": {
       "description": "Optimize imports and format code",
-      "commands": [
-        "ruff check --fix {{file}}",
-        "ruff format {{file}}"
-      ]
+      "commands": ["ruff check --fix {{file}}", "ruff format {{file}}"]
     }
   },
   "refactoring": {
@@ -295,12 +297,7 @@
       "methodLength": 50,
       "conditionComplexity": 3
     },
-    "ignorePatterns": [
-      "**/test/**",
-      "**/tests/**",
-      "**/*.test.*",
-      "**/*.spec.*"
-    ]
+    "ignorePatterns": ["**/test/**", "**/tests/**", "**/*.test.*", "**/*.spec.*"]
   },
   "testing": {
     "autoGenerateTests": true,
@@ -374,7 +371,16 @@
     "technology_support": {
       "frontend": ["react", "vue", "angular", "svelte", "solid", "preact", "alpine", "htmx"],
       "backend": ["node", "python", "ruby", "go", "rust", "java", "csharp", "php", "elixir"],
-      "database": ["postgres", "mysql", "mongodb", "redis", "elasticsearch", "cassandra", "dynamodb", "firestore"],
+      "database": [
+        "postgres",
+        "mysql",
+        "mongodb",
+        "redis",
+        "elasticsearch",
+        "cassandra",
+        "dynamodb",
+        "firestore"
+      ],
       "message_queue": ["rabbitmq", "kafka", "redis", "sqs", "pubsub"],
       "cache": ["redis", "memcached", "varnish"],
       "search": ["elasticsearch", "meilisearch", "algolia", "typesense"],

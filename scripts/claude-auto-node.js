@@ -46,26 +46,25 @@ const args = process.argv.slice(2);
 const env = buildEnvironment({ yoloMode: true, autoApprove: true });
 
 // Spawn Claude process with auto-approve flags
-const claude = spawnProcess('claude', [
-  '--dangerously-skip-permissions',
-  '--non-interactive',
-  '--auto-approve',
-  ...args
-], {
-  stdio: ['pipe', 'pipe', 'pipe'],
-  env
-});
+const claude = spawnProcess(
+  'claude',
+  ['--dangerously-skip-permissions', '--non-interactive', '--auto-approve', ...args],
+  {
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env,
+  }
+);
 
 // Create readline interface for stdout
 const rlOut = readline.createInterface({
   input: claude.stdout,
-  terminal: false
+  terminal: false,
 });
 
 // Create readline interface for stderr
 const rlErr = readline.createInterface({
   input: claude.stderr,
-  terminal: false
+  terminal: false,
 });
 
 // Buffer for collecting output
@@ -78,7 +77,7 @@ let outputBuffer = '';
 function checkAndRespond(line) {
   outputBuffer += line + '\n';
   console.log(line);
-  
+
   // Check if line matches any pattern
   for (const { pattern, response } of responsePatterns) {
     if (pattern.test(outputBuffer)) {
@@ -88,7 +87,7 @@ function checkAndRespond(line) {
       break;
     }
   }
-  
+
   // Clear buffer if it gets too large
   if (outputBuffer.length > 1000) {
     outputBuffer = outputBuffer.slice(-500);

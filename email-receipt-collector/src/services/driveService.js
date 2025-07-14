@@ -14,12 +14,12 @@ class DriveService {
       const fileMetadata = {
         name: folderName,
         mimeType: 'application/vnd.google-apps.folder',
-        parents: parentId ? [parentId] : (this.folderId ? [this.folderId] : [])
+        parents: parentId ? [parentId] : this.folderId ? [this.folderId] : [],
       };
 
       const response = await this.drive.files.create({
         resource: fileMetadata,
-        fields: 'id, name'
+        fields: 'id, name',
       });
 
       logger.info(`Created folder: ${folderName} with ID: ${response.data.id}`);
@@ -33,21 +33,21 @@ class DriveService {
   async uploadFile(fileData, metadata) {
     try {
       const { filename, mimeType, folderId } = metadata;
-      
+
       const fileMetadata = {
         name: filename,
-        parents: folderId ? [folderId] : (this.folderId ? [this.folderId] : [])
+        parents: folderId ? [folderId] : this.folderId ? [this.folderId] : [],
       };
 
       const media = {
         mimeType: mimeType || 'application/octet-stream',
-        body: Buffer.from(fileData, 'base64')
+        body: Buffer.from(fileData, 'base64'),
       };
 
       const response = await this.drive.files.create({
         resource: fileMetadata,
         media: media,
-        fields: 'id, name, webViewLink'
+        fields: 'id, name, webViewLink',
       });
 
       logger.info(`Uploaded file: ${filename} with ID: ${response.data.id}`);
@@ -68,18 +68,12 @@ class DriveService {
 
       // Create year folder
       const yearFolder = await this.findOrCreateFolder(year, this.folderId);
-      
+
       // Create month folder
-      const monthFolder = await this.findOrCreateFolder(
-        `${year}-${month}`,
-        yearFolder.id
-      );
+      const monthFolder = await this.findOrCreateFolder(`${year}-${month}`, yearFolder.id);
 
       // Create vendor folder
-      const vendorFolder = await this.findOrCreateFolder(
-        vendor,
-        monthFolder.id
-      );
+      const vendorFolder = await this.findOrCreateFolder(vendor, monthFolder.id);
 
       // Generate filename with metadata
       const timestamp = date.toISOString().split('T')[0];
@@ -91,35 +85,36 @@ class DriveService {
       const uploadedFile = await this.uploadFile(attachment.data, {
         filename: newFilename,
         mimeType: attachment.mimeType,
-        folderId: vendorFolder.id
+        folderId: vendorFolder.id,
       });
 
       // Create and upload metadata file
-      const metadataContent = JSON.stringify({
-        originalEmail: {
-          id: emailData.id,
-          subject: emailData.content.headers.subject,
-          from: emailData.content.headers.from,
-          date: emailData.content.headers.date
-        },
-        receiptData: receiptData,
-        uploadedAt: new Date().toISOString(),
-        fileInfo: {
-          originalFilename: attachment.filename,
-          uploadedFilename: newFilename,
-          driveFileId: uploadedFile.id,
-          webViewLink: uploadedFile.webViewLink
-        }
-      }, null, 2);
-
-      await this.uploadFile(
-        Buffer.from(metadataContent).toString('base64'),
+      const metadataContent = JSON.stringify(
         {
-          filename: `${timestamp}_${vendor}_metadata.json`,
-          mimeType: 'application/json',
-          folderId: vendorFolder.id
-        }
+          originalEmail: {
+            id: emailData.id,
+            subject: emailData.content.headers.subject,
+            from: emailData.content.headers.from,
+            date: emailData.content.headers.date,
+          },
+          receiptData: receiptData,
+          uploadedAt: new Date().toISOString(),
+          fileInfo: {
+            originalFilename: attachment.filename,
+            uploadedFilename: newFilename,
+            driveFileId: uploadedFile.id,
+            webViewLink: uploadedFile.webViewLink,
+          },
+        },
+        null,
+        2
       );
+
+      await this.uploadFile(Buffer.from(metadataContent).toString('base64'), {
+        filename: `${timestamp}_${vendor}_metadata.json`,
+        mimeType: 'application/json',
+        folderId: vendorFolder.id,
+      });
 
       return {
         success: true,
@@ -129,8 +124,8 @@ class DriveService {
           year,
           month,
           vendor,
-          timestamp
-        }
+          timestamp,
+        },
       };
     } catch (error) {
       logger.error('Error uploading receipt:', error);
@@ -149,7 +144,7 @@ class DriveService {
       const response = await this.drive.files.list({
         q: query,
         fields: 'files(id, name)',
-        spaces: 'drive'
+        spaces: 'drive',
       });
 
       if (response.data.files && response.data.files.length > 0) {
@@ -167,15 +162,13 @@ class DriveService {
 
   async listFiles(folderId = null) {
     try {
-      const query = folderId ? 
-        `'${folderId}' in parents and trashed=false` : 
-        'trashed=false';
+      const query = folderId ? `'${folderId}' in parents and trashed=false` : 'trashed=false';
 
       const response = await this.drive.files.list({
         q: query,
         fields: 'files(id, name, mimeType, webViewLink, createdTime)',
         orderBy: 'createdTime desc',
-        pageSize: 100
+        pageSize: 100,
       });
 
       return response.data.files;
@@ -189,7 +182,7 @@ class DriveService {
     try {
       const response = await this.drive.files.get({
         fileId: fileId,
-        fields: 'id, name, mimeType, size, createdTime, modifiedTime, webViewLink, parents'
+        fields: 'id, name, mimeType, size, createdTime, modifiedTime, webViewLink, parents',
       });
 
       return response.data;

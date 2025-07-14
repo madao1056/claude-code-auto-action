@@ -65,7 +65,7 @@ npm run typecheck
 ```json
 {
   // 既存の設定...
-  
+
   "automation": {
     "errorFix": {
       "enabled": true,
@@ -122,7 +122,7 @@ npm run typecheck
       }
     }
   },
-  
+
   "approvalLearning": {
     "enabled": true,
     "autoUpdate": true,
@@ -130,7 +130,7 @@ npm run typecheck
     "minUsageCountForAutoApproval": 3,
     "dangerousPatterns": ["rm -rf", "sudo", "ssh", "chmod 777"]
   },
-  
+
   "versioning": {
     "semantic": true,
     "autoTag": true,
@@ -221,7 +221,7 @@ monitor.startMonitoring().then(() => {
 {
   "automation": {
     "errorFix": { "enabled": true },
-    "dependencies": { "enabled": true },
+    "dependencies": { "enabled": true }
     // その他はfalseに設定
   }
 }
@@ -278,8 +278,8 @@ node src/autofix/approval-interceptor.js --cleanup --older-than 90
 ```json
 {
   "monitoring": {
-    "interval": 300000,  // 5分に延長
-    "lightweight": true   // 軽量モード
+    "interval": 300000, // 5分に延長
+    "lightweight": true // 軽量モード
   }
 }
 ```

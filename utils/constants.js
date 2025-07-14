@@ -4,7 +4,7 @@ const TIMING = {
   POLL_INTERVAL: 0.01,
   PROCESS_READY_TIMEOUT: 30000,
   TASK_RESULT_TIMEOUT: 300000,
-  CLEANUP_TIMEOUT: 1000
+  CLEANUP_TIMEOUT: 1000,
 };
 
 // Process management constants
@@ -12,7 +12,7 @@ const PROCESS = {
   MULTI_AGENT_COMMAND: 'node',
   MULTI_AGENT_SCRIPT: 'scripts/multi-agent-system.js',
   CLAUDE_EXECUTABLE: 'claude',
-  CLAUDE_FLAGS: ['--dangerously-skip-permissions', '--non-interactive']
+  CLAUDE_FLAGS: ['--dangerously-skip-permissions', '--non-interactive'],
 };
 
 // Port configuration
@@ -23,7 +23,7 @@ const PORTS = {
   FRONTEND: 3003,
   ADMIN_PANEL: 3004,
   DATABASE: 5432,
-  REDIS: 6379
+  REDIS: 6379,
 };
 
 // Environment variable names
@@ -41,7 +41,7 @@ const ENV_VARS = {
   SKIP_EDITOR_PROMPTS: 'CLAUDE_SKIP_EDITOR_PROMPTS',
   AUTO_DOCKER: 'CLAUDE_AUTO_DOCKER',
   DOCKER_AUTO_START: 'CLAUDE_DOCKER_AUTO_START',
-  DOCKER_SKIP_CONFIRM: 'CLAUDE_DOCKER_SKIP_CONFIRM'
+  DOCKER_SKIP_CONFIRM: 'CLAUDE_DOCKER_SKIP_CONFIRM',
 };
 
 // Notification sounds
@@ -49,7 +49,7 @@ const SOUNDS = {
   SUCCESS: 'Blow',
   ERROR: 'Basso',
   WARNING: 'Tink',
-  INFO: 'Pop'
+  INFO: 'Pop',
 };
 
 // File paths
@@ -58,7 +58,7 @@ const PATHS = {
   PERMISSIONS: '.claude/permissions.json',
   LOGS_DIR: 'logs',
   HOOKS_DIR: 'hooks',
-  SCRIPTS_DIR: 'scripts'
+  SCRIPTS_DIR: 'scripts',
 };
 
 module.exports = {
@@ -67,5 +67,5 @@ module.exports = {
   PORTS,
   ENV_VARS,
   SOUNDS,
-  PATHS
+  PATHS,
 };

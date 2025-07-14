@@ -38,6 +38,7 @@ Claude Code Auto Actionの学習システムは、ユーザーの行動パター
 ### 安全性機能
 
 #### 危険パターンの定義
+
 ```javascript
 const dangerousPatterns = [
   'rm -rf',
@@ -47,11 +48,12 @@ const dangerousPatterns = [
   '.env',
   'credentials',
   'password',
-  'secret'
+  'secret',
 ];
 ```
 
 #### 自動承認の条件
+
 - 使用回数 ≥ 3回
 - 信頼度 ≥ 0.8
 - 危険パターンを含まない
@@ -61,10 +63,11 @@ const dangerousPatterns = [
 ### 学習対象
 
 1. **関数パターン**
+
    ```typescript
    // 学習前
-   const handler = 
-   
+   const handler =
+
    // 学習後（自動補完）
    const handler = async (req, res) => {
      try {
@@ -89,18 +92,17 @@ const dangerousPatterns = [
 
 ```typescript
 interface LearningScore {
-  frequency: number;      // 使用頻度
-  recency: number;       // 最近の使用
-  contextMatch: number;  // コンテキスト一致度
+  frequency: number; // 使用頻度
+  recency: number; // 最近の使用
+  contextMatch: number; // コンテキスト一致度
 }
 
 function calculateScore(pattern: Pattern): number {
   const daysSinceLastUse = (Date.now() - pattern.lastUsed) / (1000 * 60 * 60 * 24);
-  
-  const recencyScore = daysSinceLastUse < 1 ? 2.0 :
-                      daysSinceLastUse < 7 ? 1.5 :
-                      daysSinceLastUse > 30 ? 0.5 : 1.0;
-  
+
+  const recencyScore =
+    daysSinceLastUse < 1 ? 2.0 : daysSinceLastUse < 7 ? 1.5 : daysSinceLastUse > 30 ? 0.5 : 1.0;
+
   return pattern.frequency * recencyScore * contextMatchScore;
 }
 ```
@@ -108,10 +110,12 @@ function calculateScore(pattern: Pattern): number {
 ## データプライバシー
 
 ### ローカル保存
+
 - すべての学習データはローカルに保存
 - 外部サーバーへの送信なし
 
 ### データ管理
+
 ```bash
 # データエクスポート
 claude-code learning export > my-patterns.json
@@ -124,6 +128,7 @@ claude-code learning reset
 ```
 
 ### チーム共有
+
 ```bash
 # チームパターンの共有
 claude-code learning share --team
@@ -135,19 +140,21 @@ claude-code learning export --exclude-personal
 ## 学習の最適化
 
 ### 定期更新
+
 ```bash
 # crontabに追加
 0 * * * * /path/to/scripts/auto-learning-update.sh --auto
 ```
 
 ### パフォーマンス設定
+
 ```json
 {
   "learning": {
-    "maxPatterns": 1000,        // 最大パターン数
-    "cleanupThreshold": 30,     // 30日使用なしで削除
-    "minFrequency": 2,          // 最小使用回数
-    "updateInterval": 3600      // 更新間隔（秒）
+    "maxPatterns": 1000, // 最大パターン数
+    "cleanupThreshold": 30, // 30日使用なしで削除
+    "minFrequency": 2, // 最小使用回数
+    "updateInterval": 3600 // 更新間隔（秒）
   }
 }
 ```
@@ -155,6 +162,7 @@ claude-code learning export --exclude-personal
 ## 統計とレポート
 
 ### 利用統計
+
 ```bash
 claude-code learning stats
 
@@ -166,6 +174,7 @@ claude-code learning stats
 ```
 
 ### 詳細レポート
+
 ```bash
 claude-code learning report --detailed
 
@@ -179,6 +188,7 @@ claude-code learning report --detailed
 ## トラブルシューティング
 
 ### 学習をリセット
+
 ```bash
 # 特定のパターンを削除
 claude-code learning remove --pattern "rm -rf"
@@ -188,6 +198,7 @@ claude-code learning reset --confirm
 ```
 
 ### デバッグモード
+
 ```bash
 # 学習プロセスの詳細ログ
 export CLAUDE_LEARNING_DEBUG=true
@@ -195,6 +206,7 @@ claude-code learning update
 ```
 
 ### バックアップとリストア
+
 ```bash
 # バックアップ作成
 claude-code learning backup

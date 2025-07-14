@@ -17,7 +17,7 @@ class ProcessManager {
     try {
       const process = spawn(command, args, {
         stdio: ['pipe', 'pipe', 'pipe'],
-        ...options
+        ...options,
       });
 
       const processId = Date.now().toString();

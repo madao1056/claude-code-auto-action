@@ -24,7 +24,7 @@ class ApprovalInterceptor {
     this.learningSystem = getApprovalLearningSystem(this.projectRoot);
     this.rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
     });
   }
 
@@ -76,16 +76,16 @@ class ApprovalInterceptor {
       /\.env/,
       /password/i,
       /secret/i,
-      /credentials/i
+      /credentials/i,
     ];
 
     const checkString = `${request.operation || ''} ${request.command || ''} ${request.filePath || ''}`;
-    return dangerousPatterns.some(pattern => pattern.test(checkString));
+    return dangerousPatterns.some((pattern) => pattern.test(checkString));
   }
 
   private async askUser(request: ApprovalRequest): Promise<boolean> {
     const question = this.formatQuestion(request);
-    
+
     return new Promise((resolve) => {
       this.rl.question(question, (answer) => {
         const normalized = answer.toLowerCase().trim();
@@ -96,11 +96,11 @@ class ApprovalInterceptor {
 
   private formatQuestion(request: ApprovalRequest): string {
     let question = '\n';
-    
+
     if (request.description) {
       question += `📝 ${request.description}\n`;
     }
-    
+
     if (request.command) {
       question += `💻 コマンド: ${request.command}\n`;
     } else if (request.filePath) {
@@ -108,12 +108,16 @@ class ApprovalInterceptor {
     } else if (request.operation) {
       question += `⚙️  操作: ${request.operation}\n`;
     }
-    
+
     question += '\nこの操作を実行しますか? (y/n): ';
     return question;
   }
 
-  private recordDecision(request: ApprovalRequest, approved: boolean, decision: 'approve' | 'deny' | 'auto'): void {
+  private recordDecision(
+    request: ApprovalRequest,
+    approved: boolean,
+    decision: 'approve' | 'deny' | 'auto'
+  ): void {
     this.learningSystem.recordApproval({
       operation: request.operation || request.type,
       command: request.command,
@@ -123,8 +127,8 @@ class ApprovalInterceptor {
         fileType: request.filePath ? path.extname(request.filePath) : undefined,
         projectPath: this.projectRoot,
         isDangerous: this.checkIfDangerous(request),
-        userDecision: decision === 'auto' ? 'approve' : decision
-      }
+        userDecision: decision === 'auto' ? 'approve' : decision,
+      },
     });
   }
 
@@ -132,7 +136,7 @@ class ApprovalInterceptor {
     const updated = await this.learningSystem.checkForUpdates();
     if (updated) {
       console.log('✅ 学習システムが更新されました');
-      
+
       const stats = this.learningSystem.getStatistics();
       console.log(`📊 統計情報:`);
       console.log(`  - 自動承認パターン: ${stats.autoApprovePatterns}個`);
@@ -149,12 +153,13 @@ class ApprovalInterceptor {
 // CLI usage
 if (require.main === module) {
   const interceptor = new ApprovalInterceptor();
-  
+
   // Parse command line arguments
   const args = process.argv.slice(2);
-  
+
   if (args[0] === '--check-updates') {
-    interceptor.checkForLearningUpdates()
+    interceptor
+      .checkForLearningUpdates()
       .then(() => interceptor.cleanup())
       .catch(console.error);
   } else if (args[0] === '--stats') {
@@ -173,18 +178,19 @@ if (require.main === module) {
   } else {
     // Process approval request from environment or stdin
     const request: ApprovalRequest = {
-      type: process.env.APPROVAL_TYPE as any || 'operation',
+      type: (process.env.APPROVAL_TYPE as any) || 'operation',
       operation: process.env.APPROVAL_OPERATION,
       command: process.env.APPROVAL_COMMAND,
       filePath: process.env.APPROVAL_FILE,
-      description: process.env.APPROVAL_DESCRIPTION
+      description: process.env.APPROVAL_DESCRIPTION,
     };
-    
-    interceptor.processApproval(request)
-      .then(approved => {
+
+    interceptor
+      .processApproval(request)
+      .then((approved) => {
         process.exit(approved ? 0 : 1);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error:', error);
         process.exit(1);
       })

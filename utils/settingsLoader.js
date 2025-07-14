@@ -15,20 +15,20 @@ function loadSettings(basePath = path.join(__dirname, '..')) {
   try {
     const settingsPath = path.join(basePath, '.claude', 'settings.json');
     const localSettingsPath = path.join(basePath, '.claude', 'settings.local.json');
-    
+
     let settings = {};
-    
+
     // Load default settings
     if (fs.existsSync(settingsPath)) {
       settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
     }
-    
+
     // Load and merge local settings
     if (fs.existsSync(localSettingsPath)) {
       const localSettings = JSON.parse(fs.readFileSync(localSettingsPath, 'utf8'));
       settings = deepMerge(settings, localSettings);
     }
-    
+
     return settings;
   } catch (error) {
     console.error('Failed to load settings:', error.message);
@@ -47,7 +47,7 @@ function loadUserSettings() {
       '.claude',
       'settings.json'
     );
-    
+
     if (fs.existsSync(claudeSettingsPath)) {
       return JSON.parse(fs.readFileSync(claudeSettingsPath, 'utf8'));
     }
@@ -65,9 +65,9 @@ function loadUserSettings() {
  */
 function deepMerge(target, source) {
   const output = Object.assign({}, target);
-  
+
   if (isObject(target) && isObject(source)) {
-    Object.keys(source).forEach(key => {
+    Object.keys(source).forEach((key) => {
       if (isObject(source[key])) {
         if (!(key in target)) {
           Object.assign(output, { [key]: source[key] });
@@ -79,7 +79,7 @@ function deepMerge(target, source) {
       }
     });
   }
-  
+
   return output;
 }
 
@@ -95,5 +95,5 @@ function isObject(item) {
 module.exports = {
   loadSettings,
   loadUserSettings,
-  deepMerge
+  deepMerge,
 };

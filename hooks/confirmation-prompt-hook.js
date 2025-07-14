@@ -50,20 +50,20 @@ class ConfirmationPromptHook {
 // CLIから直接呼び出される場合
 if (require.main === module) {
   const hook = new ConfirmationPromptHook();
-  
+
   // コマンドライン引数から判断
   const args = process.argv.slice(2);
-  
+
   if (args.includes('--prompt') || args.includes('confirmation')) {
     hook.playPromptSound();
   } else {
     // 標準入力からイベントを受け取る
     let inputData = '';
-    
+
     process.stdin.on('data', (chunk) => {
       inputData += chunk;
     });
-    
+
     process.stdin.on('end', async () => {
       try {
         const event = JSON.parse(inputData);
@@ -73,7 +73,7 @@ if (require.main === module) {
         hook.playPromptSound();
       }
     });
-    
+
     // タイムアウト設定（1秒）
     setTimeout(() => {
       process.exit(0);

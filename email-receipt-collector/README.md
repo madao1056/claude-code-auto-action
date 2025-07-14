@@ -51,6 +51,7 @@ npm run setup
 ```
 
 セットアップスクリプトで以下を設定:
+
 - Google認証情報の登録
 - Google DriveフォルダIDの設定
 - 必要なディレクトリの作成

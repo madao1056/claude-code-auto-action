@@ -47,10 +47,10 @@ export function getSettings(): ClaudeSettings {
         success: 'Glass',
         error: 'Basso',
         warning: 'Pop',
-        info: 'Pop'
+        info: 'Pop',
       },
-      types: ['all']
-    })
+      types: ['all'],
+    }),
   };
 }
 
@@ -75,10 +75,8 @@ export async function updateSetting(
  * @param {Function} callback - Callback function for setting changes
  * @returns {vscode.Disposable} Disposable for cleanup
  */
-export function onSettingsChanged(
-  callback: (settings: ClaudeSettings) => void
-): vscode.Disposable {
-  return vscode.workspace.onDidChangeConfiguration(e => {
+export function onSettingsChanged(callback: (settings: ClaudeSettings) => void): vscode.Disposable {
+  return vscode.workspace.onDidChangeConfiguration((e) => {
     if (e.affectsConfiguration('claude')) {
       callback(getSettings());
     }

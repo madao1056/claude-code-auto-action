@@ -17,46 +17,43 @@ export class FileScanner {
     'build',
     'coverage',
     '.next',
-    '.cache'
+    '.cache',
   ];
 
   /**
    * Recursively scan directory for files matching criteria
    */
-  static async scanFiles(
-    directory: string,
-    options: FileScanOptions = {}
-  ): Promise<string[]> {
+  static async scanFiles(directory: string, options: FileScanOptions = {}): Promise<string[]> {
     const {
       extensions = [],
       excludeDirs = this.DEFAULT_EXCLUDE_DIRS,
       excludePatterns = [],
       includeHidden = false,
-      maxDepth = 10
+      maxDepth = 10,
     } = options;
 
     const files: string[] = [];
-    
+
     const scan = async (dir: string, depth: number = 0): Promise<void> => {
       if (depth > maxDepth) return;
-      
+
       try {
         const entries = await fs.promises.readdir(dir, { withFileTypes: true });
-        
+
         for (const entry of entries) {
           const fullPath = path.join(dir, entry.name);
-          
+
           // Skip hidden files/dirs unless explicitly included
           if (!includeHidden && entry.name.startsWith('.')) {
             continue;
           }
-          
+
           if (entry.isDirectory()) {
             // Skip excluded directories
             if (excludeDirs.includes(entry.name)) {
               continue;
             }
-            
+
             // Recursively scan subdirectory
             await scan(fullPath, depth + 1);
           } else if (entry.isFile()) {
@@ -67,12 +64,10 @@ export class FileScanner {
                 continue;
               }
             }
-            
+
             // Check exclude patterns
-            const shouldExclude = excludePatterns.some(pattern => 
-              pattern.test(fullPath)
-            );
-            
+            const shouldExclude = excludePatterns.some((pattern) => pattern.test(fullPath));
+
             if (!shouldExclude) {
               files.push(fullPath);
             }
@@ -82,7 +77,7 @@ export class FileScanner {
         console.warn(`Failed to scan directory ${dir}:`, error);
       }
     };
-    
+
     await scan(directory);
     return files;
   }
@@ -96,7 +91,7 @@ export class FileScanner {
     options: FileScanOptions = {}
   ): Promise<string[]> {
     const allFiles = await this.scanFiles(directory, options);
-    return allFiles.filter(file => pattern.test(file));
+    return allFiles.filter((file) => pattern.test(file));
   }
 
   /**

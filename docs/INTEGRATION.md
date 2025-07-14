@@ -15,36 +15,36 @@ name: Claude Auto Action
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   auto-fix:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run auto error fix
         run: scripts/auto-fix-errors.sh
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      
+
       - name: Check for changes
         id: changes
         run: |
           if [[ -n $(git status -s) ]]; then
             echo "changes=true" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Commit fixes
         if: steps.changes.outputs.changes == 'true'
         run: |
@@ -58,10 +58,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Run dependency analysis
         run: scripts/auto-deps.sh analyze
-      
+
       - name: Upload dependency report
         uses: actions/upload-artifact@v3
         with:
@@ -73,7 +73,7 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Performance check
         run: |
           npm run build
@@ -241,7 +241,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - NODE_ENV=production
@@ -250,7 +250,7 @@ services:
       - claude-metrics:/app/.claude/metrics
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('./src/monitoring/MonitoringAlertSystem').healthCheck()"]
+      test: ['CMD', 'node', '-e', "require('./src/monitoring/MonitoringAlertSystem').healthCheck()"]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -338,17 +338,17 @@ const monitor = new MonitoringAlertSystem(process.cwd());
 // メトリクスの定義
 const cpuUsage = new Gauge({
   name: 'claude_cpu_usage',
-  help: 'CPU usage percentage'
+  help: 'CPU usage percentage',
 });
 
 const memoryUsage = new Gauge({
   name: 'claude_memory_usage',
-  help: 'Memory usage in bytes'
+  help: 'Memory usage in bytes',
 });
 
 const bundleSize = new Gauge({
   name: 'claude_bundle_size',
-  help: 'Bundle size in bytes'
+  help: 'Bundle size in bytes',
 });
 
 // メトリクスを更新
@@ -357,12 +357,12 @@ setInterval(async () => {
   if (metrics.length > 0) {
     cpuUsage.set(metrics[0].value);
   }
-  
+
   const memMetrics = monitor.getMetricsHistory('memory_usage', 1);
   if (memMetrics.length > 0) {
     memoryUsage.set(memMetrics[0].value);
   }
-  
+
   const bundleMetrics = monitor.getMetricsHistory('bundle_size', 1);
   if (bundleMetrics.length > 0) {
     bundleSize.set(bundleMetrics[0].value);
@@ -435,39 +435,48 @@ monitor.on('alert', async (alert) => {
     info: ':information_source:',
     warning: ':warning:',
     error: ':x:',
-    critical: ':rotating_light:'
+    critical: ':rotating_light:',
   };
-  
+
   await slack.chat.postMessage({
     channel: '#claude-alerts',
     text: `${emoji[alert.severity]} *${alert.type.toUpperCase()}*: ${alert.message}`,
-    attachments: [{
-      color: alert.severity === 'critical' ? 'danger' : 'warning',
-      fields: [{
-        title: 'Details',
-        value: JSON.stringify(alert.details, null, 2),
-        short: false
-      }],
-      timestamp: Math.floor(alert.timestamp.getTime() / 1000)
-    }]
+    attachments: [
+      {
+        color: alert.severity === 'critical' ? 'danger' : 'warning',
+        fields: [
+          {
+            title: 'Details',
+            value: JSON.stringify(alert.details, null, 2),
+            short: false,
+          },
+        ],
+        timestamp: Math.floor(alert.timestamp.getTime() / 1000),
+      },
+    ],
   });
 });
 
 // 日次レポート
-setInterval(async () => {
-  const report = monitor.generateReport();
-  await slack.chat.postMessage({
-    channel: '#claude-reports',
-    text: '📊 Daily Monitoring Report',
-    blocks: [{
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: report
-      }
-    }]
-  });
-}, 24 * 60 * 60 * 1000);
+setInterval(
+  async () => {
+    const report = monitor.generateReport();
+    await slack.chat.postMessage({
+      channel: '#claude-reports',
+      text: '📊 Daily Monitoring Report',
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: report,
+          },
+        },
+      ],
+    });
+  },
+  24 * 60 * 60 * 1000
+);
 ```
 
 ## APIとの統合

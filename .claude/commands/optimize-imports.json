@@ -15,11 +15,5 @@
       "target": "${current_file}"
     }
   ],
-  "file_patterns": [
-    "*.ts",
-    "*.tsx",
-    "*.js",
-    "*.jsx",
-    "*.py"
-  ]
+  "file_patterns": ["*.ts", "*.tsx", "*.js", "*.jsx", "*.py"]
 }

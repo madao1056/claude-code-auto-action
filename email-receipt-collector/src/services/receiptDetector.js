@@ -10,18 +10,52 @@ class ReceiptDetector {
   loadKeywords() {
     const defaultKeywords = [
       // English
-      'receipt', 'invoice', 'bill', 'payment', 'total', 'amount', 'subtotal',
-      'tax', 'order', 'transaction', 'purchase', 'confirmation', 'statement',
-      'charge', 'billing', 'due', 'paid', 'balance', 'summary',
-      
+      'receipt',
+      'invoice',
+      'bill',
+      'payment',
+      'total',
+      'amount',
+      'subtotal',
+      'tax',
+      'order',
+      'transaction',
+      'purchase',
+      'confirmation',
+      'statement',
+      'charge',
+      'billing',
+      'due',
+      'paid',
+      'balance',
+      'summary',
+
       // Japanese
-      '領収書', '請求書', '合計', '金額', '支払', '明細', '購入', '注文',
-      '取引', '確認', '税込', '税抜', '消費税', '小計', '決済', '振込',
-      '購入明細', '支払明細', 'レシート', '納品書'
+      '領収書',
+      '請求書',
+      '合計',
+      '金額',
+      '支払',
+      '明細',
+      '購入',
+      '注文',
+      '取引',
+      '確認',
+      '税込',
+      '税抜',
+      '消費税',
+      '小計',
+      '決済',
+      '振込',
+      '購入明細',
+      '支払明細',
+      'レシート',
+      '納品書',
     ];
 
-    const envKeywords = process.env.RECEIPT_KEYWORDS ? 
-      process.env.RECEIPT_KEYWORDS.split(',').map(k => k.trim()) : [];
+    const envKeywords = process.env.RECEIPT_KEYWORDS
+      ? process.env.RECEIPT_KEYWORDS.split(',').map((k) => k.trim())
+      : [];
 
     return [...new Set([...defaultKeywords, ...envKeywords])];
   }
@@ -30,31 +64,31 @@ class ReceiptDetector {
     return {
       // Price patterns
       price: [
-        /\$[\d,]+\.?\d*/g,  // $123.45
-        /¥[\d,]+/g,         // ¥1,234
-        /[\d,]+円/g,        // 1,234円
+        /\$[\d,]+\.?\d*/g, // $123.45
+        /¥[\d,]+/g, // ¥1,234
+        /[\d,]+円/g, // 1,234円
         /USD\s*[\d,]+\.?\d*/gi,
         /JPY\s*[\d,]+/gi,
         /total[:\s]+[\$¥]?[\d,]+\.?\d*/gi,
         /合計[:\s]*[\d,]+円?/g,
-        /請求額[:\s]*[\d,]+円?/g
+        /請求額[:\s]*[\d,]+円?/g,
       ],
-      
+
       // Date patterns
       date: [
-        /\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/g,  // 2024-01-01
-        /\d{1,2}[-\/]\d{1,2}[-\/]\d{4}/g,  // 01/01/2024
-        /\d{4}年\d{1,2}月\d{1,2}日/g,      // 2024年1月1日
+        /\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/g, // 2024-01-01
+        /\d{1,2}[-\/]\d{1,2}[-\/]\d{4}/g, // 01/01/2024
+        /\d{4}年\d{1,2}月\d{1,2}日/g, // 2024年1月1日
       ],
-      
+
       // Order/Transaction ID patterns
       transactionId: [
         /order\s*#?\s*[\w-]+/gi,
         /invoice\s*#?\s*[\w-]+/gi,
         /transaction\s*#?\s*[\w-]+/gi,
         /注文番号[:\s]*[\w-]+/g,
-        /取引番号[:\s]*[\w-]+/g
-      ]
+        /取引番号[:\s]*[\w-]+/g,
+      ],
     };
   }
 
@@ -69,9 +103,9 @@ class ReceiptDetector {
       detectedPatterns: {
         prices: [],
         dates: [],
-        transactionIds: []
+        transactionIds: [],
       },
-      attachmentAnalysis: []
+      attachmentAnalysis: [],
     };
 
     // Analyze text content
@@ -90,7 +124,7 @@ class ReceiptDetector {
       analysis.attachmentAnalysis.push({
         filename: attachment.filename,
         score: attachmentScore.score,
-        isReceipt: attachmentScore.isReceipt
+        isReceipt: attachmentScore.isReceipt,
       });
     }
 
@@ -125,8 +159,8 @@ class ReceiptDetector {
       patterns: {
         prices: [],
         dates: [],
-        transactionIds: []
-      }
+        transactionIds: [],
+      },
     };
 
     // Check for keywords
@@ -170,13 +204,20 @@ class ReceiptDetector {
   analyzeAttachment(attachment) {
     const analysis = {
       score: 0,
-      isReceipt: false
+      isReceipt: false,
     };
 
     const filename = attachment.filename.toLowerCase();
     const receiptFilenameKeywords = [
-      'receipt', 'invoice', 'bill', 'payment', 'order',
-      '領収書', '請求書', '明細', 'レシート'
+      'receipt',
+      'invoice',
+      'bill',
+      'payment',
+      'order',
+      '領収書',
+      '請求書',
+      '明細',
+      'レシート',
     ];
 
     // Check filename
@@ -191,7 +232,7 @@ class ReceiptDetector {
     // Check file type
     const extension = filename.split('.').pop();
     const receiptFileTypes = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'];
-    
+
     if (receiptFileTypes.includes(extension)) {
       analysis.score += 10;
     }
@@ -215,13 +256,13 @@ class ReceiptDetector {
       vendor: null,
       items: [],
       total: null,
-      currency: null
+      currency: null,
     };
 
     // Extract from text content
     if (content.text || content.html) {
       const text = content.text || this.extractTextFromHtml(content.html);
-      
+
       // Extract prices
       for (const pattern of this.receiptPatterns.price) {
         const matches = text.match(pattern);
@@ -269,14 +310,14 @@ class ReceiptDetector {
       if (fromMatch) {
         return fromMatch[1].trim();
       }
-      
+
       // Extract domain as vendor
       const domainMatch = headers.from.match(/@([^.]+)\./);
       if (domainMatch) {
         return domainMatch[1].charAt(0).toUpperCase() + domainMatch[1].slice(1);
       }
     }
-    
+
     return null;
   }
 }

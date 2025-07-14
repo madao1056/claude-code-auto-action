@@ -46,26 +46,31 @@ export class ThinkingModeManager {
       const settingsPath = join(process.cwd(), '.claude', 'settings.local.json');
       const settingsContent = readFileSync(settingsPath, 'utf8');
       const settings = JSON.parse(settingsContent);
-      return settings.thinkingMode || {
-        enabled: true,
-        defaultMode: 'think_hard',
-        autoEscalation: {
+      return (
+        settings.thinkingMode || {
           enabled: true,
-          revisionThreshold: 2,
-          maxMode: 'ultrathink'
-        },
-        modes: {
-          think: { maxTokens: 4000, description: '基本的な思考モード' },
-          think_hard: { maxTokens: 10000, description: 'より深い思考モード（デフォルト）' },
-          think_harder: { maxTokens: 20000, description: 'さらに深い思考モード' },
-          ultrathink: { maxTokens: 31999, description: '最強思考モード（自動エスカレーション時）' }
-        },
-        triggers: {
-          codeRevision: { enabled: true, mode: 'ultrathink' },
-          complexTask: { enabled: true, mode: 'think_harder' },
-          errorHandling: { enabled: true, mode: 'think_hard' }
+          defaultMode: 'think_hard',
+          autoEscalation: {
+            enabled: true,
+            revisionThreshold: 2,
+            maxMode: 'ultrathink',
+          },
+          modes: {
+            think: { maxTokens: 4000, description: '基本的な思考モード' },
+            think_hard: { maxTokens: 10000, description: 'より深い思考モード（デフォルト）' },
+            think_harder: { maxTokens: 20000, description: 'さらに深い思考モード' },
+            ultrathink: {
+              maxTokens: 31999,
+              description: '最強思考モード（自動エスカレーション時）',
+            },
+          },
+          triggers: {
+            codeRevision: { enabled: true, mode: 'ultrathink' },
+            complexTask: { enabled: true, mode: 'think_harder' },
+            errorHandling: { enabled: true, mode: 'think_hard' },
+          },
         }
-      };
+      );
     } catch (error) {
       console.warn('Failed to load thinking mode settings, using defaults:', error);
       return {
@@ -74,24 +79,27 @@ export class ThinkingModeManager {
         autoEscalation: {
           enabled: true,
           revisionThreshold: 2,
-          maxMode: 'ultrathink'
+          maxMode: 'ultrathink',
         },
         modes: {
           think: { maxTokens: 4000, description: '基本的な思考モード' },
           think_hard: { maxTokens: 10000, description: 'より深い思考モード（デフォルト）' },
           think_harder: { maxTokens: 20000, description: 'さらに深い思考モード' },
-          ultrathink: { maxTokens: 31999, description: '最強思考モード（自動エスカレーション時）' }
+          ultrathink: { maxTokens: 31999, description: '最強思考モード（自動エスカレーション時）' },
         },
         triggers: {
           codeRevision: { enabled: true, mode: 'ultrathink' },
           complexTask: { enabled: true, mode: 'think_harder' },
-          errorHandling: { enabled: true, mode: 'think_hard' }
-        }
+          errorHandling: { enabled: true, mode: 'think_hard' },
+        },
       };
     }
   }
 
-  public getThinkingMode(taskId: string, context: 'codeRevision' | 'complexTask' | 'errorHandling' | 'default' = 'default'): {
+  public getThinkingMode(
+    taskId: string,
+    context: 'codeRevision' | 'complexTask' | 'errorHandling' | 'default' = 'default'
+  ): {
     mode: string;
     maxTokens: number;
     description: string;
@@ -100,7 +108,7 @@ export class ThinkingModeManager {
       return {
         mode: 'think',
         maxTokens: 4000,
-        description: '基本的な思考モード'
+        description: '基本的な思考モード',
       };
     }
 
@@ -116,7 +124,9 @@ export class ThinkingModeManager {
       const revisions = this.revisionCount.get(taskId) || 0;
       if (revisions >= this.settings.autoEscalation.revisionThreshold) {
         selectedMode = this.settings.autoEscalation.maxMode;
-        console.log(`🧠 思考モード自動エスカレーション: ${revisions}回の修正により${selectedMode}に変更`);
+        console.log(
+          `🧠 思考モード自動エスカレーション: ${revisions}回の修正により${selectedMode}に変更`
+        );
       }
     }
 
@@ -132,18 +142,20 @@ export class ThinkingModeManager {
     return {
       mode: selectedMode,
       maxTokens: finalConfig.maxTokens,
-      description: finalConfig.description
+      description: finalConfig.description,
     };
   }
 
   public trackRevision(taskId: string): void {
     const current = this.revisionCount.get(taskId) || 0;
     this.revisionCount.set(taskId, current + 1);
-    
+
     console.log(`📊 修正回数追跡: ${taskId} - ${current + 1}回目`);
-    
+
     if (current + 1 >= this.settings.autoEscalation.revisionThreshold) {
-      console.log(`⚡ 自動エスカレーション条件達成: ${this.settings.autoEscalation.maxMode}モードに変更`);
+      console.log(
+        `⚡ 自動エスカレーション条件達成: ${this.settings.autoEscalation.maxMode}モードに変更`
+      );
     }
   }
 
@@ -185,13 +197,13 @@ export class ThinkingModeManager {
     autoEscalationEnabled: boolean;
   } {
     const config = this.settings.modes[this.currentMode];
-    
+
     return {
       currentMode: this.currentMode,
       maxTokens: config.maxTokens,
       description: config.description,
       revisionCounts: Object.fromEntries(this.revisionCount),
-      autoEscalationEnabled: this.settings.autoEscalation.enabled
+      autoEscalationEnabled: this.settings.autoEscalation.enabled,
     };
   }
 }

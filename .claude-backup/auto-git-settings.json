@@ -76,27 +76,15 @@
       "skipIntermediateConfirmations": true,
       "commonWorkflows": {
         "quickCommitPush": {
-          "commands": [
-            "git add .",
-            "git commit -m 'Auto-commit'",
-            "git push"
-          ],
+          "commands": ["git add .", "git commit -m 'Auto-commit'", "git push"],
           "autoApprove": true
         },
         "syncWithRemote": {
-          "commands": [
-            "git fetch",
-            "git pull",
-            "git push"
-          ],
+          "commands": ["git fetch", "git pull", "git push"],
           "autoApprove": true
         },
         "cleanCommit": {
-          "commands": [
-            "git add -A",
-            "git commit --amend --no-edit",
-            "git push --force-with-lease"
-          ],
+          "commands": ["git add -A", "git commit --amend --no-edit", "git push --force-with-lease"],
           "autoApprove": true,
           "requireDoubleConfirmation": false
         }

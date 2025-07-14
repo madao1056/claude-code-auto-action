@@ -27,84 +27,87 @@ export function registerCommands(
   context: vscode.ExtensionContext
 ): vscode.Disposable[] {
   const commands: vscode.Disposable[] = [];
-  
+
   // Ask Question Command
   commands.push(
     vscode.commands.registerCommand('claude.askQuestion', async () => {
       await handleAskQuestion(services.claudeService);
     })
   );
-  
+
   // Auto Commit Command
   commands.push(
     vscode.commands.registerCommand('claude.autoCommit', async () => {
       await handleAutoCommit(services.claudeService);
     })
   );
-  
+
   // Toggle YOLO Mode Command
   commands.push(
     vscode.commands.registerCommand('claude.toggleYoloMode', async () => {
       await handleToggleYoloMode(services.claudeService);
     })
   );
-  
+
   // Compact Context Command
   commands.push(
     vscode.commands.registerCommand('claude.compactContext', async () => {
       await handleCompactContext(services.claudeService);
     })
   );
-  
+
   // Show Cost Command
   commands.push(
     vscode.commands.registerCommand('claude.showCost', async () => {
       await handleShowCost(services.claudeService);
     })
   );
-  
+
   // Generate Tests Command
   commands.push(
     vscode.commands.registerCommand('claude.generateTests', async () => {
       await handleGenerateTests(services.claudeService);
     })
   );
-  
+
   // Optimize Code Command
   commands.push(
     vscode.commands.registerCommand('claude.optimizeCode', async () => {
       await handleOptimizeCode(services.claudeService);
     })
   );
-  
+
   // Explain Code Command
   commands.push(
     vscode.commands.registerCommand('claude.explainCode', async () => {
       await handleExplainCode(services.claudeService);
     })
   );
-  
+
   // Auto Apply Edits Command
   commands.push(
     vscode.commands.registerCommand('claude.autoApplyEdits', async () => {
       await handleAutoApplyEdits(services.autoEditService);
     })
   );
-  
+
   // Direct Edit Command
   commands.push(
-    vscode.commands.registerCommand('claude.directEdit', async (filePath: string, content: string) => {
-      await handleDirectEdit(services.autoEditService, filePath, content);
-    })
+    vscode.commands.registerCommand(
+      'claude.directEdit',
+      async (filePath: string, content: string) => {
+        await handleDirectEdit(services.autoEditService, filePath, content);
+      }
+    )
   );
-  
+
   // Fix Errors Command
   commands.push(
     vscode.commands.registerCommand('claude.fixErrors', async () => {
       await handleFixErrors(services.claudeService);
     })
   );
-  
+
   return commands;
 }
 
@@ -121,7 +124,7 @@ async function handleAskQuestion(claudeService: ClaudeCodeService): Promise<void
   const selection = editor.document.getText(editor.selection);
   const question = await vscode.window.showInputBox({
     prompt: 'What would you like to ask Claude about this code?',
-    placeHolder: 'e.g., Explain this function, optimize this code, find bugs...'
+    placeHolder: 'e.g., Explain this function, optimize this code, find bugs...',
   });
 
   if (question) {
@@ -152,10 +155,10 @@ async function handleAutoCommit(claudeService: ClaudeCodeService): Promise<void>
 async function handleToggleYoloMode(claudeService: ClaudeCodeService): Promise<void> {
   const settings = getSettings();
   const newMode = !settings.yoloMode;
-  
+
   await updateSetting('yoloMode', newMode);
   claudeService.setYoloMode(newMode);
-  
+
   vscode.window.showInformationMessage(
     `YOLO Mode ${newMode ? 'enabled' : 'disabled'}. ${newMode ? '⚠️ Auto-permissions active!' : '✅ Safe mode restored.'}`
   );
@@ -165,11 +168,10 @@ async function handleToggleYoloMode(claudeService: ClaudeCodeService): Promise<v
  * Handle compact context command
  */
 async function handleCompactContext(claudeService: ClaudeCodeService): Promise<void> {
-  const strategy = await vscode.window.showQuickPick(
-    ['dot_points', 'summary', 'code_only'],
-    { placeHolder: 'Select compaction strategy' }
-  );
-  
+  const strategy = await vscode.window.showQuickPick(['dot_points', 'summary', 'code_only'], {
+    placeHolder: 'Select compaction strategy',
+  });
+
   if (strategy) {
     try {
       await claudeService.compactContext(strategy);
@@ -187,7 +189,7 @@ async function handleShowCost(claudeService: ClaudeCodeService): Promise<void> {
   const cost = await claudeService.getCurrentCost();
   const settings = getSettings();
   const limit = settings.costLimit || 8;
-  
+
   vscode.window.showInformationMessage(formatCostDisplay(cost, limit));
 }
 
@@ -204,12 +206,10 @@ async function handleGenerateTests(claudeService: ClaudeCodeService): Promise<vo
   try {
     const code = editor.document.getText();
     const tests = await claudeService.generateTests(code, editor.document.languageId);
-    
+
     // Create test file
-    const testUri = vscode.Uri.file(
-      editor.document.uri.fsPath.replace(/\.(\w+)$/, '.test.$1')
-    );
-    
+    const testUri = vscode.Uri.file(editor.document.uri.fsPath.replace(/\.(\w+)$/, '.test.$1'));
+
     await vscode.workspace.fs.writeFile(testUri, Buffer.from(tests));
     await vscode.window.showTextDocument(testUri);
   } catch (error: any) {
@@ -231,16 +231,16 @@ async function handleOptimizeCode(claudeService: ClaudeCodeService): Promise<voi
     const code = editor.document.getText();
     const optimized = await claudeService.optimizeCode(code, editor.document.languageId);
     const settings = getSettings();
-    
+
     // In YOLO mode, save directly without edit confirmation
     if (settings.yoloMode) {
       const uri = editor.document.uri;
       await vscode.workspace.fs.writeFile(uri, Buffer.from(optimized));
-      
+
       // Reload the document to reflect changes
       await vscode.commands.executeCommand('workbench.action.files.revert');
     } else {
-      await editor.edit(editBuilder => {
+      await editor.edit((editBuilder) => {
         const fullRange = new vscode.Range(
           editor.document.positionAt(0),
           editor.document.positionAt(code.length)
@@ -266,14 +266,14 @@ async function handleExplainCode(claudeService: ClaudeCodeService): Promise<void
   try {
     const selection = editor.document.getText(editor.selection);
     const explanation = await claudeService.explainCode(selection);
-    
+
     const panel = vscode.window.createWebviewPanel(
       'claudeExplanation',
       'Code Explanation',
       vscode.ViewColumn.Beside,
       {}
     );
-    
+
     panel.webview.html = getWebviewContent(explanation);
   } catch (error: any) {
     vscode.window.showErrorMessage(`Failed to explain code: ${error.message}`);
@@ -310,9 +310,9 @@ async function handleDirectEdit(
 async function handleFixErrors(claudeService: ClaudeCodeService): Promise<void> {
   const diagnostics = vscode.languages.getDiagnostics();
   const errors: string[] = [];
-  
+
   diagnostics.forEach(([uri, diags]) => {
-    diags.forEach(diag => {
+    diags.forEach((diag) => {
       if (diag.severity === vscode.DiagnosticSeverity.Error) {
         errors.push(`${uri.fsPath}:${diag.range.start.line + 1} - ${diag.message}`);
       }

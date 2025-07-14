@@ -125,10 +125,6 @@
       "quiet": false,
       "verbose": false
     },
-    "defaultArguments": [
-      "--dangerously-skip-permissions",
-      "--non-interactive",
-      "--auto-approve"
-    ]
+    "defaultArguments": ["--dangerously-skip-permissions", "--non-interactive", "--auto-approve"]
   }
 }
