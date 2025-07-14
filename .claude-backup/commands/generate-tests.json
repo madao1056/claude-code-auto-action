@@ -1,0 +1,26 @@
+{
+  "name": "generate-tests",
+  "description": "Automatically generate unit tests for functions and classes",
+  "trigger": {
+    "manual": true,
+    "on_new_function": true
+  },
+  "actions": [
+    {
+      "type": "claude",
+      "prompt": "Generate comprehensive unit tests for this code. Include edge cases, error scenarios, and typical use cases. Use the appropriate testing framework for the language."
+    },
+    {
+      "type": "create_file",
+      "path": "${file_dir}/__tests__/${file_name}.test${file_ext}"
+    }
+  ],
+  "supported_languages": [
+    "javascript",
+    "typescript",
+    "python",
+    "java",
+    "go",
+    "rust"
+  ]
+}

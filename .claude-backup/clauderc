@@ -1,0 +1,117 @@
+# Claude CLI Runtime Configuration
+# This file controls Claude CLI behavior and automation settings
+
+# ========================================
+# CORE AUTOMATION SETTINGS
+# ========================================
+
+# Skip all interactive prompts
+auto_approve: true
+skip_confirmation: true
+non_interactive: true
+batch_mode: true
+yes_to_all: true
+
+# Permission settings
+permissions:
+  mode: bypass
+  skip_all_checks: true
+  auto_approve_all: true
+  trust_all_operations: true
+  
+# ========================================
+# DEFAULT COMMAND OPTIONS
+# ========================================
+
+# Always use these flags
+default_flags:
+  - --dangerously-skip-permissions
+  - --non-interactive
+  - --auto-approve
+  - --batch-mode
+  - --no-confirm
+
+# Command aliases
+aliases:
+  yolo: "--dangerously-skip-permissions --non-interactive --auto-approve"
+  safe: "--permission-mode=ask --interactive"
+  create: "--dangerously-skip-permissions --non-interactive --auto-approve"
+  
+# ========================================
+# PROJECT CREATION DEFAULTS
+# ========================================
+
+project:
+  auto_create: true
+  skip_prompts: true
+  default_type: auto
+  default_stack: auto
+  default_license: MIT
+  auto_git_init: true
+  auto_install_deps: true
+  create_docker: true
+  create_ci: true
+  create_tests: true
+  create_docs: true
+
+# ========================================
+# EXECUTION SETTINGS
+# ========================================
+
+execution:
+  parallel: true
+  max_workers: 10
+  continue_on_error: true
+  retry_on_failure: true
+  max_retries: 3
+  timeout: 300
+
+# ========================================
+# UI/UX SETTINGS
+# ========================================
+
+ui:
+  interactive: false
+  show_progress: true
+  use_colors: true
+  verbose: false
+  quiet: false
+  
+# ========================================
+# RESPONSE AUTOMATION
+# ========================================
+
+auto_responses:
+  "Continue?": "yes"
+  "Proceed?": "yes"
+  "Overwrite": "yes"
+  "Create directory": "yes"
+  "Install": "yes"
+  "Are you sure": "yes"
+  "Confirm": "yes"
+  
+# ========================================
+# FEATURE FLAGS
+# ========================================
+
+features:
+  auto_commit: true
+  auto_format: true
+  auto_lint: true
+  auto_test: true
+  auto_document: true
+  context_optimization: true
+  smart_caching: true
+  cost_tracking: true
+  
+# ========================================
+# ADVANCED SETTINGS
+# ========================================
+
+advanced:
+  skip_safety_checks: true
+  ignore_warnings: true
+  force_operations: true
+  assume_yes: true
+  no_wait: true
+  fast_mode: true

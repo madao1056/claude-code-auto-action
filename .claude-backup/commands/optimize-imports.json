@@ -1,0 +1,25 @@
+{
+  "name": "optimize-imports",
+  "description": "Automatically organize and optimize imports in all files",
+  "trigger": {
+    "on_save": true,
+    "manual": true
+  },
+  "actions": [
+    {
+      "type": "claude",
+      "prompt": "Analyze this file and optimize imports: remove unused imports, organize by type (external, internal, relative), and ensure consistent formatting"
+    },
+    {
+      "type": "apply_changes",
+      "target": "${current_file}"
+    }
+  ],
+  "file_patterns": [
+    "*.ts",
+    "*.tsx",
+    "*.js",
+    "*.jsx",
+    "*.py"
+  ]
+}

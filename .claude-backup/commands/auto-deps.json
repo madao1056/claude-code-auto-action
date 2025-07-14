@@ -1,0 +1,43 @@
+{
+  "name": "auto-deps",
+  "description": "Automatically manage project dependencies",
+  "aliases": ["deps", "dependencies"],
+  "commands": {
+    "install": {
+      "description": "Install missing dependencies automatically",
+      "script": "scripts/auto-deps.sh install"
+    },
+    "clean": {
+      "description": "Remove unused dependencies",
+      "script": "scripts/auto-deps.sh clean"
+    },
+    "fix-vulnerabilities": {
+      "description": "Fix security vulnerabilities",
+      "script": "scripts/auto-deps.sh fix-vulnerabilities"
+    },
+    "analyze": {
+      "description": "Analyze all dependencies",
+      "script": "scripts/auto-deps.sh analyze"
+    },
+    "auto-fix-all": {
+      "description": "Automatically fix all dependency issues",
+      "script": "scripts/auto-deps.sh auto-fix-all"
+    }
+  },
+  "hooks": {
+    "post-install": "npm run build",
+    "pre-clean": "npm test"
+  },
+  "config": {
+    "autoInstallTypes": true,
+    "cleanBeforeInstall": false,
+    "checkVulnerabilities": true,
+    "updateStrategy": "minor",
+    "excludePackages": [
+      "typescript",
+      "eslint",
+      "prettier",
+      "@types/node"
+    ]
+  }
+}

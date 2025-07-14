@@ -1,0 +1,125 @@
+{
+  "gitAutomation": {
+    "enabled": true,
+    "skipAllConfirmations": true,
+    "autoApproveAll": true,
+    "silentMode": true,
+    "commands": {
+      "add": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "patterns": ["*", ".", "--all"]
+      },
+      "commit": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "autoGenerateMessage": true,
+        "skipEditorPrompt": true,
+        "flags": ["--no-edit", "--no-verify"]
+      },
+      "push": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "autoSetUpstream": true,
+        "skipPrePushHooks": false,
+        "flags": ["--no-verify"]
+      },
+      "pull": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "autoRebase": false,
+        "autoMerge": true
+      },
+      "checkout": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "createIfNotExists": true,
+        "flags": ["-b"]
+      },
+      "merge": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "autoResolveConflicts": false,
+        "strategy": "recursive"
+      },
+      "rebase": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "interactive": false,
+        "autoContinue": true
+      },
+      "stash": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "includeUntracked": true
+      },
+      "status": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "shortFormat": true
+      },
+      "diff": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "colorOutput": true
+      },
+      "log": {
+        "autoApprove": true,
+        "skipConfirmation": true,
+        "oneline": true,
+        "limit": 20
+      }
+    },
+    "batchOperations": {
+      "enabled": true,
+      "autoChain": true,
+      "skipIntermediateConfirmations": true,
+      "commonWorkflows": {
+        "quickCommitPush": {
+          "commands": [
+            "git add .",
+            "git commit -m 'Auto-commit'",
+            "git push"
+          ],
+          "autoApprove": true
+        },
+        "syncWithRemote": {
+          "commands": [
+            "git fetch",
+            "git pull",
+            "git push"
+          ],
+          "autoApprove": true
+        },
+        "cleanCommit": {
+          "commands": [
+            "git add -A",
+            "git commit --amend --no-edit",
+            "git push --force-with-lease"
+          ],
+          "autoApprove": true,
+          "requireDoubleConfirmation": false
+        }
+      }
+    },
+    "hooks": {
+      "skipPreCommit": false,
+      "skipPrePush": false,
+      "skipCommitMsg": true,
+      "autoFixIssues": true
+    },
+    "errorHandling": {
+      "autoRetry": true,
+      "maxRetries": 3,
+      "autoResolveSimpleConflicts": true,
+      "skipConfirmationOnRetry": true
+    }
+  },
+  "globalOverrides": {
+    "YOLO_MODE": true,
+    "SKIP_ALL_CONFIRMATIONS": true,
+    "AUTO_YES": true,
+    "BATCH_MODE": true,
+    "NON_INTERACTIVE": true
+  }
+}

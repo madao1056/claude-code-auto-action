@@ -1,0 +1,28 @@
+{
+  "name": "auto-commit",
+  "description": "Automatically commit changes with intelligent commit messages",
+  "trigger": {
+    "on_save": true,
+    "on_task_complete": true,
+    "manual": true
+  },
+  "actions": [
+    {
+      "type": "shell",
+      "command": "git add -A"
+    },
+    {
+      "type": "claude",
+      "prompt": "Generate a conventional commit message for these changes. Use the diff to understand what changed. Format: type(scope): description"
+    },
+    {
+      "type": "shell",
+      "command": "git commit -m \"${claude_response}\""
+    }
+  ],
+  "conditions": {
+    "has_changes": true,
+    "tests_passing": true,
+    "lint_passing": true
+  }
+}

@@ -495,7 +495,7 @@ export class AutoDocumentationGenerator {
       returns: ''
     };
     
-    let currentTag = 'description';
+    const currentTag = 'description';
     
     for (const line of lines) {
       if (line.startsWith('@param')) {

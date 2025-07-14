@@ -435,7 +435,7 @@ export class CodeCompletionLearningSystem {
     
     // コーディングスタイルを適用
     if (this.userPreferences.codingStyle.indentation === 'tabs') {
-      snippet = snippet.replace(/  /g, '\t');
+      snippet = snippet.replace(/ {2}/g, '\t');
     } else {
       const spaces = ' '.repeat(this.userPreferences.codingStyle.indentSize);
       snippet = snippet.replace(/\t/g, spaces);

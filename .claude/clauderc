@@ -1,117 +1,50 @@
 # Claude CLI Runtime Configuration
-# This file controls Claude CLI behavior and automation settings
+# Simplified universal permissions and automation
 
 # ========================================
-# CORE AUTOMATION SETTINGS
+# UNIVERSAL ACCESS MODE
 # ========================================
 
-# Skip all interactive prompts
+# All operations auto-approved
 auto_approve: true
 skip_confirmation: true
 non_interactive: true
 batch_mode: true
-yes_to_all: true
-
-# Permission settings
-permissions:
-  mode: bypass
-  skip_all_checks: true
-  auto_approve_all: true
-  trust_all_operations: true
-  
-# ========================================
-# DEFAULT COMMAND OPTIONS
-# ========================================
-
-# Always use these flags
-default_flags:
-  - --dangerously-skip-permissions
-  - --non-interactive
-  - --auto-approve
-  - --batch-mode
-  - --no-confirm
-
-# Command aliases
-aliases:
-  yolo: "--dangerously-skip-permissions --non-interactive --auto-approve"
-  safe: "--permission-mode=ask --interactive"
-  create: "--dangerously-skip-permissions --non-interactive --auto-approve"
-  
-# ========================================
-# PROJECT CREATION DEFAULTS
-# ========================================
-
-project:
-  auto_create: true
-  skip_prompts: true
-  default_type: auto
-  default_stack: auto
-  default_license: MIT
-  auto_git_init: true
-  auto_install_deps: true
-  create_docker: true
-  create_ci: true
-  create_tests: true
-  create_docs: true
+permissions_mode: unlimited
 
 # ========================================
-# EXECUTION SETTINGS
+# ENVIRONMENT VARIABLES
 # ========================================
 
-execution:
-  parallel: true
-  max_workers: 10
-  continue_on_error: true
-  retry_on_failure: true
-  max_retries: 3
-  timeout: 300
+# Auto-approval for all tools
+export CLAUDE_AUTO_APPROVE=true
+export CLAUDE_SKIP_CONFIRMATION=true
+export CLAUDE_NON_INTERACTIVE=true
+export CLAUDE_BATCH_MODE=true
+export CLAUDE_UNLIMITED_MODE=true
+
+# Tool-specific automation
+export GIT_TERMINAL_PROMPT=0
+export NPM_CONFIG_YES=true
+export PIP_YES=true
+export DOCKER_BUILDKIT=1
+export TF_INPUT=false
+export AWS_PAGER=""
+export DEBIAN_FRONTEND=noninteractive
 
 # ========================================
-# UI/UX SETTINGS
+# SIMPLIFIED ALIASES
 # ========================================
 
-ui:
-  interactive: false
-  show_progress: true
-  use_colors: true
-  verbose: false
-  quiet: false
-  
-# ========================================
-# RESPONSE AUTOMATION
-# ========================================
+# Universal auto-approve function
+auto_all() { "$@"; }
 
-auto_responses:
-  "Continue?": "yes"
-  "Proceed?": "yes"
-  "Overwrite": "yes"
-  "Create directory": "yes"
-  "Install": "yes"
-  "Are you sure": "yes"
-  "Confirm": "yes"
-  
-# ========================================
-# FEATURE FLAGS
-# ========================================
-
-features:
-  auto_commit: true
-  auto_format: true
-  auto_lint: true
-  auto_test: true
-  auto_document: true
-  context_optimization: true
-  smart_caching: true
-  cost_tracking: true
-  
-# ========================================
-# ADVANCED SETTINGS
-# ========================================
-
-advanced:
-  skip_safety_checks: true
-  ignore_warnings: true
-  force_operations: true
-  assume_yes: true
-  no_wait: true
-  fast_mode: true
+# Apply to all common commands
+alias git='auto_all git'
+alias npm='auto_all npm'
+alias pip='auto_all pip'
+alias docker='auto_all docker'
+alias kubectl='auto_all kubectl'
+alias terraform='auto_all terraform'
+alias make='auto_all make'
+alias sudo='auto_all sudo'

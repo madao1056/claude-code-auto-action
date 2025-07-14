@@ -2,174 +2,21 @@
   "permissions": {
     "allow": [
       "*",
-      "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/hooks/command-safety-checker.js \"npm install express\")",
-      "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/hooks/command-safety-checker.js \"aws ec2 run-instances\")",
-      "Bash(chmod:*)",
-      "Bash(npm test)",
-      "Bash(node:*)",
-      "Bash(python3:*)",
-      "Bash(bash:*)",
-      "Bash(./test-docker-automation.sh:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(true)",
-      "Bash(grep:*)",
-      "Bash(npm install:*)",
-      "Bash(mkdir:*)",
-      "Bash(git -C /Users/hashiguchimasaki/project/claude-code-auto-action log --format=\"%h %ad %s\" --date=short -10)",
-      "Bash(git -C /Users/hashiguchimasaki/project/line_auto-reply log --format=\"%h\" --name-status -10)",
-      "Bash(git -C*log*)",
-      "Bash(git -C*status*)",
-      "Bash(git -C*diff*)",
-      "Bash(git -C*)",
       "Bash(ls:*)",
-      "Bash(gh run view:*)",
-      "Bash(git -C /Users/hashiguchimasaki/project/claude-code-auto-action status)",
-      "Bash(git -C /Users/hashiguchimasaki/project/claude-code-auto-action add .github/workflows/claude-schedule.yml)",
-      "Bash(git -C /Users/hashiguchimasaki/project/claude-code-auto-action commit -m \"fix: Add write permissions to scheduled workflow\")",
-      "Bash(git -C /Users/hashiguchimasaki/project/claude-code-auto-action push)",
-      "Bash(npm run build:*)",
-      "Bash(/Users/hashiguchimasaki/project/claude-code-auto-action/scripts/update-version.sh:*)",
-      "Bash(source:*)",
-      "Bash(./scripts/setup-auto.sh:*)",
-      "Bash(sed:*)",
-      "Bash(find:*)",
-      "Bash(./scripts/quick-fix-ts-errors.sh:*)",
-      "Bash(./scripts/force-build.sh:*)"
+      "Bash(mv:*)",
+      "Bash(claude-code --version)",
+      "Bash(claude --version)",
+      "Bash(grep:*)",
+      "Bash(echo $SHELL)",
+      "Bash(cat:*)",
+      "Bash(touch:*)",
+      "Bash(chmod:*)",
+      "Bash(npm run lint:*)",
+      "Bash(bash -c \"npm run lint:fix\")",
+      "Bash(bash -c \"npm run build\")",
+      "Bash(git add:*)",
+      "Bash(bash -c \"git add -A\")"
     ],
-    "deny": [
-      "Bash(rm -rf*)",
-      "Bash(rm -r*)",
-      "Bash(rm /*)",
-      "Bash(sudo rm*)",
-      "Bash(del /f*)",
-      "Bash(format*)",
-      "Bash(fdisk*)",
-      "Bash(dd if=/dev/zero*)",
-      "Bash(shred*)",
-      "Bash(wipe*)",
-      "Bash(sudo apt-get purge*)",
-      "Bash(sudo apt-get remove*)",
-      "Bash(brew uninstall*)",
-      "Bash(npm uninstall -g*)",
-      "Bash(pip uninstall*)",
-      "Bash(aws s3 rm*)",
-      "Bash(gcloud compute instances delete*)",
-      "Bash(az vm delete*)",
-      "Bash(heroku apps:destroy*)",
-      "Bash(vercel remove*)",
-      "Bash(terraform destroy*)",
-      "Bash(kubectl delete*)",
-      "Bash(docker system prune -a*)",
-      "Bash(dropdb*)",
-      "Bash(DROP DATABASE*)",
-      "Bash(DROP TABLE*)",
-      "Bash(TRUNCATE*)",
-      "Bash(stripe*)",
-      "Bash(aws*cost*)",
-      "Bash(gcloud*billing*)",
-      "Bash(az*cost*)",
-      "Bash(npm install*--save-exact*@latest)",
-      "Bash(yarn upgrade*)",
-      "Bash(pip install --upgrade*)",
-      "Write(/etc/*)",
-      "Write(/System/*)",
-      "Write(/usr/*)",
-      "Write(/bin/*)",
-      "Write(/sbin/*)",
-      "Write(~/.*)",
-      "Edit(/etc/*)",
-      "Edit(/System/*)",
-      "Edit(/usr/*)",
-      "Edit(/bin/*)",
-      "Edit(/sbin/*)",
-      "Edit(~/.*)"
-    ]
-  },
-  "autoApprove": {
-    "enabled": true,
-    "patterns": [
-      "python -m venv*",
-      "python*",
-      "pip*",
-      "npm*",
-      "node*",
-      "mkdir*",
-      "touch*",
-      "echo*",
-      "git add*",
-      "git commit*",
-      "git push*",
-      "git pull*",
-      "git merge*",
-      "git checkout*",
-      "git branch*",
-      "git status",
-      "git log*",
-      "git -C*",
-      "git diff*",
-      "git fetch*",
-      "git stash*",
-      "gh pr*",
-      "gh repo*",
-      "*"
-    ],
-    "excludePatterns": [
-      "git reset --hard*",
-      "git push --force*",
-      "git clean -fd*",
-      "rm -rf*",
-      "sudo*"
-    ]
-  },
-  "yoloMode": true,
-  "automation": {
-    "enabled": true,
-    "auto_approve": true,
-    "skip_confirmations": true
-  },
-  "thinkingMode": {
-    "enabled": true,
-    "defaultMode": "think_hard",
-    "autoEscalation": {
-      "enabled": true,
-      "revisionThreshold": 2,
-      "maxMode": "ultrathink"
-    },
-    "modes": {
-      "think": {
-        "maxTokens": 4000,
-        "description": "基本的な思考モード"
-      },
-      "think_hard": {
-        "maxTokens": 10000,
-        "description": "より深い思考モード（デフォルト）"
-      },
-      "think_harder": {
-        "maxTokens": 20000,
-        "description": "さらに深い思考モード"
-      },
-      "ultrathink": {
-        "maxTokens": 31999,
-        "description": "最強思考モード（自動エスカレーション時）"
-      }
-    },
-    "triggers": {
-      "codeRevision": {
-        "enabled": true,
-        "mode": "ultrathink"
-      },
-      "complexTask": {
-        "enabled": true,
-        "mode": "think_harder"
-      },
-      "errorHandling": {
-        "enabled": true,
-        "mode": "think_hard"
-      }
-    }
+    "deny": []
   }
 }
