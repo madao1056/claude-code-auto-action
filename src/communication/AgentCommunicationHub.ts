@@ -33,7 +33,7 @@ export enum MessageType {
   THINKING_MODE_UPDATE = 'thinking_mode_update',
   THINKING_MODE_STATUS = 'thinking_mode_status',
   HEARTBEAT = 'heartbeat',
-  SHUTDOWN = 'shutdown'
+  SHUTDOWN = 'shutdown',
 }
 
 export interface AgentEndpoint {
@@ -54,17 +54,20 @@ export class AgentCommunicationHub extends EventEmitter {
     return {
       ...data,
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
   private agents: Map<string, AgentEndpoint> = new Map();
   private messageQueue: Message[] = [];
-  private responseCallbacks: Map<string, {
-    resolve: (value: any) => void;
-    reject: (error: any) => void;
-    timeout: NodeJS.Timeout;
-  }> = new Map();
+  private responseCallbacks: Map<
+    string,
+    {
+      resolve: (value: any) => void;
+      reject: (error: any) => void;
+      timeout: NodeJS.Timeout;
+    }
+  > = new Map();
   private server: WebSocket.Server | null = null;
   private port: number;
   private heartbeatInterval: NodeJS.Timeout | null = null;
@@ -138,7 +141,7 @@ export class AgentCommunicationHub extends EventEmitter {
       to: 'broadcast',
       payload: { request: 'heartbeat' },
       priority: 'low',
-      requires_response: true
+      requires_response: true,
     };
 
     this.broadcastMessage(heartbeatMessage);
@@ -160,47 +163,47 @@ export class AgentCommunicationHub extends EventEmitter {
       case MessageType.STATUS_REQUEST:
         this.handleStatusRequest(message, ws);
         break;
-      
+
       case MessageType.TASK_UPDATE:
         this.handleTaskUpdate(message);
         break;
-      
+
       case MessageType.TASK_COMPLETION:
         this.handleTaskCompletion(message);
         break;
-      
+
       case MessageType.TASK_FAILURE:
         this.handleTaskFailure(message);
         break;
-      
+
       case MessageType.TASK_REVISION:
         this.handleTaskRevision(message);
         break;
-      
+
       case MessageType.THINKING_MODE_UPDATE:
         this.handleThinkingModeUpdate(message);
         break;
-      
+
       case MessageType.THINKING_MODE_STATUS:
         this.handleThinkingModeStatus(message);
         break;
-      
+
       case MessageType.COORDINATION_REQUEST:
         this.handleCoordinationRequest(message);
         break;
-      
+
       case MessageType.RESOURCE_REQUEST:
         this.handleResourceRequest(message);
         break;
-      
+
       case MessageType.ERROR_REPORT:
         this.handleErrorReport(message);
         break;
-      
+
       case MessageType.HEARTBEAT:
         this.handleHeartbeat(message, ws);
         break;
-      
+
       default:
         console.warn(`Unknown message type: ${message.type}`);
     }
@@ -219,12 +222,12 @@ export class AgentCommunicationHub extends EventEmitter {
       to: message.from,
       payload: {
         agent_count: this.agents.size,
-        online_agents: Array.from(this.agents.values()).filter(a => a.status === 'online').length,
-        message_queue_size: this.messageQueue.length
+        online_agents: Array.from(this.agents.values()).filter((a) => a.status === 'online').length,
+        message_queue_size: this.messageQueue.length,
       },
       priority: 'medium',
       requires_response: false,
-      correlation_id: message.id
+      correlation_id: message.id,
     };
 
     this.sendMessage(this.createMessage(response), ws);
@@ -236,7 +239,7 @@ export class AgentCommunicationHub extends EventEmitter {
       agent.load = message.payload.load || agent.load;
       agent.current_tasks = message.payload.current_tasks || agent.current_tasks;
     }
-    
+
     this.emit('task_update', message);
   }
 
@@ -244,11 +247,11 @@ export class AgentCommunicationHub extends EventEmitter {
     const agent = this.agents.get(message.from);
     if (agent) {
       agent.current_tasks = agent.current_tasks.filter(
-        taskId => taskId !== message.payload.task_id
+        (taskId) => taskId !== message.payload.task_id
       );
       agent.load = Math.max(0, agent.load - 1);
     }
-    
+
     this.emit('task_completion', message);
   }
 
@@ -256,11 +259,11 @@ export class AgentCommunicationHub extends EventEmitter {
     const agent = this.agents.get(message.from);
     if (agent) {
       agent.current_tasks = agent.current_tasks.filter(
-        taskId => taskId !== message.payload.task_id
+        (taskId) => taskId !== message.payload.task_id
       );
       agent.load = Math.max(0, agent.load - 1);
     }
-    
+
     this.emit('task_failure', message);
   }
 
@@ -268,28 +271,24 @@ export class AgentCommunicationHub extends EventEmitter {
     // Find appropriate agents for coordination
     const requestedCapabilities = message.payload.required_capabilities || [];
     const availableAgents = Array.from(this.agents.values())
-      .filter(agent => 
-        agent.status === 'online' || agent.status === 'idle'
-      )
-      .filter(agent =>
-        requestedCapabilities.every(cap => agent.capabilities.includes(cap))
-      );
+      .filter((agent) => agent.status === 'online' || agent.status === 'idle')
+      .filter((agent) => requestedCapabilities.every((cap) => agent.capabilities.includes(cap)));
 
     const response: Omit<Message, 'id' | 'timestamp'> = {
       type: MessageType.COORDINATION_RESPONSE,
       from: 'hub',
       to: message.from,
       payload: {
-        available_agents: availableAgents.map(a => ({
+        available_agents: availableAgents.map((a) => ({
           id: a.id,
           type: a.type,
           load: a.load,
-          capabilities: a.capabilities
-        }))
+          capabilities: a.capabilities,
+        })),
       },
       priority: 'medium',
       requires_response: false,
-      correlation_id: message.id
+      correlation_id: message.id,
     };
 
     const requesterAgent = this.agents.get(message.from);
@@ -311,11 +310,11 @@ export class AgentCommunicationHub extends EventEmitter {
       payload: {
         resource_type: resourceType,
         allocated: quantity,
-        available: true
+        available: true,
       },
       priority: 'medium',
       requires_response: false,
-      correlation_id: message.id
+      correlation_id: message.id,
     };
 
     const requesterAgent = this.agents.get(message.from);
@@ -328,7 +327,7 @@ export class AgentCommunicationHub extends EventEmitter {
     console.error(`Error reported by ${message.from}:`, message.payload);
     this.emit('agent_error', {
       agent_id: message.from,
-      error: message.payload
+      error: message.payload,
     });
   }
 
@@ -347,20 +346,22 @@ export class AgentCommunicationHub extends EventEmitter {
         payload: { response: 'pong' },
         priority: 'low',
         requires_response: false,
-        correlation_id: message.id
+        correlation_id: message.id,
       };
 
       this.sendMessage(this.createMessage(response), ws);
     }
   }
 
-  registerAgent(agentInfo: Omit<AgentEndpoint, 'status' | 'last_heartbeat' | 'current_tasks' | 'load'>): void {
+  registerAgent(
+    agentInfo: Omit<AgentEndpoint, 'status' | 'last_heartbeat' | 'current_tasks' | 'load'>
+  ): void {
     const agent: AgentEndpoint = {
       ...agentInfo,
       status: 'online',
       last_heartbeat: new Date(),
       current_tasks: [],
-      load: 0
+      load: 0,
     };
 
     this.agents.set(agent.id, agent);
@@ -368,7 +369,10 @@ export class AgentCommunicationHub extends EventEmitter {
     this.emit('agent_registered', agent);
   }
 
-  async sendMessageToAgent(agentId: string, messageData: Omit<Message, 'id' | 'timestamp' | 'from'>): Promise<any> {
+  async sendMessageToAgent(
+    agentId: string,
+    messageData: Omit<Message, 'id' | 'timestamp' | 'from'>
+  ): Promise<any> {
     const agent = this.agents.get(agentId);
     if (!agent || !agent.websocket) {
       throw new Error(`Agent ${agentId} not found or not connected`);
@@ -376,10 +380,11 @@ export class AgentCommunicationHub extends EventEmitter {
 
     // Add thinking mode information for task-related messages
     let thinkingMode: any = null;
-    if (messageData.type === MessageType.TASK_ASSIGNMENT || 
-        messageData.type === MessageType.TASK_UPDATE ||
-        messageData.type === MessageType.TASK_REVISION) {
-      
+    if (
+      messageData.type === MessageType.TASK_ASSIGNMENT ||
+      messageData.type === MessageType.TASK_UPDATE ||
+      messageData.type === MessageType.TASK_REVISION
+    ) {
       const taskId = messageData.payload?.task_id || messageData.payload?.id || agentId;
       const context = messageData.type === MessageType.TASK_REVISION ? 'codeRevision' : 'default';
       thinkingMode = thinkingModeManager.getThinkingMode(taskId, context);
@@ -391,7 +396,7 @@ export class AgentCommunicationHub extends EventEmitter {
       timestamp: new Date(),
       from: 'hub',
       thinking_mode: thinkingMode?.mode,
-      thinking_tokens: thinkingMode?.maxTokens
+      thinking_tokens: thinkingMode?.maxTokens,
     };
 
     if (messageData.requires_response) {
@@ -404,7 +409,7 @@ export class AgentCommunicationHub extends EventEmitter {
         this.responseCallbacks.set(message.id, {
           resolve,
           reject,
-          timeout
+          timeout,
         });
 
         this.sendMessage(message, agent.websocket!);
@@ -416,45 +421,53 @@ export class AgentCommunicationHub extends EventEmitter {
   }
 
   broadcastMessage(messageData: Message | Omit<Message, 'id' | 'timestamp'>): void {
-    const message = 'id' in messageData && 'timestamp' in messageData 
-      ? messageData 
-      : this.createMessage(messageData as Omit<Message, 'id' | 'timestamp'>);
+    const message =
+      'id' in messageData && 'timestamp' in messageData
+        ? messageData
+        : this.createMessage(messageData as Omit<Message, 'id' | 'timestamp'>);
     // Add thinking mode information for task-related broadcasts
     let thinkingMode: any = null;
-    if (messageData.type === MessageType.TASK_ASSIGNMENT || 
-        messageData.type === MessageType.TASK_UPDATE ||
-        messageData.type === MessageType.TASK_REVISION) {
-      
+    if (
+      messageData.type === MessageType.TASK_ASSIGNMENT ||
+      messageData.type === MessageType.TASK_UPDATE ||
+      messageData.type === MessageType.TASK_REVISION
+    ) {
       const taskId = messageData.payload?.task_id || messageData.payload?.id || 'broadcast';
       const context = messageData.type === MessageType.TASK_REVISION ? 'codeRevision' : 'default';
       thinkingMode = thinkingModeManager.getThinkingMode(taskId, context);
     }
 
-    const message: Message = {
+    const broadcastMessage: Message = {
       ...messageData,
       id: uuidv4(),
       timestamp: new Date(),
       thinking_mode: thinkingMode?.mode,
-      thinking_tokens: thinkingMode?.maxTokens
+      thinking_tokens: thinkingMode?.maxTokens,
     };
 
     for (const agent of this.agents.values()) {
-      if (agent.websocket && (agent.status === 'online' || agent.status === 'busy' || agent.status === 'idle')) {
-        this.sendMessage(message, agent.websocket);
+      if (
+        agent.websocket &&
+        (agent.status === 'online' || agent.status === 'busy' || agent.status === 'idle')
+      ) {
+        this.sendMessage(broadcastMessage, agent.websocket);
       }
     }
   }
 
-  private sendMessage(message: Message, ws: WebSocket): void {
+  private sendMessage(message: Message | Omit<Message, 'id' | 'timestamp'>, ws: WebSocket): void {
     try {
-      ws.send(JSON.stringify(message));
+      const fullMessage = 'id' in message && 'timestamp' in message 
+        ? message 
+        : this.createMessage(message as Omit<Message, 'id' | 'timestamp'>);
+      ws.send(JSON.stringify(fullMessage));
     } catch (error) {
       console.error('Failed to send message:', error);
     }
   }
 
   private findAgentByWebSocket(ws: WebSocket): AgentEndpoint | undefined {
-    return Array.from(this.agents.values()).find(agent => agent.websocket === ws);
+    return Array.from(this.agents.values()).find((agent) => agent.websocket === ws);
   }
 
   async assignTask(agentId: string, taskData: any): Promise<any> {
@@ -463,7 +476,7 @@ export class AgentCommunicationHub extends EventEmitter {
       to: agentId,
       payload: taskData,
       priority: 'high',
-      requires_response: true
+      requires_response: true,
     });
   }
 
@@ -473,7 +486,7 @@ export class AgentCommunicationHub extends EventEmitter {
       to: fromAgentId,
       payload: coordinationData,
       priority: 'medium',
-      requires_response: true
+      requires_response: true,
     });
   }
 
@@ -486,13 +499,13 @@ export class AgentCommunicationHub extends EventEmitter {
   }
 
   getOnlineAgents(): AgentEndpoint[] {
-    return Array.from(this.agents.values())
-      .filter(agent => agent.status === 'online' || agent.status === 'idle');
+    return Array.from(this.agents.values()).filter(
+      (agent) => agent.status === 'online' || agent.status === 'idle'
+    );
   }
 
   getAgentsByType(type: 'architect' | 'manager' | 'worker'): AgentEndpoint[] {
-    return Array.from(this.agents.values())
-      .filter(agent => agent.type === type);
+    return Array.from(this.agents.values()).filter((agent) => agent.type === type);
   }
 
   shutdown(): void {
@@ -505,7 +518,7 @@ export class AgentCommunicationHub extends EventEmitter {
       to: 'broadcast',
       payload: { reason: 'Hub shutting down' },
       priority: 'high',
-      requires_response: false
+      requires_response: false,
     });
 
     // Clear intervals
@@ -532,10 +545,10 @@ export class AgentCommunicationHub extends EventEmitter {
     const taskId = message.payload.task_id;
     if (taskId) {
       thinkingModeManager.trackRevision(taskId);
-      
+
       // Get updated thinking mode after revision tracking
       const thinkingMode = thinkingModeManager.getThinkingMode(taskId, 'codeRevision');
-      
+
       // Broadcast thinking mode update to all agents
       this.broadcastMessage({
         type: MessageType.THINKING_MODE_UPDATE,
@@ -546,13 +559,13 @@ export class AgentCommunicationHub extends EventEmitter {
           thinking_mode: thinkingMode.mode,
           max_tokens: thinkingMode.maxTokens,
           description: thinkingMode.description,
-          revision_count: thinkingModeManager.getRevisionCount(taskId)
+          revision_count: thinkingModeManager.getRevisionCount(taskId),
         },
         priority: 'medium',
-        requires_response: false
+        requires_response: false,
       });
     }
-    
+
     this.emit('task_revision', message);
   }
 
@@ -563,16 +576,16 @@ export class AgentCommunicationHub extends EventEmitter {
 
   private handleThinkingModeStatus(message: Message): void {
     const status = thinkingModeManager.getThinkingModeStatus();
-    
+
     const response: Omit<Message, 'id' | 'timestamp'> = {
       type: MessageType.THINKING_MODE_STATUS,
       from: 'hub',
       to: message.from,
       payload: status,
       priority: 'low',
-      requires_response: false
+      requires_response: false,
     };
-    
+
     this.sendMessageToAgent(message.from, response);
     this.emit('thinking_mode_status', message);
   }
@@ -580,7 +593,7 @@ export class AgentCommunicationHub extends EventEmitter {
   // Public methods for thinking mode management
   public setThinkingMode(taskId: string, mode: string): void {
     thinkingModeManager.setMode(mode);
-    
+
     this.broadcastMessage({
       type: MessageType.THINKING_MODE_UPDATE,
       from: 'hub',
@@ -589,14 +602,17 @@ export class AgentCommunicationHub extends EventEmitter {
         task_id: taskId,
         thinking_mode: mode,
         max_tokens: thinkingModeManager.getAllModes()[mode]?.maxTokens || 4000,
-        description: thinkingModeManager.getAllModes()[mode]?.description || 'Unknown mode'
+        description: thinkingModeManager.getAllModes()[mode]?.description || 'Unknown mode',
       },
       priority: 'medium',
-      requires_response: false
+      requires_response: false,
     });
   }
 
-  public getThinkingModeForTask(taskId: string, context: 'codeRevision' | 'complexTask' | 'errorHandling' | 'default' = 'default'): {
+  public getThinkingModeForTask(
+    taskId: string,
+    context: 'codeRevision' | 'complexTask' | 'errorHandling' | 'default' = 'default'
+  ): {
     mode: string;
     maxTokens: number;
     description: string;
@@ -617,13 +633,13 @@ export class AgentCommunicationHub extends EventEmitter {
       online: 0,
       offline: 0,
       busy: 0,
-      idle: 0
+      idle: 0,
     };
 
     const agentsByType = {
       architect: 0,
       manager: 0,
-      worker: 0
+      worker: 0,
     };
 
     for (const agent of this.agents.values()) {
@@ -637,7 +653,7 @@ export class AgentCommunicationHub extends EventEmitter {
       agents_by_type: agentsByType,
       message_queue_size: this.messageQueue.length,
       pending_responses: this.responseCallbacks.size,
-      uptime: process.uptime()
+      uptime: process.uptime(),
     };
   }
 }

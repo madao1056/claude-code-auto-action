@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { MultiAgentOrchestrator, Task, ProjectAnalysis } from '../core/MultiAgentOrchestrator';
+import { MultiAgentOrchestrator, Task, ProjectAnalysis, AgentConfig } from '../core/MultiAgentOrchestrator';
 import { TaskDistributor } from '../core/TaskDistributor';
-import { AgentCommunicationHub, MessageType } from '../communication/AgentCommunicationHub';
+import { AgentCommunicationHub, MessageType, AgentEndpoint } from '../communication/AgentCommunicationHub';
 
 export interface CommandContext {
   session_id: string;
@@ -50,7 +50,7 @@ export enum CommandType {
   ADD_TESTING = 'add_testing',
   IMPROVE_SECURITY = 'improve_security',
   CREATE_DOCUMENTATION = 'create_documentation',
-  DEPLOY_PROJECT = 'deploy_project'
+  DEPLOY_PROJECT = 'deploy_project',
 }
 
 export class TopDownCommandSystem extends EventEmitter {
@@ -79,10 +79,10 @@ export class TopDownCommandSystem extends EventEmitter {
       phases: [
         { name: 'Initial Analysis', agent_type: 'architect', estimated_duration: 10 },
         { name: 'Deep Dive Analysis', agent_type: 'manager', estimated_duration: 20 },
-        { name: 'Technology Assessment', agent_type: 'worker', estimated_duration: 15 }
+        { name: 'Technology Assessment', agent_type: 'worker', estimated_duration: 15 },
       ],
       parallel_execution: false,
-      quality_gates: ['analysis_completeness', 'risk_assessment']
+      quality_gates: ['analysis_completeness', 'risk_assessment'],
     });
 
     this.executionStrategies.set(CommandType.IMPLEMENT_FEATURE, {
@@ -91,10 +91,10 @@ export class TopDownCommandSystem extends EventEmitter {
         { name: 'Implementation Planning', agent_type: 'manager', estimated_duration: 10 },
         { name: 'Code Implementation', agent_type: 'worker', estimated_duration: 60 },
         { name: 'Testing', agent_type: 'worker', estimated_duration: 30 },
-        { name: 'Integration', agent_type: 'manager', estimated_duration: 20 }
+        { name: 'Integration', agent_type: 'manager', estimated_duration: 20 },
       ],
       parallel_execution: true,
-      quality_gates: ['design_review', 'code_review', 'test_coverage', 'integration_test']
+      quality_gates: ['design_review', 'code_review', 'test_coverage', 'integration_test'],
     });
 
     this.executionStrategies.set(CommandType.FIX_ISSUES, {
@@ -103,10 +103,10 @@ export class TopDownCommandSystem extends EventEmitter {
         { name: 'Root Cause Investigation', agent_type: 'worker', estimated_duration: 20 },
         { name: 'Fix Implementation', agent_type: 'worker', estimated_duration: 30 },
         { name: 'Regression Testing', agent_type: 'worker', estimated_duration: 15 },
-        { name: 'Verification', agent_type: 'manager', estimated_duration: 10 }
+        { name: 'Verification', agent_type: 'manager', estimated_duration: 10 },
       ],
       parallel_execution: false,
-      quality_gates: ['issue_reproduction', 'fix_verification', 'regression_test']
+      quality_gates: ['issue_reproduction', 'fix_verification', 'regression_test'],
     });
 
     this.executionStrategies.set(CommandType.OPTIMIZE_PERFORMANCE, {
@@ -115,10 +115,10 @@ export class TopDownCommandSystem extends EventEmitter {
         { name: 'Bottleneck Analysis', agent_type: 'manager', estimated_duration: 15 },
         { name: 'Optimization Strategy', agent_type: 'architect', estimated_duration: 10 },
         { name: 'Implementation', agent_type: 'worker', estimated_duration: 45 },
-        { name: 'Performance Testing', agent_type: 'worker', estimated_duration: 25 }
+        { name: 'Performance Testing', agent_type: 'worker', estimated_duration: 25 },
       ],
       parallel_execution: true,
-      quality_gates: ['baseline_measurement', 'optimization_plan', 'performance_improvement']
+      quality_gates: ['baseline_measurement', 'optimization_plan', 'performance_improvement'],
     });
 
     this.executionStrategies.set(CommandType.ADD_TESTING, {
@@ -127,10 +127,10 @@ export class TopDownCommandSystem extends EventEmitter {
         { name: 'Unit Tests', agent_type: 'worker', estimated_duration: 40 },
         { name: 'Integration Tests', agent_type: 'worker', estimated_duration: 30 },
         { name: 'E2E Tests', agent_type: 'worker', estimated_duration: 35 },
-        { name: 'Test Automation', agent_type: 'manager', estimated_duration: 20 }
+        { name: 'Test Automation', agent_type: 'manager', estimated_duration: 20 },
       ],
       parallel_execution: true,
-      quality_gates: ['test_plan', 'coverage_target', 'test_automation']
+      quality_gates: ['test_plan', 'coverage_target', 'test_automation'],
     });
   }
 
@@ -148,7 +148,12 @@ export class TopDownCommandSystem extends EventEmitter {
     });
   }
 
-  async executeCommand(commandData: Omit<Command, 'id' | 'created_at' | 'status' | 'progress' | 'generated_tasks' | 'assigned_agents'>): Promise<string> {
+  async executeCommand(
+    commandData: Omit<
+      Command,
+      'id' | 'created_at' | 'status' | 'progress' | 'generated_tasks' | 'assigned_agents'
+    >
+  ): Promise<string> {
     const command: Command = {
       ...commandData,
       id: `cmd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -156,7 +161,7 @@ export class TopDownCommandSystem extends EventEmitter {
       status: 'pending',
       progress: 0,
       generated_tasks: [],
-      assigned_agents: []
+      assigned_agents: [],
     };
 
     this.activeCommands.set(command.id, command);
@@ -192,7 +197,7 @@ export class TopDownCommandSystem extends EventEmitter {
     // Phase 2: Task Generation and Planning
     command.status = 'planning';
     const tasks = await this.generateTasks(command, analysis, strategy);
-    command.generated_tasks = tasks.map(t => t.id);
+    command.generated_tasks = tasks.map((t) => t.id);
     this.updateCommandProgress(command.id, 50);
 
     // Phase 3: Execution
@@ -215,7 +220,7 @@ export class TopDownCommandSystem extends EventEmitter {
 
     // Use the architect agent for high-level analysis
     const analysisPrompt = this.buildAnalysisPrompt(command);
-    
+
     try {
       const analysis = await this.orchestrator.analyzeProject(
         command.context.project_path,
@@ -256,25 +261,37 @@ Please provide:
 `;
   }
 
-  private async generateTasks(command: Command, analysis: ProjectAnalysis, strategy: ExecutionStrategy): Promise<Task[]> {
+  private async generateTasks(
+    command: Command,
+    analysis: ProjectAnalysis,
+    strategy: ExecutionStrategy
+  ): Promise<Task[]> {
     console.log(`📋 Generating tasks for command: ${command.title}`);
 
     const baseTasks = this.taskDistributor.generateTasksFromAnalysis(analysis);
-    
+
     // Customize tasks based on command type and strategy
     const customizedTasks = this.customizeTasksForCommand(baseTasks, command, strategy);
-    
+
     // Add command-specific tasks
-    const commandSpecificTasks = await this.generateCommandSpecificTasks(command, analysis, strategy);
-    
+    const commandSpecificTasks = await this.generateCommandSpecificTasks(
+      command,
+      analysis,
+      strategy
+    );
+
     const allTasks = [...customizedTasks, ...commandSpecificTasks];
-    
+
     console.log(`📋 Generated ${allTasks.length} tasks for command: ${command.title}`);
     return allTasks;
   }
 
-  private customizeTasksForCommand(tasks: Task[], command: Command, strategy: ExecutionStrategy): Task[] {
-    return tasks.map(task => {
+  private customizeTasksForCommand(
+    tasks: Task[],
+    command: Command,
+    strategy: ExecutionStrategy
+  ): Task[] {
+    return tasks.map((task) => {
       // Adjust priority based on command context
       if (command.context.priority === 'high') {
         task.priority = task.priority === 'low' ? 'medium' : 'high';
@@ -287,7 +304,11 @@ Please provide:
     });
   }
 
-  private async generateCommandSpecificTasks(command: Command, analysis: ProjectAnalysis, strategy: ExecutionStrategy): Promise<Task[]> {
+  private async generateCommandSpecificTasks(
+    command: Command,
+    analysis: ProjectAnalysis,
+    strategy: ExecutionStrategy
+  ): Promise<Task[]> {
     const tasks: Task[] = [];
 
     for (const phase of strategy.phases) {
@@ -300,7 +321,7 @@ Please provide:
         dependencies: [],
         status: 'pending',
         created_at: new Date(),
-        child_tasks: []
+        child_tasks: [],
       };
 
       tasks.push(task);
@@ -317,7 +338,10 @@ Please provide:
   }
 
   private mapPhaseToTaskType(phaseName: string): Task['type'] {
-    if (phaseName.toLowerCase().includes('analysis') || phaseName.toLowerCase().includes('design')) {
+    if (
+      phaseName.toLowerCase().includes('analysis') ||
+      phaseName.toLowerCase().includes('design')
+    ) {
       return 'analysis';
     }
     if (phaseName.toLowerCase().includes('test')) {
@@ -329,7 +353,11 @@ Please provide:
     return 'implementation';
   }
 
-  private async executeTasks(command: Command, tasks: Task[], strategy: ExecutionStrategy): Promise<void> {
+  private async executeTasks(
+    command: Command,
+    tasks: Task[],
+    strategy: ExecutionStrategy
+  ): Promise<void> {
     console.log(`🚀 Executing ${tasks.length} tasks for command: ${command.title}`);
 
     // Register tasks with orchestrator
@@ -339,7 +367,7 @@ Please provide:
 
     // Assign agents based on strategy
     const agentAssignments = await this.assignAgentsToTasks(tasks, strategy);
-    command.assigned_agents = [...new Set(agentAssignments.map(a => a.agentId))];
+    command.assigned_agents = [...new Set(agentAssignments.map((a) => a.agentId))];
 
     // Execute tasks
     for (const assignment of agentAssignments) {
@@ -350,26 +378,31 @@ Please provide:
     await this.waitForTaskCompletion(tasks);
   }
 
-  private async assignAgentsToTasks(tasks: Task[], strategy: ExecutionStrategy): Promise<Array<{ taskId: string; agentId: string }>> {
+  private async assignAgentsToTasks(
+    tasks: Task[],
+    strategy: ExecutionStrategy
+  ): Promise<Array<{ taskId: string; agentId: string }>> {
     const assignments: Array<{ taskId: string; agentId: string }> = [];
     const availableAgents = this.communicationHub.getOnlineAgents();
 
     for (const task of tasks) {
       // Find corresponding phase
-      const phase = strategy.phases.find(p => 
+      const phase = strategy.phases.find((p) =>
         task.title.toLowerCase().includes(p.name.toLowerCase())
       );
 
       let suitableAgents = availableAgents;
       if (phase) {
-        suitableAgents = availableAgents.filter(agent => agent.type === phase.agent_type);
+        suitableAgents = availableAgents.filter((agent) => agent.type === phase.agent_type);
       }
 
-      const selectedAgent = this.taskDistributor.distributeTask(task, suitableAgents);
+      // Convert AgentEndpoint to AgentConfig for task distribution
+      const agentConfigs = suitableAgents.map(this.convertEndpointToConfig);
+      const selectedAgent = this.taskDistributor.distributeTask(task, agentConfigs);
       if (selectedAgent) {
         assignments.push({
           taskId: task.id,
-          agentId: selectedAgent.id
+          agentId: selectedAgent.id,
         });
       }
     }
@@ -377,11 +410,25 @@ Please provide:
     return assignments;
   }
 
+  private convertEndpointToConfig(endpoint: AgentEndpoint): AgentConfig {
+    return {
+      id: endpoint.id,
+      name: endpoint.name,
+      type: endpoint.type,
+      model: 'claude-3-sonnet-20240229', // Default model
+      temperature: 0.7,
+      max_tokens: 4096,
+      system_prompts: [],
+      capabilities: endpoint.capabilities,
+      parallel_limit: 1,
+    };
+  }
+
   private async waitForTaskCompletion(tasks: Task[]): Promise<void> {
     return new Promise((resolve) => {
       const checkCompletion = () => {
-        const pendingTasks = tasks.filter(task => 
-          task.status === 'pending' || task.status === 'in_progress'
+        const pendingTasks = tasks.filter(
+          (task) => task.status === 'pending' || task.status === 'in_progress'
         );
 
         if (pendingTasks.length === 0) {
@@ -408,20 +455,23 @@ Please provide:
     console.log(`✅ All quality gates passed for command: ${command.title}`);
   }
 
-  private async executeQualityGate(gate: string, command: Command): Promise<{ passed: boolean; reason?: string }> {
+  private async executeQualityGate(
+    gate: string,
+    command: Command
+  ): Promise<{ passed: boolean; reason?: string }> {
     // Mock quality gate execution
     // In a real implementation, this would run actual quality checks
     console.log(`Running quality gate: ${gate}`);
-    
+
     // Simulate quality gate execution
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Random success for demo (in reality, this would be real quality checks)
     const passed = Math.random() > 0.1; // 90% success rate
-    
+
     return {
       passed,
-      reason: passed ? undefined : `Quality gate ${gate} failed validation`
+      reason: passed ? undefined : `Quality gate ${gate} failed validation`,
     };
   }
 
@@ -432,7 +482,7 @@ Please provide:
 
   private handleTaskFailure(task: Task, error: Error): void {
     console.error(`Task failed: ${task.title}`, error);
-    
+
     // Find associated command and handle failure
     const command = this.findCommandByTask(task.id);
     if (command) {
@@ -444,7 +494,7 @@ Please provide:
 
   private handleAgentError(agentId: string, error: any): void {
     console.error(`Agent error: ${agentId}`, error);
-    
+
     // Handle agent-level errors that might affect commands
     this.emit('agent_error', { agentId, error });
   }
@@ -469,8 +519,9 @@ Please provide:
   }
 
   private findCommandByTask(taskId: string): Command | undefined {
-    return Array.from(this.activeCommands.values())
-      .find(command => command.generated_tasks.includes(taskId));
+    return Array.from(this.activeCommands.values()).find((command) =>
+      command.generated_tasks.includes(taskId)
+    );
   }
 
   getCommandStatus(commandId: string): Command | undefined {
@@ -482,8 +533,7 @@ Please provide:
   }
 
   getCommandsByStatus(status: Command['status']): Command[] {
-    return Array.from(this.activeCommands.values())
-      .filter(command => command.status === status);
+    return Array.from(this.activeCommands.values()).filter((command) => command.status === status);
   }
 
   private async cancelCommandTasks(command: Command): Promise<void> {
@@ -508,24 +558,26 @@ Please provide:
         command_id: command.id,
         command_title: command.title,
         reason: 'Command cancelled by user',
-        affected_tasks: command.generated_tasks
+        affected_tasks: command.generated_tasks,
       },
       priority: 'high' as const,
-      requires_response: false
+      requires_response: false,
     };
 
     // Send cancellation notification to all assigned agents
     for (const agentId of command.assigned_agents) {
       await this.communicationHub.sendMessageToAgent(agentId, {
         ...cancellationMessage,
-        to: agentId
+        to: agentId,
       });
     }
 
     // Also broadcast to all agents for awareness
     this.communicationHub.broadcastMessage(cancellationMessage);
 
-    console.log(`✅ Cancelled ${command.generated_tasks.length} tasks and notified ${command.assigned_agents.length} agents`);
+    console.log(
+      `✅ Cancelled ${command.generated_tasks.length} tasks and notified ${command.assigned_agents.length} agents`
+    );
   }
 
   async cancelCommand(commandId: string): Promise<void> {
@@ -536,10 +588,10 @@ Please provide:
 
     command.status = 'failed';
     command.error = 'Cancelled by user';
-    
+
     // Cancel associated tasks and notify agents
     await this.cancelCommandTasks(command);
-    
+
     this.emit('command_cancelled', command);
   }
 }
