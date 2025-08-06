@@ -1,7 +1,16 @@
 import { EventEmitter } from 'events';
-import { MultiAgentOrchestrator, Task, ProjectAnalysis, AgentConfig } from '../core/MultiAgentOrchestrator';
+import {
+  MultiAgentOrchestrator,
+  Task,
+  ProjectAnalysis,
+  AgentConfig,
+} from '../core/MultiAgentOrchestrator';
 import { TaskDistributor } from '../core/TaskDistributor';
-import { AgentCommunicationHub, MessageType, AgentEndpoint } from '../communication/AgentCommunicationHub';
+import {
+  AgentCommunicationHub,
+  MessageType,
+  AgentEndpoint,
+} from '../communication/AgentCommunicationHub';
 
 export interface CommandContext {
   session_id: string;

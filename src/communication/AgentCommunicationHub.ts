@@ -457,9 +457,10 @@ export class AgentCommunicationHub extends EventEmitter {
 
   private sendMessage(message: Message | Omit<Message, 'id' | 'timestamp'>, ws: WebSocket): void {
     try {
-      const fullMessage = 'id' in message && 'timestamp' in message 
-        ? message 
-        : this.createMessage(message as Omit<Message, 'id' | 'timestamp'>);
+      const fullMessage =
+        'id' in message && 'timestamp' in message
+          ? message
+          : this.createMessage(message as Omit<Message, 'id' | 'timestamp'>);
       ws.send(JSON.stringify(fullMessage));
     } catch (error) {
       console.error('Failed to send message:', error);

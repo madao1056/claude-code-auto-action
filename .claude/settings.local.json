@@ -22,8 +22,105 @@
       "Bash(/usr/bin/git push origin master)",
       "Bash(npm run format:*)",
       "Bash(npm run build:*)",
-      "Bash(npm run compile:*)"
+      "Bash(npm run compile:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
+  },
+  "parallelProcessing": {
+    "enabled": true,
+    "maxConcurrentTasks": 20,
+    "adaptiveScaling": {
+      "enabled": true,
+      "minWorkers": 4,
+      "maxWorkers": 16,
+      "scaleUpThreshold": 75,
+      "scaleDownThreshold": 25,
+      "scaleUpCooldown": 120000,
+      "scaleDownCooldown": 300000
+    },
+    "taskBatching": {
+      "enabled": true,
+      "batchSize": 5,
+      "maxBatchWaitTime": 30000,
+      "priorityGrouping": true
+    },
+    "workerPools": {
+      "analysis": {
+        "minWorkers": 2,
+        "maxWorkers": 6,
+        "specialization": ["code_analysis", "dependency_analysis", "security_analysis"]
+      },
+      "implementation": {
+        "minWorkers": 4,
+        "maxWorkers": 10,
+        "specialization": ["code_generation", "refactoring", "bug_fixes"]
+      },
+      "testing": {
+        "minWorkers": 2,
+        "maxWorkers": 8,
+        "specialization": ["unit_testing", "integration_testing", "performance_testing"]
+      },
+      "documentation": {
+        "minWorkers": 1,
+        "maxWorkers": 3,
+        "specialization": ["api_docs", "user_guides", "technical_specs"]
+      }
+    },
+    "loadBalancing": {
+      "strategy": "performance_based",
+      "healthChecks": {
+        "enabled": true,
+        "interval": 30000,
+        "timeout": 5000
+      },
+      "metrics": {
+        "collectInterval": 5000,
+        "retentionPeriod": 3600000
+      }
+    },
+    "priorityManagement": {
+      "enabled": true,
+      "dynamicPriority": true,
+      "machineLearning": true,
+      "priorityDecayRate": 0.1,
+      "urgencyThreshold": 80,
+      "rebalanceInterval": 60000
+    },
+    "resourceLimits": {
+      "maxMemoryPerWorker": 2048,
+      "maxCpuPercentage": 80,
+      "maxExecutionTime": 300000,
+      "timeoutHandling": "graceful_termination"
+    },
+    "failureHandling": {
+      "retryPolicy": {
+        "maxRetries": 3,
+        "backoffStrategy": "exponential",
+        "baseDelay": 1000,
+        "maxDelay": 30000
+      },
+      "circuitBreaker": {
+        "enabled": true,
+        "failureThreshold": 5,
+        "recoveryTimeout": 60000
+      }
+    },
+    "monitoring": {
+      "realTimeMetrics": true,
+      "alerting": {
+        "enabled": true,
+        "thresholds": {
+          "errorRate": 0.1,
+          "avgResponseTime": 30000,
+          "queueDepth": 50
+        }
+      },
+      "logging": {
+        "level": "info",
+        "structured": true,
+        "performance": true
+      }
+    }
   }
 }
